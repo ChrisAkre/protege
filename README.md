@@ -64,6 +64,81 @@ The most common way to use Protege is by adding it to the `maven-compiler-plugin
 ### Gradle Integration
 ¯\\\_(ツ)_/¯
 
+## Examples
+
+### Custom Interfaces and Annotations
+
+Protege allows you to specify that a generated message should implement a specific Java interface and add custom annotations to its fields. This is done using custom Protobuf options.
+
+**`message.proto`**
+```proto
+syntax = "proto3";
+import "protege/options.proto";
+
+message User {
+  option (dev.akre.protege.java_implements) = "com.example.Identifiable";
+
+  string id = 1 [
+    (dev.akre.protege.java_annotation) = "@jakarta.persistence.Id"
+  ];
+  string email = 2;
+}
+```
+
+**`Identifiable.java`**
+```java
+package com.example;
+
+public interface Identifiable {
+    String getId();
+}
+```
+
+### Enhanced Oneof Support
+
+With `java_enhanced_oneof` enabled, Protege generates sealed interfaces for `oneof` fields, allowing for exhaustive and type-safe pattern matching using modern Java switch expressions.
+
+**`shape.proto`**
+```proto
+syntax = "proto3";
+import "protege/options.proto";
+
+option (dev.akre.protege.java_enhanced_oneof) = true;
+
+message Thing {
+  oneof shape {
+    Circle circle = 1;
+    Rectangle rectangle = 2;
+    Square square = 3;
+  }
+
+  message Circle {
+    double radius = 1;
+  }
+
+  message Rectangle {
+    double width = 1;
+    double height = 2;
+  }
+
+  message Square {
+    double side = 1;
+  }
+}
+```
+
+**`AreaCalculator.java`**
+```java
+public double calculateArea(Thing thing) {
+    return switch (thing.getShape()) {
+        case Thing.CircleOrBuilder c -> Math.PI * c.getRadius() * c.getRadius();
+        case Thing.RectangleOrBuilder r -> r.getWidth() * r.getHeight();
+        case Thing.SquareOrBuilder s -> s.getSide() * s.getSide();
+        case null -> 0.0;
+    };
+}
+```
+
 ## Build Instructions
 
 Protege requires **Java 21** and **Maven**.

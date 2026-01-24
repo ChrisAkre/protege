@@ -81,6 +81,10 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 * **Template Injection**: Do not hardcode versions. The build uses `ProtegeVersion.java` as a template for version
   injection.
 
+### 5. Documentation
+
+* **README Synchronization**: When making changes to the codebase (adding features, changing configuration options, etc.), always check `README.md` to see if documentation updates are required to reflect the new functionality or changes.
+
 ## Common Workflows
 
 * **Adding a feature to generated code:** Modify `ProtoCodegen.java` and add a corresponding test case in `src/it` to
