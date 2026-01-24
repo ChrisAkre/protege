@@ -58,6 +58,7 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
   expressions for enums/sealed types.
 * **Immutability**: Use `dev.akre.util.Cons` (Immutable Linked List) for stack-based traversal during recursion.
 * **Statelessness**: Prefer `static` utility methods for transformation logic within visitors and factories.
+* **1TBS**: Always put braces around each clause in if-else statements.
 
 ### 2. Grammar and AST
 
@@ -69,10 +70,6 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 ### 3. Code Generation (JavaPoet)
 
 * **No String Templates**: All Java generation must use `JavaPoet` (`TypeSpec`, `MethodSpec`).
-* **Type Mapping**: When adding new annotations (like JPA), ensure they are added as `AnnotationSpec` within the
-  `ProtoCodegen` logic.
-* **Sealed Interfaces**: Oneof fields must be generated as sealed interfaces with record implementations to ensure
-  pattern-matching compatibility.
 
 ### 4. Build and Verification
 
@@ -83,11 +80,13 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 
 ### 5. Documentation
 
-* **README Synchronization**: When making changes to the codebase (adding features, changing configuration options, etc.), always check `README.md` to see if documentation updates are required to reflect the new functionality or changes.
+* **README Synchronization**: When making changes to the codebase (adding features, changing configuration options,
+  etc.), always check `README.md` to see if documentation updates are required to reflect the new functionality or
+  changes.
 
 ## Common Workflows
 
-* **Adding a feature to generated code:** Modify `ProtoCodegen.java` and add a corresponding test case in `src/it` to
+* **Adding a feature to generated code**: Modify `ProtoCodegen.java` and add a corresponding test case in `src/it` to
   verify the generated source compiles.
-* **Fixing Parsing issues:** Check the ANTLR visitor logic in `ProtobufFileDescriptorVisitor.java`. Use the `Cons` stack
+* **Fixing Parsing issues**: Check the ANTLR visitor logic in `ProtobufFileDescriptorVisitor.java`. Use the `Cons` stack
   to debug nested message scoping.
