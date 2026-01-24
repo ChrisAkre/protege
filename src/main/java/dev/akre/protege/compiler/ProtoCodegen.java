@@ -440,6 +440,8 @@ public class ProtoCodegen {
                 .superclass(messageParentClass)
                 .addSuperinterface(interfaceClassName);
 
+        classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(message.getOptions()));
+
         // Nested types
         for (var nestedMessage : message.getNestedTypeList()) {
             generateMessageTypes(classBuilder, ctx, nestedMessage, allNames);
@@ -552,6 +554,8 @@ public class ProtoCodegen {
     private void generateOrBuilderInterface(TypeSpec.Builder parentBuilder, MessageContext msgCtx, CodegenContext ctx, String interfaceName, Optional<String> javaImplements) {
         var interfaceBuilder = TypeSpec.interfaceBuilder(interfaceName)
                 .addModifiers(Modifier.PUBLIC);
+
+        interfaceBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(msgCtx.message().getOptions()));
 
         if (javaImplements.isPresent()) {
             interfaceBuilder.addSuperinterface(ClassName.bestGuess(javaImplements.get()));

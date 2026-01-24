@@ -2,14 +2,10 @@ package dev.akre.protege;
 
 import dev.akre.protege.compiler.ProtoCodegen;
 import dev.akre.protege.testutil.TestUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled
 public class AnnotationTest {
 
     @Test
@@ -34,22 +30,30 @@ public class AnnotationTest {
                   string email = 2 [
                     (dev.akre.protege.java_annotation) = "@java.lang.Deprecated(forRemoval = true)"
                   ];
+
+                  repeated string tags = 3 [
+                    (dev.akre.protege.java_annotation) = "@java.lang.SafeVarargs"
+                  ];
+
+                  map<string, string> attributes = 4 [
+                    (dev.akre.protege.java_annotation) = "@java.lang.Deprecated"
+                  ];
                 }
                 """;
 
         var parsedProto = ProtoUtils.parseProto(protoContent, "annotations.proto");
         var mockFiler = new TestUtils.MockFiler();
         ProtoCodegen codegen = new ProtoCodegen(mockFiler);
-        String outerClassName = "com.example.annotations.AnnotationProto";
         
         var javaFileObject = codegen.generateFile(parsedProto);
         
         // We use the generated source content because the implementation is expected to fail to include these strings for now.
         String userSource = javaFileObject.getCharContent(false).toString();
 
-        assertThat(userSource).contains("@java.lang.Deprecated");
-        assertThat(userSource).contains("@java.lang.annotation.Documented");
-        assertThat(userSource).contains("@java.lang.Deprecated(since = \"1.0\")");
-        assertThat(userSource).contains("@java.lang.Deprecated(forRemoval = true)");
+        assertThat(userSource).contains("@Deprecated");
+        assertThat(userSource).contains("@Documented");
+        assertThat(userSource).contains("since = \"1.0\"");
+        assertThat(userSource).contains("forRemoval = true");
+        assertThat(userSource).contains("@SafeVarargs");
     }
 }
