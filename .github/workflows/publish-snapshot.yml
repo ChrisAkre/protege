@@ -5,14 +5,34 @@ on:
       - develop
 
 jobs:
-  publish:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and Verify
+        run: mvn --batch-mode verify
+      
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-build
+          path: target/
+          retention-days: 1
+
+  publish-snapshot:
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-java@v4
         with:
           java-version: '25'
@@ -20,10 +40,23 @@ jobs:
           server-id: github-snapshot
           settings-path: ${{ github.workspace }}
 
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-build
+          path: target/
+
       - name: Publish Snapshot
-        run: mvn --batch-mode deploy -s $GITHUB_WORKSPACE/settings.xml
+        run: mvn --batch-mode deploy -DskipTests -s $GITHUB_WORKSPACE/settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  dependency-submission:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+    steps:
+      - uses: actions/checkout@v5
       - name: Submit Dependency Snapshot
         uses: advanced-security/maven-dependency-submission-action@v5
