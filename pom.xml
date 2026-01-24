@@ -218,4 +218,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>github-snapshot</id>
+            <name>GitHub Protege Snapshots</name>
+            <url>https://maven.pkg.github.com/ChrisAkre/protege</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
