@@ -1,6 +1,7 @@
 package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
+import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import dev.akre.protege.ProtoUtils;
 
@@ -10,9 +11,72 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CodegenUtils {
+    private static final String JAVA_ANNOTATION_OPTION = "dev.akre.protege.java_annotation";
+    private static final String JAVA_MESSAGE_ANNOTATION_OPTION = "dev.akre.protege.java_message_annotation";
 
     private CodegenUtils() {
         // Utility class
+    }
+
+    static List<AnnotationSpec> getGetterAnnotations(DescriptorProtos.FieldOptions options) {
+        return options.getUninterpretedOptionList().stream()
+                .filter(o -> o.getNameList().stream()
+                        .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
+                        .collect(Collectors.joining(".")).equals(JAVA_ANNOTATION_OPTION))
+                .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
+                .collect(Collectors.toList());
+    }
+
+    static List<AnnotationSpec> getMessageAnnotations(DescriptorProtos.MessageOptions options) {
+        return options.getUninterpretedOptionList().stream()
+                .filter(o -> o.getNameList().stream()
+                        .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
+                        .collect(Collectors.joining(".")).equals(JAVA_MESSAGE_ANNOTATION_OPTION))
+                .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
+                .collect(Collectors.toList());
+    }
+
+    static AnnotationSpec parseAnnotation(String annotationStr) {
+        if (annotationStr.startsWith("@")) {
+            annotationStr = annotationStr.substring(1);
+        }
+        int parenIndex = annotationStr.indexOf('(');
+        if (parenIndex == -1) {
+            return AnnotationSpec.builder(ClassName.bestGuess(annotationStr)).build();
+        } else {
+            String className = annotationStr.substring(0, parenIndex).trim();
+            String content = annotationStr.substring(parenIndex + 1, annotationStr.lastIndexOf(')')).trim();
+            var builder = AnnotationSpec.builder(ClassName.bestGuess(className));
+            if (!content.isEmpty()) {
+                // naive split by comma, but avoiding commas inside quotes
+                List<String> parts = new ArrayList<>();
+                boolean inQuotes = false;
+                StringBuilder currentPart = new StringBuilder();
+                for (int i = 0; i < content.length(); i++) {
+                    char c = content.charAt(i);
+                    if (c == '"') inQuotes = !inQuotes;
+                    if (c == ',' && !inQuotes) {
+                        parts.add(currentPart.toString());
+                        currentPart = new StringBuilder();
+                    } else {
+                        currentPart.append(c);
+                    }
+                }
+                parts.add(currentPart.toString());
+
+                for (String part : parts) {
+                    if (part.contains("=")) {
+                        int eqIndex = part.indexOf('=');
+                        String key = part.substring(0, eqIndex).trim();
+                        String value = part.substring(eqIndex + 1).trim();
+                        builder.addMember(key, "$L", value);
+                    } else {
+                        builder.addMember("value", "$L", part.trim());
+                    }
+                }
+            }
+            return builder.build();
+        }
     }
 
     static void registerAllTypes(DescriptorProtos.FileDescriptorProto fileDescriptor, String packageName, String outerClassName, Map<String, ClassName> typeRegistry, Map<String, Boolean> isEnumMap, Map<String, Boolean> isMapEntryMap, Map<String, DescriptorProtos.DescriptorProto> messageDescriptorRegistry) {

@@ -125,6 +125,7 @@ public class CodegenMethods {
         static MethodSpec getField(SingularFieldContext ctx) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName())
                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(ctx.fieldType())
                     .build();
         }
@@ -162,6 +163,7 @@ public class CodegenMethods {
         static MethodSpec getMapField(MapFieldContext ctx) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(ParameterizedTypeName.get(ClassName.get(Map.class), ctx.keyType().box(), ctx.valueType().box()))
                     .build();
         }
@@ -202,6 +204,7 @@ public class CodegenMethods {
         static MethodSpec getRepeatedList(RepeatedFieldContext ctx, TypeName listType) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(listType)
                     .build();
         }
@@ -454,6 +457,7 @@ public class CodegenMethods {
                     .addAnnotation(AnnotationSpec.builder(Field.class)
                             .addMember("value", "$L", ctx.fieldNumber())
                             .build())
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(ctx.fieldType());
 
             if (ctx.isString()) {
@@ -519,6 +523,7 @@ public class CodegenMethods {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(fieldType)
                     .addStatement("return $L.getMap()", ctx.internalName())
                     .build();
@@ -572,6 +577,7 @@ public class CodegenMethods {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
                     .addStatement("return new $T($L)", com.google.protobuf.UnmodifiableLazyStringList.class, ctx.internalName())
                     .build();
@@ -581,6 +587,7 @@ public class CodegenMethods {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(fieldType)
                     .addStatement("return $L", ctx.internalName())
                     .build();
@@ -886,6 +893,7 @@ public class CodegenMethods {
             var builder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(ctx.fieldType());
 
             if (ctx.isString()) {
@@ -1088,6 +1096,7 @@ public class CodegenMethods {
         static MethodSpec getMapField(MapFieldContext ctx, TypeName fieldType) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(fieldType)
                     .addStatement("return $L.getMap()", ctx.internalName())
                     .build();
@@ -1204,6 +1213,7 @@ public class CodegenMethods {
         static MethodSpec getRepeatedListString(RepeatedFieldContext ctx) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
                     .addStatement("return $L.getUnmodifiableView()", ctx.internalName())
                     .build();
@@ -1232,10 +1242,11 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec getRepeatedList(RepeatedFieldContext ctx, TypeName fieldType) {
+        static MethodSpec getRepeatedList(RepeatedFieldContext ctx, TypeName listType) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(fieldType)
+                    .addAnnotations(ctx.getterAnnotations())
+                    .returns(listType)
                     .addStatement("return $T.unmodifiableList($L)", java.util.Collections.class, ctx.internalName())
                     .build();
         }

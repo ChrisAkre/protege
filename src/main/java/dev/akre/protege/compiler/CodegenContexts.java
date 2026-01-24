@@ -1,6 +1,7 @@
 package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
+import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
@@ -177,7 +178,8 @@ record FieldContext(
         String pascalName,
         String internalName,
         boolean isMap,
-        boolean isRepeated
+        boolean isRepeated,
+        List<AnnotationSpec> getterAnnotations
 ) {
     static FieldContext create(
             DescriptorProtos.FieldDescriptorProto field,
@@ -188,6 +190,7 @@ record FieldContext(
         String pascalName = ProtoUtils.toPascalCase(fieldName);
         String internalName = fieldName + "_";
         boolean isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
+        List<AnnotationSpec> getterAnnotations = CodegenUtils.getGetterAnnotations(field.getOptions());
 
         return new FieldContext(
                 field,
@@ -196,7 +199,8 @@ record FieldContext(
                 pascalName,
                 internalName,
                 isMap,
-                isRepeated
+                isRepeated,
+                getterAnnotations
         );
     }
 }
@@ -225,6 +229,10 @@ record MapFieldContext(
 
     DescriptorProtos.FieldDescriptorProto.Type valueFieldType() {
         return entryDescriptor.getField(1).getType();
+    }
+
+    List<AnnotationSpec> getterAnnotations() {
+        return fieldContext.getterAnnotations();
     }
 }
 
@@ -261,6 +269,10 @@ record RepeatedFieldContext(
 
     boolean isEnum() {
         return fieldType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM;
+    }
+
+    List<AnnotationSpec> getterAnnotations() {
+        return fieldContext.getterAnnotations();
     }
 }
 
@@ -309,6 +321,10 @@ record SingularFieldContext(
 
     boolean isEnum() {
         return type() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM;
+    }
+
+    List<AnnotationSpec> getterAnnotations() {
+        return fieldContext.getterAnnotations();
     }
 }
 
