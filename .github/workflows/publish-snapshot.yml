@@ -47,7 +47,13 @@ jobs:
           path: target/
 
       - name: Publish Snapshot
-        run: mvn --batch-mode deploy -DskipTests -s $GITHUB_WORKSPACE/settings.xml
+        run: >
+          mvn --batch-mode deploy 
+          -DskipTests 
+          -DskipITs 
+          -Dprotoc.skip=true
+          -Dmaven.test.skip=true
+          -s $GITHUB_WORKSPACE/settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
