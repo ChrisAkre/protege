@@ -200,6 +200,9 @@
                     <settingsFile>src/it/settings.xml</settingsFile>
                     <showErrors>true</showErrors>
                     <streamLogsOnFailures>true</streamLogsOnFailures>
+                    <filterProperties>
+                        <project.version>${project.version}</project.version>
+                    </filterProperties>
                     <goals>
                         <goal>clean</goal>
                         <goal>verify</goal>
@@ -218,4 +221,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>github-snapshot</id>
+            <name>GitHub Protege Snapshots</name>
+            <url>https://maven.pkg.github.com/ChrisAkre/protege</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
