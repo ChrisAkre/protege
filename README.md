@@ -19,10 +19,9 @@ Protege improves upon the standard `protoc` output with several specialized feat
 
 ## Examples
 
-### Custom Interfaces and Annotations
+### Custom Interfaces
 
-Protege allows you to specify that a generated message should implement a specific Java interface. You may add
-annotations to that interface to improve compatibility with other Java libraries.
+Protege allows you to specify that a generated message should implement a specific Java interface. This enables polymorphism and allows you to treat generated messages as implementations of your business domain interfaces.
 
 **`message.proto`**
 
@@ -33,12 +32,12 @@ import "protege/options.proto";
 message User {
   option (dev.akre.protege.java_implements) = "com.example.Identifiable";
 
-  string id = 1
+  int64 id = 1;
   string email = 2;
 }
 ```
 
-**`User.java`**
+**`JsonUser.java`**
 
 ```java
 
@@ -52,7 +51,35 @@ public interface JsonUser {
 }
 ```
 
-Your generated `User` and `User.Builder` classes will implement `JsonUser` to customize JSON serialization.
+Your generated `User` and `User.Builder` classes will implement `JsonUser` allowing Jackson JSON serialization.
+
+
+### Annotation Support
+
+Protege provides the `java_annotation` option to add Java annotations directly to generated classes and fields. This is particularly useful for integration with persistence frameworks like JPA/Hibernate or validation frameworks.
+
+**`persistence.proto`**
+
+```proto
+syntax = "proto3";
+import "protege/options.proto";
+
+message User {
+  option (dev.akre.protege.java_annotation) = "@jakarta.persistence.Entity";
+  option (dev.akre.protege.java_annotation) = "@jakarta.persistence.Table(name = \"users\")";
+
+  int64 id = 1 [
+    (dev.akre.protege.java_annotation) = "@jakarta.persistence.Id",
+    (dev.akre.protege.java_annotation) = "@jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)"
+  ];
+
+  string email = 2 [
+    (dev.akre.protege.java_annotation) = "@jakarta.persistence.Column(nullable = false, unique = true)"
+  ];
+}
+```
+
+The generated Java code will include the specified annotations, allowing the Protobuf message to function as a JPA entity.
 
 ### Enhanced Oneof Support
 
