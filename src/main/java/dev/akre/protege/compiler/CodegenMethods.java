@@ -2,15 +2,7 @@ package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.MethodSpec;
-import com.palantir.javapoet.ParameterizedTypeName;
-import com.palantir.javapoet.TypeName;
-import com.palantir.javapoet.TypeSpec;
-import com.palantir.javapoet.WildcardTypeName;
-import dev.akre.protege.Field;
+import com.palantir.javapoet.*;
 import dev.akre.protege.ProtoUtils;
 
 import javax.lang.model.element.Modifier;
@@ -27,10 +19,42 @@ public class CodegenMethods {
         // Utility class
     }
 
+//    static class OuterClass {
+//        public static FieldSpec versionField() {
+//            return FieldSpec.builder(String.class, "PROTEGE_VERSION", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+//                    .initializer("$S", ProtegeVersion.VERSION_STRING)
+//                    .build();
+//        }
+//
+//        public static MethodSpec getDescriptor() {
+//            return MethodSpec.methodBuilder("getDescriptor")
+//                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+//                    .returns(Descriptors.FileDescriptor.class)
+//                    .addStatement("return fileDescriptor")
+//                    .build();
+//        }
+//
+//        public static FieldSpec fileDescriptorField(CodegenContext ctx) {
+//            var descriptorChunks =  ProtoUtils.splitAndEscapeBytes(ctx.fileDescriptor().toByteArray()).stream()
+//                    .map(s -> CodeBlock.of("\"$L\"", s))
+//                    .collect(CodeBlock.joining(",\n"));
+//
+//            var data = CodeBlock.builder().add("new String[] {\n").indent().add(descriptorChunks).unindent().add("\n}").build();
+//
+//            CodeBlock descriptorInitializer = CodeBlock.builder()
+//                    .addStatement("$T.internalBuildGeneratedFileFrom($L, new $T[0])",
+//                            Descriptors.FileDescriptor.class, data, Descriptors.FileDescriptor.class)
+//                    .build();
+//            return FieldSpec.builder(Descriptors.FileDescriptor.class, "fileDescriptor", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+//                    .initializer(descriptorInitializer)
+//                    .build();
+//        }
+//    }
+
     /**
      * Methods for generating enum types
      */
-    static class Enum {
+    static class Enums {
 
         static MethodSpec getNumber() {
             return MethodSpec.methodBuilder("getNumber")
@@ -107,614 +131,6 @@ public class CodegenMethods {
                     .returns(ClassName.get("", enumName))
                     .addStatement("return forNumber(desc.getNumber())")
                     .build();
-        }
-    }
-
-    /**
-     * Methods for generating OrBuilder interfaces
-     */
-    static class OrBuilder {
-
-        static MethodSpec hasField(SingularFieldContext ctx) {
-            return MethodSpec.methodBuilder("has" + ctx.pascalName())
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(boolean.class)
-                    .build();
-        }
-
-        static MethodSpec getField(SingularFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
-                    .returns(ctx.fieldType())
-                    .build();
-        }
-
-        static MethodSpec getFieldOrBuilder(SingularFieldContext ctx, TypeName orBuilderType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(orBuilderType)
-                    .build();
-        }
-
-        static MethodSpec getFieldValue(String pascalName) {
-            return MethodSpec.methodBuilder("get" + pascalName + "Value")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(int.class)
-                    .build();
-        }
-
-        static MethodSpec getFieldBytes(String pascalName) {
-            return MethodSpec.methodBuilder("get" + pascalName + "Bytes")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ClassName.get("com.google.protobuf", "ByteString"))
-                    .build();
-        }
-
-        // Map field methods
-        static MethodSpec containsMapKey(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("contains" + ctx.pascalName())
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(boolean.class)
-                    .addParameter(ctx.keyType(), "key")
-                    .build();
-        }
-
-        static MethodSpec getMapField(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
-                    .returns(ParameterizedTypeName.get(ClassName.get(Map.class), ctx.keyType().box(), ctx.valueType().box()))
-                    .build();
-        }
-
-        static MethodSpec getMapCount(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(int.class)
-                    .build();
-        }
-
-        static MethodSpec getMapOrDefault(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrDefault")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ctx.valueType())
-                    .addParameter(ctx.keyType(), "key")
-                    .addParameter(ctx.valueType(), "defaultValue")
-                    .build();
-        }
-
-        static MethodSpec getMapOrThrow(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrThrow")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ctx.valueType())
-                    .addParameter(ctx.keyType(), "key")
-                    .build();
-        }
-
-        static MethodSpec getMapDeprecated(MapFieldContext ctx, TypeName fieldType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addAnnotation(Deprecated.class)
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(fieldType)
-                    .build();
-        }
-
-        // Repeated field methods
-        static MethodSpec getRepeatedList(RepeatedFieldContext ctx, TypeName listType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
-                    .returns(listType)
-                    .build();
-        }
-
-        static MethodSpec getRepeatedCount(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(int.class)
-                    .build();
-        }
-
-        static MethodSpec getRepeatedElement(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ctx.genericType())
-                    .addParameter(int.class, "index")
-                    .build();
-        }
-
-        static MethodSpec getRepeatedOrBuilderList(RepeatedFieldContext ctx, TypeName orBuilderType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilderList")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ParameterizedTypeName.get(ClassName.get(List.class), WildcardTypeName.subtypeOf(orBuilderType)))
-                    .build();
-        }
-
-        static MethodSpec getRepeatedOrBuilder(RepeatedFieldContext ctx, TypeName orBuilderType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(orBuilderType)
-                    .addParameter(int.class, "index")
-                    .build();
-        }
-
-        static MethodSpec getRepeatedValueList(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "ValueList")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ParameterizedTypeName.get(List.class, Integer.class))
-                    .build();
-        }
-
-        static MethodSpec getRepeatedValue(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Value")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(int.class)
-                    .addParameter(int.class, "index")
-                    .build();
-        }
-
-        static MethodSpec getRepeatedBytes(String pascalName) {
-            return MethodSpec.methodBuilder("get" + pascalName + "Bytes")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ClassName.get("com.google.protobuf", "ByteString"))
-                    .addParameter(int.class, "index")
-                    .build();
-        }
-
-        // Oneof methods
-        static MethodSpec getOneof(OneofContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ctx.getInterfaceClassName())
-                    .build();
-        }
-
-        static MethodSpec getOneofCase(OneofContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Case")
-                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                    .returns(ctx.getEnumClassName())
-                    .build();
-        }
-    }
-
-    /**
-     * Methods for generating Message classes
-     */
-    static class Message {
-
-        static MethodSpec getDescriptor(ClassName messageClassName) {
-            return MethodSpec.methodBuilder("getDescriptor")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                    .returns(Descriptors.Descriptor.class)
-                    .addStatement("return descriptor")
-                    .build();
-        }
-
-        static MethodSpec getDefaultInstance(ClassName messageClassName) {
-            return MethodSpec.methodBuilder("getDefaultInstance")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(messageClassName)
-                    .addStatement("return DEFAULT_INSTANCE")
-                    .build();
-        }
-
-        static MethodSpec toBuilder(ClassName messageClassName, ClassName builderClassName) {
-            return MethodSpec.methodBuilder("toBuilder")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(builderClassName)
-                    .addStatement("return this == DEFAULT_INSTANCE ? new $T() : new $T().mergeFrom(this)", builderClassName, builderClassName)
-                    .build();
-        }
-
-        static MethodSpec getParserForType() {
-            return MethodSpec.methodBuilder("getParserForType")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(com.google.protobuf.Parser.class)
-                    .addStatement("return PARSER")
-                    .build();
-        }
-
-        static MethodSpec newBuilderForType(ClassName builderClassName) {
-            return MethodSpec.methodBuilder("newBuilderForType")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(builderClassName)
-                    .addStatement("return newBuilder()")
-                    .build();
-        }
-
-        static MethodSpec newBuilderForTypeWithParent(ClassName messageParentClass, ClassName builderClassName) {
-            return MethodSpec.methodBuilder("newBuilderForType")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PROTECTED)
-                    .returns(builderClassName)
-                    .addParameter(messageParentClass.nestedClass("BuilderParent"), "parent")
-                    .addStatement("return new $T(parent)", builderClassName)
-                    .build();
-        }
-
-        static MethodSpec getDefaultInstanceForType(ClassName messageClassName) {
-            return MethodSpec.methodBuilder("getDefaultInstanceForType")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(messageClassName)
-                    .addStatement("return DEFAULT_INSTANCE")
-                    .build();
-        }
-
-        static MethodSpec getUnknownFields() {
-            return MethodSpec.methodBuilder("getUnknownFields")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(com.google.protobuf.UnknownFieldSet.class)
-                    .addStatement("return com.google.protobuf.UnknownFieldSet.getDefaultInstance()")
-                    .build();
-        }
-
-        static MethodSpec isInitialized() {
-            return MethodSpec.methodBuilder("isInitialized")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                    .returns(boolean.class)
-                    .addStatement("return true")
-                    .build();
-        }
-
-        static MethodSpec newBuilder(ClassName messageClassName, ClassName builderClassName) {
-            return MethodSpec.methodBuilder("newBuilder")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(builderClassName)
-                    .addStatement("return DEFAULT_INSTANCE.toBuilder()")
-                    .build();
-        }
-
-        static MethodSpec newBuilderWithPrototype(ClassName messageClassName, ClassName builderClassName) {
-            return MethodSpec.methodBuilder("newBuilder")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addParameter(messageClassName, "prototype")
-                    .returns(builderClassName)
-                    .addStatement("return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype)")
-                    .build();
-        }
-
-        static MethodSpec parser(ClassName messageClassName) {
-            return MethodSpec.methodBuilder("parser")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(ParameterizedTypeName.get(ClassName.get("com.google.protobuf", "Parser"), messageClassName))
-                    .addStatement("return PARSER")
-                    .build();
-        }
-
-        static MethodSpec internalGetFieldAccessorTable(ClassName messageClassName, ClassName fieldAccessorTableClass) {
-            return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PROTECTED)
-                    .returns(fieldAccessorTableClass)
-                    .addStatement("return internal_fieldAccessorTable.ensureFieldAccessorsInitialized($T.class, $T.Builder.class)", messageClassName, messageClassName)
-                    .build();
-        }
-
-        static MethodSpec internalGetMapFieldReflection(MessageContext msgCtx, CodegenContext ctx) {
-            var method = MethodSpec.methodBuilder("internalGetMapFieldReflection")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PROTECTED)
-                    .returns(com.google.protobuf.MapFieldReflectionAccessor.class)
-                    .addParameter(int.class, "fieldNumber")
-                    .beginControlFlow("switch (fieldNumber)");
-
-            for (var field : msgCtx.message().getFieldList()) {
-                if (isMapField(field, ctx)) {
-                    method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
-                }
-            }
-
-            method.addStatement("default: throw new $T($S + fieldNumber)", RuntimeException.class, "Invalid map field number: ")
-                    .endControlFlow();
-
-            return method.build();
-        }
-
-        private static boolean isMapField(DescriptorProtos.FieldDescriptorProto field, CodegenContext ctx) {
-            if (field.getLabel() != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
-                return false;
-            }
-            if (field.getType() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                return false;
-            }
-            if (!field.hasTypeName()) {
-                return false;
-            }
-
-            String typeName = field.getTypeName();
-            if (typeName.startsWith(".")) {
-                var protoPackage = ctx.fileDescriptor().getPackage();
-                if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
-                    typeName = typeName.substring(protoPackage.length() + 2);
-                } else if (typeName.startsWith(".")) {
-                    typeName = typeName.substring(1);
-                }
-            }
-            return ctx.isMapEntryMap().getOrDefault(typeName, false);
-        }
-
-        // Field getters
-        static MethodSpec hasField(SingularFieldContext ctx, CodeBlock hasCode) {
-            return MethodSpec.methodBuilder("has" + ctx.pascalName())
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(boolean.class)
-                    .addCode(hasCode)
-                    .build();
-        }
-
-        static MethodSpec getField(SingularFieldContext ctx) {
-            var getterBuilder = MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotation(AnnotationSpec.builder(Field.class)
-                            .addMember("value", "$L", ctx.fieldNumber())
-                            .build())
-                    .addAnnotations(ctx.getterAnnotations())
-                    .returns(ctx.fieldType());
-
-            if (ctx.isString()) {
-                getterBuilder.addStatement("java.lang.Object ref = $L", ctx.internalName());
-                getterBuilder.addStatement("if (ref instanceof $T) { return ($T) ref; }", String.class, String.class);
-                getterBuilder.addStatement("$T bs = ($T) ref", com.google.protobuf.ByteString.class, com.google.protobuf.ByteString.class);
-                getterBuilder.addStatement("$T s = bs.toStringUtf8()", String.class);
-                getterBuilder.addStatement("$L = s", ctx.internalName());
-                getterBuilder.addStatement("return s");
-            } else {
-                getterBuilder.addStatement("return ($T)$L", ctx.fieldType(), ctx.internalName());
-            }
-
-            return getterBuilder.build();
-        }
-
-        static MethodSpec getFieldValue(SingularFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Value")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(int.class)
-                    .addStatement("return $L == null ? 0 : $L.getNumber()", ctx.internalName(), ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getFieldOrBuilder(SingularFieldContext ctx, TypeName orBuilderType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(orBuilderType)
-                    .addStatement("return get$L()", ctx.pascalName())
-                    .build();
-        }
-
-        static MethodSpec getFieldBytes(SingularFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Bytes")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ClassName.get("com.google.protobuf", "ByteString"))
-                    .addStatement("java.lang.Object ref = $L", ctx.internalName())
-                    .beginControlFlow("if (ref instanceof String)")
-                    .addStatement("$T b = $T.copyFromUtf8(($T) ref)", com.google.protobuf.ByteString.class, com.google.protobuf.ByteString.class, String.class)
-                    .addStatement("$L = b", ctx.internalName())
-                    .addStatement("return b")
-                    .nextControlFlow("else")
-                    .addStatement("return ($T) ref", com.google.protobuf.ByteString.class)
-                    .endControlFlow()
-                    .build();
-        }
-
-        // Map field getters
-        static MethodSpec containsMapKey(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("contains" + ctx.pascalName())
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(boolean.class)
-                    .addParameter(ctx.keyType(), "key")
-                    .addStatement("return $L.getMap().containsKey(key)", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getMapField(MapFieldContext ctx, TypeName fieldType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
-                    .returns(fieldType)
-                    .addStatement("return $L.getMap()", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getMapCount(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(int.class)
-                    .addStatement("return $L.getMap().size()", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getMapOrDefault(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrDefault")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ctx.valueType())
-                    .addParameter(ctx.keyType(), "key")
-                    .addParameter(ctx.valueType(), "defaultValue")
-                    .addStatement("return $L.getMap().getOrDefault(key, defaultValue)", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getMapOrThrow(MapFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrThrow")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ctx.valueType())
-                    .addParameter(ctx.keyType(), "key")
-                    .beginControlFlow("if (!$L.getMap().containsKey(key))", ctx.internalName())
-                    .addStatement("throw new $T()", IllegalArgumentException.class)
-                    .endControlFlow()
-                    .addStatement("return $L.getMap().get(key)", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getMapDeprecated(MapFieldContext ctx, TypeName fieldType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addAnnotation(Override.class)
-                    .addAnnotation(Deprecated.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(fieldType)
-                    .addStatement("return get$LMap()", ctx.pascalName())
-                    .build();
-        }
-
-        // Repeated field getters
-        static MethodSpec getRepeatedListString(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
-                    .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
-                    .addStatement("return new $T($L)", com.google.protobuf.UnmodifiableLazyStringList.class, ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getRepeatedList(RepeatedFieldContext ctx, TypeName fieldType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
-                    .returns(fieldType)
-                    .addStatement("return $L", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getRepeatedCount(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(int.class)
-                    .addStatement("return $L.size()", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getRepeatedElement(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ctx.genericType())
-                    .addParameter(int.class, "index")
-                    .addStatement("return $L.get(index)", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getRepeatedOrBuilderList(RepeatedFieldContext ctx, TypeName orBuilderType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilderList")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ParameterizedTypeName.get(ClassName.get(List.class), WildcardTypeName.subtypeOf(orBuilderType)))
-                    .addStatement("return (java.util.List) $L", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getRepeatedOrBuilder(RepeatedFieldContext ctx, TypeName orBuilderType) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(orBuilderType)
-                    .addParameter(int.class, "index")
-                    .addStatement("return $L.get(index)", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getRepeatedValueList(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "ValueList")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ParameterizedTypeName.get(List.class, Integer.class))
-                    .addStatement("return $L.stream().map(e -> e.getNumber()).collect($T.toList())", ctx.internalName(), Collectors.class)
-                    .build();
-        }
-
-        static MethodSpec getRepeatedValue(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Value")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(int.class)
-                    .addParameter(int.class, "index")
-                    .addStatement("return $L.get(index).getNumber()", ctx.internalName())
-                    .build();
-        }
-
-        static MethodSpec getRepeatedBytes(RepeatedFieldContext ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Bytes")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ClassName.get("com.google.protobuf", "ByteString"))
-                    .addParameter(int.class, "index")
-                    .addStatement("return $L.getByteString(index)", ctx.internalName())
-                    .build();
-        }
-
-        // Oneof getters
-        static MethodSpec getOneof(OneofContext ctx, MessageContext msgCtx, CodeBlock switchCode) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ctx.getInterfaceClassName())
-                    .addCode(switchCode)
-                    .build();
-        }
-
-        static MethodSpec getOneofCase(OneofContext ctx, CodeBlock getCaseCode) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Case")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ctx.getEnumClassName())
-                    .addCode(getCaseCode)
-                    .build();
-        }
-
-        // Parse methods
-        static MethodSpec parseFrom(ClassName messageClassName, TypeName paramType, String paramName, boolean hasRegistry) {
-            var builder = MethodSpec.methodBuilder("parseFrom")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(messageClassName)
-                    .addParameter(paramType, paramName);
-
-            if (hasRegistry) {
-                builder.addParameter(ClassName.get("com.google.protobuf", "ExtensionRegistryLite"), "extensionRegistry");
-                builder.addException(ClassName.get("com.google.protobuf", "InvalidProtocolBufferException"));
-                builder.addStatement("return PARSER.parseFrom($L, extensionRegistry)", paramName);
-            } else {
-                builder.addException(paramType.toString().contains("InputStream") ?
-                        ClassName.get("java.io", "IOException") :
-                        ClassName.get("com.google.protobuf", "InvalidProtocolBufferException"));
-                builder.addStatement("return PARSER.parseFrom($L)", paramName);
-            }
-
-            return builder.build();
-        }
-
-        static MethodSpec parseDelimitedFrom(ClassName messageClassName, boolean hasRegistry) {
-            var builder = MethodSpec.methodBuilder("parseDelimitedFrom")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(messageClassName)
-                    .addParameter(ClassName.get("java.io", "InputStream"), "input")
-                    .addException(ClassName.get("java.io", "IOException"));
-
-            if (hasRegistry) {
-                builder.addParameter(ClassName.get("com.google.protobuf", "ExtensionRegistryLite"), "extensionRegistry");
-                builder.addStatement("return PARSER.parseDelimitedFrom(input, extensionRegistry)");
-            } else {
-                builder.addStatement("return PARSER.parseDelimitedFrom(input)");
-            }
-
-            return builder.build();
         }
     }
 
@@ -816,7 +232,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec internalGetMapFieldReflection(MessageContext msgCtx, CodegenContext ctx) {
+        static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
             var method = MethodSpec.methodBuilder("internalGetMapFieldReflection")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -824,7 +240,7 @@ public class CodegenMethods {
                     .addParameter(int.class, "fieldNumber")
                     .beginControlFlow("switch (fieldNumber)");
 
-            for (var field : msgCtx.message().getFieldList()) {
+            for (var field : msgCodegen.message().getFieldList()) {
                 if (isMapField(field, ctx)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
@@ -836,7 +252,7 @@ public class CodegenMethods {
             return method.build();
         }
 
-        static MethodSpec internalGetMutableMapFieldReflection(MessageContext msgCtx, CodegenContext ctx) {
+        static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
             var method = MethodSpec.methodBuilder("internalGetMutableMapFieldReflection")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -844,7 +260,7 @@ public class CodegenMethods {
                     .addParameter(int.class, "fieldNumber")
                     .beginControlFlow("switch (fieldNumber)");
 
-            for (var field : msgCtx.message().getFieldList()) {
+            for (var field : msgCodegen.message().getFieldList()) {
                 if (isMapField(field, ctx)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
@@ -921,7 +337,7 @@ public class CodegenMethods {
             if (ctx.hasOneofIndex()) {
                 builder.addCode(clearOneofCode);
                 builder.addStatement("$LCase_ = $L",
-                        ctx.messageContext().message().getOneofDecl(ctx.oneofIndex()).getName(),
+                        ctx.messageCodegen().message().getOneofDecl(ctx.oneofIndex()).getName(),
                         ctx.fieldNumber());
             }
 
@@ -988,7 +404,7 @@ public class CodegenMethods {
             if (ctx.hasOneofIndex()) {
                 builder.addCode(clearOneofCode);
                 builder.addStatement("$LCase_ = $L",
-                        ctx.messageContext().message().getOneofDecl(ctx.oneofIndex()).getName(),
+                        ctx.messageCodegen().message().getOneofDecl(ctx.oneofIndex()).getName(),
                         ctx.fieldNumber());
             }
 
@@ -1042,7 +458,7 @@ public class CodegenMethods {
             if (ctx.hasOneofIndex()) {
                 builder.addCode(clearOneofCode);
                 builder.addStatement("$LCase_ = $L",
-                        ctx.messageContext().message().getOneofDecl(ctx.oneofIndex()).getName(),
+                        ctx.messageCodegen().message().getOneofDecl(ctx.oneofIndex()).getName(),
                         ctx.fieldNumber());
             }
 
@@ -1508,7 +924,30 @@ public class CodegenMethods {
     /**
      * Methods for generating Service classes
      */
-    static class Service {
+    static class Services {
+        static MethodSpec constructor() {
+            return MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PROTECTED)
+                    .build();
+        }
+        static TypeSpec generateInterface(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+            var interfaceBuilder = TypeSpec.interfaceBuilder("Interface")
+                    .addModifiers(Modifier.PUBLIC);
+            for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
+                interfaceBuilder.addMethod(Services.rpcMethod(method, ctx));
+            }
+            return interfaceBuilder.build();
+        }
+
+        public static TypeSpec generateBlockingInterface(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+            var blockingInterfaceBuilder = TypeSpec.interfaceBuilder("BlockingInterface")
+                    .addModifiers(Modifier.PUBLIC);
+            for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
+                blockingInterfaceBuilder.addMethod(Services.blockingMethod(method, ctx));
+            }
+            return blockingInterfaceBuilder.build();
+        }
+
 
         static TypeSpec generateServiceStub(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
             var stubBuilder = TypeSpec.classBuilder("Stub")
@@ -1693,7 +1132,7 @@ public class CodegenMethods {
             return MethodSpec.methodBuilder("getDescriptor")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                     .returns(Descriptors.ServiceDescriptor.class)
-                    .addStatement("return $T.getDescriptor().getServices().get($L)", ClassName.get(ctx.packageName(), ctx.outerClassName()), ctx.fileDescriptor().getServiceList().indexOf(service))
+                    .addStatement("return $T.getDescriptor().getServices().get($L)", ClassName.get(ctx.packageName(), ctx.outerName()), ctx.fileDescriptor().getServiceList().indexOf(service))
                     .build();
         }
 
@@ -1844,5 +1283,8 @@ public class CodegenMethods {
                     .addException(com.google.protobuf.ServiceException.class)
                     .build();
         }
+
     }
+
+
 }

@@ -111,6 +111,12 @@
             <version>1.68.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.palantir.goethe</groupId>
+            <artifactId>goethe</artifactId>
+            <version>0.18.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,22 +1,21 @@
 package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.ParameterizedTypeName;
-import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.*;
 import dev.akre.protege.ProtoUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static dev.akre.protege.compiler.CodegenUtils.getBooleanOption;
+
 /**
  * Global context for code generation
  */
 record CodegenContext(
         String packageName,
-        String outerClassName,
+        String outerName,
         ClassName messageParentClass,
         DescriptorProtos.FileDescriptorProto fileDescriptor,
         Map<String, ClassName> typeRegistry,
@@ -28,8 +27,12 @@ record CodegenContext(
         boolean fileGenerateOneofCase
 ) {
 
-    private static final String JAVA_ENHANCED_ONEOF_OPTION = "dev.akre.protege.java_enhanced_oneof";
-    private static final String JAVA_GENERATE_ONEOF_CASE_OPTION = "dev.akre.protege.java_oneof_case";
+    ClassName outerClassName() {
+        return ClassName.get(packageName, outerName);
+    }
+
+    public static final String JAVA_ENHANCED_ONEOF_OPTION = "dev.akre.protege.java_enhanced_oneof";
+    public static final String JAVA_GENERATE_ONEOF_CASE_OPTION = "dev.akre.protege.java_oneof_case";
 
     static CodegenContext create(DescriptorProtos.FileDescriptorProto fileDescriptor, ClassName messageParentClass, boolean generateDeprecated) {
         var packageName = ProtoUtils.getJavaPackage(fileDescriptor);
@@ -44,8 +47,8 @@ record CodegenContext(
 
         var fixedFileDescriptor = CodegenUtils.fixAllFieldTypes(fileDescriptor, isEnumMap);
 
-        boolean fileEnhancedOneof = CodegenUtils.getBooleanOption(fixedFileDescriptor.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, false);
-        boolean fileGenerateOneofCase = CodegenUtils.getBooleanOption(fixedFileDescriptor.getOptions().getUninterpretedOptionList(), JAVA_GENERATE_ONEOF_CASE_OPTION, true);
+        boolean fileEnhancedOneof = getBooleanOption(fixedFileDescriptor.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, false);
+        boolean fileGenerateOneofCase = getBooleanOption(fixedFileDescriptor.getOptions().getUninterpretedOptionList(), JAVA_GENERATE_ONEOF_CASE_OPTION, true);
 
         return new CodegenContext(
                 packageName,
@@ -83,6 +86,7 @@ record CodegenContext(
         return isMapEntryMap.getOrDefault(typeName, false);
     }
 
+
     TypeName resolveTypeName(String protoTypeName, List<String> currentScope) {
         if (protoTypeName.startsWith(".")) {
             var typeName = protoTypeName;
@@ -95,7 +99,7 @@ record CodegenContext(
             if (typeRegistry.containsKey(typeName)) {
                 return typeRegistry.get(typeName);
             }
-            return ClassName.get(packageName, outerClassName, typeName.split("\\."));
+            return ClassName.get(packageName, outerName, typeName.split("\\."));
         }
 
         for (int i = currentScope.size(); i >= 0; i--) {
@@ -106,7 +110,7 @@ record CodegenContext(
             }
         }
 
-        return ClassName.get(packageName, outerClassName, protoTypeName.split("\\."));
+        return ClassName.get(packageName, outerName, protoTypeName.split("\\."));
     }
 
     TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
@@ -149,24 +153,30 @@ record CodegenContext(
             return fieldType;
         }
     }
-}
 
-/**
- * Context for a specific message being generated
- */
-record MessageContext(
-        DescriptorProtos.DescriptorProto message,
-        ClassName messageClassName,
-        ClassName interfaceClassName,
-        List<String> currentScope,
-        String[] allNames,
-        boolean enhancedOneof,
-        boolean generateOneofCase
-) {
-    String getMessageName() {
-        return ProtoUtils.toPascalCase(message.getName());
+
+    public DescriptorProtos.DescriptorProto getEntryDescriptor(DescriptorProtos.FieldDescriptorProto field) {
+        String typeEntryName = relativeToProtoPackage(field.getTypeName());
+        return messageDescriptorRegistry().get(typeEntryName);
     }
-}
+
+    public String protoPackageName() {
+        return fileDescriptor.getPackage();
+    }
+
+    public String relativeToProtoPackage(String typeName) {
+        String protoPackage = protoPackageName();
+            if (typeName.startsWith(".")) {
+                if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
+                    typeName = typeName.substring(protoPackage.length() + 2);
+                } else if (typeName.startsWith(".")) {
+                    typeName = typeName.substring(1);
+                }
+            }
+            return typeName;
+        }
+    }
+
 
 /**
  * Context for a field being generated
@@ -281,7 +291,7 @@ record RepeatedFieldContext(
  */
 record SingularFieldContext(
         FieldContext fieldContext,
-        MessageContext messageContext
+        MessageCodegen messageCodegen
 ) {
     String pascalName() {
         return fieldContext.pascalName();
@@ -336,6 +346,14 @@ record EnumContext(
         ClassName outerClassName,
         String[] parentNames
 ) {
+    public EnumContext(DescriptorProtos.EnumDescriptorProto enumType, CodegenContext ctx) {
+        this(enumType, ClassName.get(ctx.packageName(), ctx.outerName()), new String[]{ctx.outerName()});
+    }
+
+    public EnumContext(DescriptorProtos.EnumDescriptorProto enumType, CodegenContext ctx, String[] allNames) {
+        this(enumType, ClassName.get(ctx.packageName(), ctx.outerName()), allNames);
+    }
+
     String getEnumName() {
         return enumType.getName();
     }

@@ -34,7 +34,7 @@ public class TestProtos {
                             String outerClassName = TestUtils.makeOuterClassName(parsedProto, protoPath.getFileName().toString());
                             Class<?> expectedClass = Class.forName(outerClassName);
                             ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-                            Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto));
+                            Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto).toJavaFileObject());
                             ClassAssert.assertThat(generatedClass)
                                     .hasPublicStaticFinalStringField("PROTEGE_VERSION", ProtegeVersion.VERSION_STRING);
                             return Arguments.of(protoPath, parsedProto, expectedClass, generatedClass);

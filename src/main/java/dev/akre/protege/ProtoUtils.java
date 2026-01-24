@@ -136,11 +136,16 @@ public class ProtoUtils {
                 .collect(Collectors.joining(""));
     }
 
-    public static String[] splitAndEscapeBytes(byte[] bytes) {
+    public static List<String> splitAndEscapeBytes(byte[] bytes) {
+        List<String> result = new ArrayList<>();
         StringBuilder builder = new StringBuilder();
         for (byte b : bytes) {
             switch (b) {
-                case '\n' -> builder.append("\\n");
+                case '\n' -> {
+                    builder.append("\\n");
+                    result.add(builder.toString());
+                    builder.setLength(0);
+                }
                 case '\r' -> builder.append("\\r");
                 case '\t' -> builder.append("\\t");
                 case '\"' -> builder.append("\\\"");
@@ -154,7 +159,8 @@ public class ProtoUtils {
                 }
             }
         }
-        return builder.toString().split("(?<=\\\\n)");
+        result.add(builder.toString());
+        return result;
     }
 
     public static String getWriteMethodName(DescriptorProtos.FieldDescriptorProto.Type type) {

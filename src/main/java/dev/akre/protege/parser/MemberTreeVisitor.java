@@ -19,9 +19,7 @@ class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode
                 return resolveRelative(typeParts);
             }
 
-            List<String> scopeList = new ArrayList<>();
-            scope.forEach(scopeList::add);
-            Collections.reverse(scopeList);
+            List<String> scopeList = scope.stream().toList();
 
             return resolveInScope(scopeList, 0, typeParts);
         }

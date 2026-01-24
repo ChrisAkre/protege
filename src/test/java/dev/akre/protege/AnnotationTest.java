@@ -52,7 +52,7 @@ public class AnnotationTest {
         var javaFileObject = codegen.generateFile(parsedProto);
         
         String outerClassName = "com.example.annotations.AnnotationProto";
-        Class<?> outerClass = TestUtils.compile(outerClassName, javaFileObject);
+        Class<?> outerClass = TestUtils.compile(outerClassName, javaFileObject.toJavaFileObject());
         Class<?> userClass = Arrays.stream(outerClass.getDeclaredClasses())
                 .filter(c -> c.getSimpleName().equals("User"))
                 .findFirst()

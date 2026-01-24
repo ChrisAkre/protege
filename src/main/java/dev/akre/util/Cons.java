@@ -7,7 +7,6 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Immutable Linked List
@@ -59,27 +58,19 @@ public record Cons<T>(T head, Cons<T> tail) implements Iterable<T> {
     }
 
     public Stream<T> stream() {
-        return StreamSupport.stream(spliterator(), false);
+        return streamBuilder(this).build();
+    }
+
+    private static <T> Stream.Builder<T> streamBuilder(Cons<T> cons) {
+        return switch (cons) {
+            case Cons<T> c when c.isEmpty() -> Stream.builder();
+            case Cons<T> c -> streamBuilder(c.tail()).add(c.head);
+        };
     }
 
     @Override
     public Iterator<T> iterator() {
-        return new Iterator<>() {
-            private Cons<T> current = Cons.this;
-
-            @Override
-            public boolean hasNext() {
-                return current != NIL;
-            }
-
-            @Override
-            public T next() {
-                if (!hasNext()) throw new NoSuchElementException();
-                T value = current.head();
-                current = current.tail();
-                return value;
-            }
-        };
+        return stream().iterator();
     }
 
     @Override
