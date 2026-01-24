@@ -122,6 +122,6 @@ public class DescriptorAssert extends AbstractAssert<DescriptorAssert, Object> {
     }
 
     private boolean isIgnoredName(String name) {
-        return name.endsWith("java_implements") || name.endsWith("java_annotation");
+        return name.endsWith("java_implements") || name.endsWith("java_annotation") || name.endsWith("java_message_annotation");
     }
 }

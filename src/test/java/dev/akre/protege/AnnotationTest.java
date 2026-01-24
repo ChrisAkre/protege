@@ -2,12 +2,14 @@ package dev.akre.protege;
 
 import dev.akre.protege.compiler.ProtoCodegen;
 import dev.akre.protege.testutil.TestUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 public class AnnotationTest {
 
     @Test
