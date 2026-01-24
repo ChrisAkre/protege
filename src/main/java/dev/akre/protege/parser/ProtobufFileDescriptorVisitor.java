@@ -231,6 +231,14 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                 .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
                 .setTypeName(ProtoUtils.qualify(entryName, scope));
 
+        if (ctx.fieldOptions() != null) {
+            var options = FieldOptions.newBuilder();
+            ctx.fieldOptions().option().stream()
+                    .map(this::visitOption)
+                    .forEach(options::addUninterpretedOption);
+            field.setOptions(options);
+        }
+
         return new MapField(field, entry);
     }
 

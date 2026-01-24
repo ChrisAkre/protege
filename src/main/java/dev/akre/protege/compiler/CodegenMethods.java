@@ -577,6 +577,7 @@ public class CodegenMethods {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
                     .addStatement("return new $T($L)", com.google.protobuf.UnmodifiableLazyStringList.class, ctx.internalName())
                     .build();
@@ -1212,6 +1213,7 @@ public class CodegenMethods {
         static MethodSpec getRepeatedListString(RepeatedFieldContext ctx) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotations(ctx.getterAnnotations())
                     .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
                     .addStatement("return $L.getUnmodifiableView()", ctx.internalName())
                     .build();
