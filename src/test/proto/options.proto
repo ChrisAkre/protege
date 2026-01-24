@@ -7,10 +7,11 @@ option java_outer_classname = "OptionsOuterClass";
 
 extend google.protobuf.MessageOptions {
   string java_implements = 50001;
+  repeated string java_message_annotation = 50002;
 }
 
 extend google.protobuf.FieldOptions {
-  string java_annotation = 50002;
+  repeated string java_annotation = 50003;
 }
 
 message MyMessage {

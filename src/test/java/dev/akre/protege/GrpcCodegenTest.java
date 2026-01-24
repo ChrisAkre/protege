@@ -105,7 +105,7 @@ public class GrpcCodegenTest {
     //@Disabled("Streaming is not yet supported in GrpcCodegen")
     public void testStreamingGrpcCodeGeneration() throws Exception {
         String protoContent = """
-                syntax = "proto3\";
+                syntax = "proto3";
                 package test;
                 option java_package = "com.test.streaming";
                 option java_outer_classname = "StreamingProto";
