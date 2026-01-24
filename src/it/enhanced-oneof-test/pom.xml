@@ -19,7 +19,7 @@
         <dependency>
             <groupId>dev.akre</groupId>
             <artifactId>protege</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>@project.version@</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
@@ -51,7 +51,7 @@
                         <path>
                             <groupId>dev.akre</groupId>
                             <artifactId>protege</artifactId>
-                            <version>0.0.1-SNAPSHOT</version>
+                            <version>@project.version@</version>
                         </path>
                     </annotationProcessorPaths>
                     <annotationProcessors>

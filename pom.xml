@@ -200,6 +200,9 @@
                     <settingsFile>src/it/settings.xml</settingsFile>
                     <showErrors>true</showErrors>
                     <streamLogsOnFailures>true</streamLogsOnFailures>
+                    <filterProperties>
+                        <project.version>${project.version}</project.version>
+                    </filterProperties>
                     <goals>
                         <goal>clean</goal>
                         <goal>verify</goal>
