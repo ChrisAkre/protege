@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package dev.akre.it;
+
+option java_package = "dev.akre.it";
+option java_outer_classname = "ExtraProtos";
+
+message PackedMessage {
+  repeated int32 values = 1 [packed = true];
+  repeated int32 non_packed = 2 [packed = false];
+}
+
+message JsonNameMessage {
+  string my_field = 1 [json_name = "custom_field_name"];
+}
+
+message MapKeyValues {
+  map<string, int32> string_to_int = 1;
+  map<int32, bool> int_to_bool = 2;
+  map<bool, string> bool_to_string = 3; // bool keys are allowed in proto3
+}
+
+message NestedMap {
+  message Inner {
+    string value = 1;
+  }
+  map<string, Inner> inner_map = 1;
+}

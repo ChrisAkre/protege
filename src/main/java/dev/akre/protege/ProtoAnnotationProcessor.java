@@ -1,0 +1,84 @@
+package dev.akre.protege;
+
+import com.google.auto.service.AutoService;
+
+import javax.annotation.processing.*;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.*;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Set;
+
+@SupportedAnnotationTypes("dev.akre.protege.GenProto")
+@AutoService(Processor.class)
+public class ProtoAnnotationProcessor extends AbstractProcessor {
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
+
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        for (TypeElement annotation : annotations) {
+            for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
+                if (element.getKind() != ElementKind.INTERFACE) continue;
+                try {
+                    TypeElement typeElement = (TypeElement) element;
+                    String protoContent = generateProto(typeElement);
+                    String packageName = processingEnv.getElementUtils().getPackageOf(typeElement).getQualifiedName().toString();
+                    FileObject fileObject = processingEnv.getFiler().createResource(
+                            StandardLocation.SOURCE_OUTPUT,
+                            packageName,
+                            typeElement.getSimpleName() + ".proto"
+                    );
+                    try (Writer writer = fileObject.openWriter()) {
+                        writer.write(protoContent);
+                    }
+                } catch (IOException e) {
+                    processingEnv.getMessager().printMessage(javax.tools.Diagnostic.Kind.ERROR, e.getMessage());
+                }
+            }
+        }
+        return true;
+    }
+
+    private String generateProto(TypeElement typeElement) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("syntax = \"proto3\";\n\n");
+        sb.append("package ").append(processingEnv.getElementUtils().getPackageOf(typeElement).getQualifiedName()).append(";\n\n");
+        sb.append("message ").append(typeElement.getSimpleName()).append(" {");
+        int count = 1;
+        for (Element enclosed : typeElement.getEnclosedElements()) {
+            if (enclosed.getKind() == ElementKind.METHOD) {
+                ExecutableElement method = (ExecutableElement) enclosed;
+                String name = method.getSimpleName().toString();
+                if (name.startsWith("get")) {
+                    name = decapitalize(name.substring(3));
+                    String type = getProtoType(method.getReturnType());
+                    sb.append("  ").append(type).append(" ").append(name).append(" = ").append(count++).append(";\n");
+                }
+            }
+        }
+        sb.append("}\n");
+        return sb.toString();
+    }
+
+    private String getProtoType(javax.lang.model.type.TypeMirror type) {
+        String typeStr = type.toString();
+        if (typeStr.equals("java.lang.String")) return "string";
+        if (typeStr.equals("int")) return "int32";
+        if (typeStr.equals("long")) return "int64";
+        if (typeStr.equals("boolean")) return "bool";
+        if (typeStr.equals("float")) return "float";
+        if (typeStr.equals("double")) return "double";
+        return "string"; // Default
+    }
+
+    private String decapitalize(String s) {
+        if (s == null || s.isEmpty()) return s;
+        return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+    }
+}

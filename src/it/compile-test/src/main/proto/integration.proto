@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package dev.akre.it;
+
+option java_package = "dev.akre.it";
+option java_outer_classname = "IntegrationProtos";
+
+// Mocking google types for this test as the current generator doesn't resolve external imports yet
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+message Duration {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+enum Status {
+  UNKNOWN = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+}
+
+message SampleMessage {
+  required string id = 1;
+  string name = 2;
+  Status status = 3;
+  repeated string tags = 4;
+  map<string, string> metadata = 5;
+  Timestamp created_at = 6;
+  Duration timeout = 7;
+}

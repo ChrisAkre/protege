@@ -13,8 +13,11 @@ grammar Protobuf;
 proto
     : syntax ( importStatement
              | packageStatement
-             | option
-             | topLevelDef
+             | optionDecl
+             | messageDef
+             | enumDef
+             | serviceDef
+             | extend
              | emptyStatement_
              )* EOF
     ;
@@ -32,38 +35,30 @@ importStatement
     ;
 
 packageStatement
-    : PACKAGE fullIdent SEMICOLON
+    : PACKAGE name=fullIdent SEMICOLON
+    ;
+
+optionDecl
+    : OPTION option SEMICOLON
     ;
 
 option
-    : OPTION optionName EQUAL constant SEMICOLON
+    : optionName EQUAL constant
     ;
 
 optionName
-    : ident ( DOT ident )*
-    | LPAREN custom=ident RPAREN ( DOT ident )*
-    ;
-
-topLevelDef
-    : messageDef
-    | enumDef
-    | serviceDef
-    | extend
+    : plain+=ident ( DOT plain+=ident )*
+    | LPAREN custom+=ident ( DOT custom+=ident )* RPAREN ( DOT plain+=ident )*
     ;
 
 // Message definition
 messageDef
-    : MESSAGE messageName messageBody
-    ;
-
-messageBody
-    : LBRACE ( field
+    : MESSAGE name=ident LBRACE ( field
             | enumDef
             | messageDef
             | extend
             | extensions
-            | group
-            | option
+            | optionDecl
             | oneof
             | mapField
             | reserved
@@ -73,22 +68,18 @@ messageBody
 
 // Enum definition
 enumDef
-    : ENUM enumName enumBody
+    : ENUM name=ident enumBody
     ;
 
 enumBody
-    : LBRACE ( option
+    : LBRACE ( optionDecl
             | enumField
             | emptyStatement_
             )* RBRACE
     ;
 
 enumField
-    : ident EQUAL ( MINUS )? intLit ( LBRACK enumValueOption ( COMMA enumValueOption )* RBRACK )? SEMICOLON
-    ;
-
-enumValueOption
-    : optionName EQUAL constant
+    : ident EQUAL intLit ( LBRACK option ( COMMA option )* RBRACK )? SEMICOLON
     ;
 
 // Service definition
@@ -100,13 +91,17 @@ serviceDef
     ;
 
 rpc
-    : RPC rpcName LPAREN ( STREAM )? messageType RPAREN RETURNS LPAREN ( STREAM )? messageType RPAREN
+    : RPC rpcName LPAREN ( clientStream=STREAM )? clientType=messageType RPAREN RETURNS LPAREN ( serverStream=STREAM )? serverType=messageType RPAREN
       ( ( LBRACE ( option | emptyStatement_ )* RBRACE ) | SEMICOLON )
     ;
 
 // Field
 field
-    : ( REQUIRED | OPTIONAL | REPEATED )? type_ fieldName EQUAL fieldNumber ( LBRACK fieldOptions RBRACK )? SEMICOLON
+    : label type_ fieldName EQUAL fieldNumber ( LBRACK fieldOptions RBRACK )? SEMICOLON
+    ;
+
+label
+    : (REQUIRED | OPTIONAL | REPEATED)?
     ;
 
 fieldOptions
@@ -144,7 +139,7 @@ type_
     ;
 
 messageType
-    : ( DOT )? ( ident DOT )* messageName
+    : ( DOT )? ( ident DOT )* ident
     ;
 
 // Extensions
@@ -162,13 +157,10 @@ range
 
 // Extend
 extend
-    : EXTEND messageType LBRACE ( field | group | emptyStatement_ )* RBRACE
+    : EXTEND messageType LBRACE ( field | emptyStatement_ )* RBRACE
     ;
 
-// Group (proto2 only)
-group
-    : ( REQUIRED | OPTIONAL | REPEATED )? GROUP groupName EQUAL fieldNumber messageBody
-    ;
+
 
 // Reserved
 reserved
@@ -193,8 +185,6 @@ fullIdent
     : ident ( DOT ident )*
     ;
 
-messageName : ident ;
-enumName    : ident ;
 fieldName   : ident ;
 oneofName   : ident ;
 mapName     : ident ;

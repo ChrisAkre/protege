@@ -1,0 +1,33 @@
+syntax = "proto3";
+package com.example.proto;
+option java_package = "com.example.proto.generated";
+option java_outer_classname = "SearchOuterClass";
+option java_generic_services = true;
+
+message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;
+  int32 result_per_page = 3;
+  
+  message Corpus {
+    enum Type {
+      UNIVERSAL = 0;
+      WEB = 1;
+      IMAGES = 2;
+      LOCAL = 3;
+      NEWS = 4;
+      PRODUCTS = 5;
+      VIDEO = 6;
+    }
+    Type type = 1;
+  }
+  Corpus corpus = 4;
+}
+
+message SearchResponse {
+  repeated string results = 1;
+}
+
+service SearchService {
+  rpc Search(SearchRequest) returns (SearchResponse);
+}

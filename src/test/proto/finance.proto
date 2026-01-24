@@ -1,0 +1,31 @@
+syntax = "proto3";
+package com.example.proto;
+option java_package = "com.example.proto.generated";
+option java_outer_classname = "FinanceOuterClass";
+
+message Transaction {
+  string id = 1;
+  double amount = 2;
+  string currency = 3;
+  
+  enum Type {
+    DEBIT = 0;
+    CREDIT = 1;
+    TRANSFER = 2;
+  }
+  Type type = 4;
+  
+  message Party {
+    string account_number = 1;
+    string bank_code = 2;
+  }
+  
+  Party sender = 5;
+  Party receiver = 6;
+  fixed64 internal_trace_id = 7;
+}
+
+message AccountBalance {
+  string account_id = 1;
+  map<string, double> balances_by_currency = 2;
+}

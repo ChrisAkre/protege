@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+package dev.akre.it;
+
+option java_package = "dev.akre.it";
+option java_outer_classname = "Proto2Protos";
+
+message Proto2Message {
+  optional string name = 1 [default = "unnamed"];
+  required int32 id = 2;
+
+  extensions 100 to 199;
+
+  enum Color {
+    RED = 0;
+    GREEN = 1;
+    BLUE = 2;
+  }
+  optional Color favorite_color = 3;
+}
+
+extend Proto2Message {
+  optional string extra_info = 100;
+}
+
+message Container {
+  repeated Proto2Message messages = 1;
+}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+package com.example.proto;
+option java_package = "com.example.proto.generated";
+option java_outer_classname = "SocialOuterClass";
+
+message User {
+  string id = 1;
+  string display_name = 2;
+  repeated string friend_ids = 3;
+}
+
+message Post {
+  string id = 1;
+  string author_id = 2;
+  string content = 3;
+  int64 timestamp = 4;
+  
+  message Comment {
+    string user_id = 1;
+    string text = 2;
+    int64 timestamp = 3;
+  }
+  
+  repeated Comment comments = 5;
+  map<string, bool> reactions = 6; // user_id -> liked
+}

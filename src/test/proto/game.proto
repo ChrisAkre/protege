@@ -1,0 +1,29 @@
+syntax = "proto3";
+package com.example.proto;
+option java_package = "com.example.proto.generated";
+option java_outer_classname = "GameOuterClass";
+
+message Player {
+  string id = 1;
+  string username = 2;
+  int32 level = 3;
+  
+  message Inventory {
+    map<string, int32> items = 1; // item_id -> count
+    repeated string equipped_gear = 2;
+  }
+  
+  Inventory inventory = 4;
+  Stats stats = 5;
+
+  message Stats {
+    int32 health = 1;
+    int32 mana = 2;
+    map<string, float> attributes = 3; // "strength", "agility", etc.
+  }
+}
+
+message World {
+  repeated Player players = 1;
+  map<int32, string> zones = 2; // zone_id -> zone_name
+}

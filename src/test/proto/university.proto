@@ -1,0 +1,27 @@
+syntax = "proto3";
+package com.example.proto;
+option java_package = "com.example.proto.generated";
+option java_outer_classname = "UniversityOuterClass";
+
+message Course {
+  string code = 1;
+  string title = 2;
+  int32 credits = 3;
+
+  message Grade {
+    float value = 1;
+  }
+}
+
+message Student {
+  string id = 1;
+  string name = 2;
+  map<string, Course.Grade> grades = 3; // courseCode -> grade
+}
+
+message Department {
+  string name = 1;
+  repeated Course courses = 2;
+  repeated Student students = 3;
+  map<string, Department> sub_departments = 4;
+}

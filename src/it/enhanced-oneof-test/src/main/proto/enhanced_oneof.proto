@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package dev.akre.it;
+
+import "options.proto";
+
+option java_package = "dev.akre.it";
+option java_outer_classname = "EnhancedOneofProtos";
+option (dev.akre.protege.java_enhanced_oneof) = true;
+
+message Thing {
+  oneof shape {
+    Circle circle = 1;
+    Rectangle rectangle = 2;
+    Square square = 3;
+  }
+
+  message Circle {
+    double radius = 1;
+  }
+
+  message Rectangle {
+    double width = 1;
+    double height = 2;
+  }
+
+  message Square {
+    double side = 1;
+  }
+}

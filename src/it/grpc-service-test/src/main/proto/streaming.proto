@@ -1,0 +1,16 @@
+syntax = "proto3";
+package dev.akre.it;
+option java_package = "dev.akre.it.generated";
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string content = 1;
+}
+
+service StreamingService {
+  rpc StreamHello(HelloRequest) returns (stream HelloResponse);
+}
+

@@ -1,0 +1,33 @@
+syntax = "proto3";
+package com.example.proto;
+option java_package = "com.example.proto.generated";
+option java_outer_classname = "IotOuterClass";
+
+message Device {
+  string id = 1;
+  string model = 2;
+  
+  enum Connectivity {
+    WIFI = 0;
+    BLUETOOTH = 1;
+    CELLULAR = 2;
+    ZIGBEE = 3;
+  }
+  Connectivity connectivity = 3;
+
+  State state = 4;
+  message State {
+    map<string, string> shadow = 1;
+    int64 last_seen = 2;
+    Connectivity conn = 3;
+  }
+}
+
+message Command {
+  string target_device_id = 1;
+  oneof payload {
+    string action = 2;
+    int32 reboot_delay = 3;
+    bytes raw_data = 4;
+  }
+}
