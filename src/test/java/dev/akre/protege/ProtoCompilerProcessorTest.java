@@ -55,9 +55,9 @@ public class ProtoCompilerProcessorTest {
         // Verification
         assertThat(compilation).succeeded();
         
-        // ProtoUtils.getJavaOuterClassName for helloworld.proto -> HelloworldOuterClass
+        // ProtoUtils.getJavaOuterClassName for helloworld.proto -> Helloworld
         var generatedSourceFile = assertThat(compilation)
-                .generatedSourceFile("com.example.generated.HelloworldOuterClass");
+                .generatedSourceFile("com.example.generated.Helloworld");
         
         generatedSourceFile.contentsAsUtf8String().contains("public static final class HelloWorld");
         generatedSourceFile.contentsAsUtf8String().contains("public String getContent()");

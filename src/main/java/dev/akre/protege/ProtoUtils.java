@@ -121,25 +121,21 @@ public class ProtoUtils {
         String baseName = (fileName.contains("/")
                 ? fileName.substring(fileName.lastIndexOf("/") + 1)
                 : fileName).replace(".proto", "");
-        return getNames(fileDescriptorProto).anyMatch(baseName::equalsIgnoreCase)
-                ? (toPascalCase(baseName) + "OuterClass")
-                : toPascalCase(baseName);
 
+        String candidateName = toPascalCase(baseName);
+        return getNames(fileDescriptorProto).anyMatch(candidateName::equals)
+                ? (candidateName + "OuterClass")
+                : candidateName;
     }
 
     private static Stream<String> getNames(Object descriptor) {
+        // We only care about top-level names in the file scope that could conflict with the outer class
         return switch (descriptor) {
-            case DescriptorProtos.FileDescriptorProto f -> Stream.of(
-                    f.getMessageTypeList().stream().flatMap(ProtoUtils::getNames),
-                    f.getEnumTypeList().stream().flatMap(ProtoUtils::getNames))
-                    .flatMap(s -> s);
-            case DescriptorProtos.DescriptorProto m -> Stream.of(
-                            Stream.of(m.getName()),
-                            m.getNestedTypeList().stream().flatMap(ProtoUtils::getNames),
-                            m.getEnumTypeList().stream().flatMap(ProtoUtils::getNames))
-                    .flatMap(s -> s);
-            case DescriptorProtos.EnumDescriptorProto e -> Stream.of(e.getName());
-            default -> throw new IllegalArgumentException("unexpected: " + descriptor);
+            case DescriptorProtos.FileDescriptorProto f -> Stream.concat(
+                    f.getMessageTypeList().stream().map(DescriptorProtos.DescriptorProto::getName),
+                    f.getEnumTypeList().stream().map(DescriptorProtos.EnumDescriptorProto::getName)
+            );
+            default -> Stream.empty();
         };
     }
 
