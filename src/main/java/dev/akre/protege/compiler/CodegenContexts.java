@@ -3,6 +3,7 @@ package dev.akre.protege.compiler;
 import com.google.protobuf.DescriptorProtos;
 import com.palantir.javapoet.*;
 import dev.akre.protege.ProtoUtils;
+import dev.akre.util.Cons;
 
 import java.util.HashMap;
 import java.util.List;
@@ -111,6 +112,23 @@ record CodegenContext(
         for (int i = currentScope.size(); i >= 0; i--) {
             var scope = currentScope.subList(0, i);
             var candidateName = scope.isEmpty() ? protoTypeName : String.join(".", scope) + "." + protoTypeName;
+            if (typeRegistry.containsKey(candidateName)) {
+                return typeRegistry.get(candidateName);
+            }
+        }
+
+        return ClassName.get(packageName, outerName, protoTypeName.split("\\."));
+    }
+
+    TypeName resolveTypeName(String protoTypeName, Cons<String> currentScope) {
+        if (protoTypeName.startsWith(".")) {
+            return resolveTypeName(protoTypeName, java.util.Collections.<String>emptyList());
+        }
+
+        for (var scope = currentScope; scope != null; scope = scope.tail()) {
+            // Cons.stream() iterates from tail to head (root to leaf), so the order is correct.
+            String scopeStr = scope.stream().map(Object::toString).collect(java.util.stream.Collectors.joining("."));
+            var candidateName = scopeStr.isEmpty() ? protoTypeName : scopeStr + "." + protoTypeName;
             if (typeRegistry.containsKey(candidateName)) {
                 return typeRegistry.get(candidateName);
             }

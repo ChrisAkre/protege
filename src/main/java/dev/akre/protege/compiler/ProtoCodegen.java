@@ -8,6 +8,7 @@ import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import dev.akre.protege.ProtoUtils;
+import dev.akre.util.Cons;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
@@ -119,15 +120,14 @@ public class ProtoCodegen {
         oneofInterfacesByType.clear();
 
         for (var message : ctx.fileDescriptor().getMessageTypeList()) {
-            populateOneofInterfaces(message, ctx, new ArrayList<>());
+            populateOneofInterfaces(message, ctx, Cons.nil());
         }
     }
 
-    private void populateOneofInterfaces(DescriptorProtos.DescriptorProto message, CodegenContext ctx, List<String> parentPath) {
+    private void populateOneofInterfaces(DescriptorProtos.DescriptorProto message, CodegenContext ctx, Cons<String> parentPath) {
         boolean enhancedOneof = getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, ctx.fileEnhancedOneof());
 
-        var currentPath = new ArrayList<>(parentPath);
-        currentPath.add(message.getName());
+        var currentPath = parentPath.cons(message.getName());
 
         if (enhancedOneof) {
             for (int i = 0; i < message.getOneofDeclCount(); i++) {

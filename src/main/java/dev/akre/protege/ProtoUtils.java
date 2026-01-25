@@ -50,8 +50,8 @@ public class ProtoUtils {
         );
 
     public static DescriptorProtos.FileDescriptorProto parseProto(File file) throws IOException {
-        String content = Files.readString(file.toPath());
-        return parseProto(content, file.getName());
+        CharStream input = CharStreams.fromPath(file.toPath());
+        return parseProto(input, file.getName());
     }
 
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent) {
@@ -60,6 +60,10 @@ public class ProtoUtils {
 
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent, String filename) {
         CharStream input = CharStreams.fromString(protoContent);
+        return parseProto(input, filename);
+    }
+
+    private static DescriptorProtos.FileDescriptorProto parseProto(CharStream input, String filename) {
         ProtobufLexer lexer = new ProtobufLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ProtobufParser parser = new ProtobufParser(tokens);
@@ -154,7 +158,11 @@ public class ProtoUtils {
                     if (b >= 32 && b <= 126) {
                         builder.append((char) b);
                     } else {
-                        builder.append(String.format("\\%03o", b & 0xFF));
+                        builder.append('\\');
+                        int v = b & 0xFF;
+                        builder.append((char) ('0' + ((v >> 6) & 7)));
+                        builder.append((char) ('0' + ((v >> 3) & 7)));
+                        builder.append((char) ('0' + (v & 7)));
                     }
                 }
             }
