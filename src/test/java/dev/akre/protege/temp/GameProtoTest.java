@@ -35,7 +35,7 @@ public class GameProtoTest {
         String outerClassName = TestUtils.makeOuterClassName(parsedProto, protoPath.getFileName().toString());
         
         ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-        var generatedFile = codegen.generateFile(parsedProto);
+        var generatedFile = codegen.generateFile(parsedProto).toJavaFileObject();
         assertNotNull(generatedFile);
         
         // This will attempt to compile the generated code.
@@ -136,7 +136,7 @@ public class GameProtoTest {
         String outerClassName = "com.example.proto.generated.GameNoDeprecated";
 
         ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler(), false);
-        var generatedFile = codegen.generateFile(parsedProto);
+        var generatedFile = codegen.generateFile(parsedProto).toJavaFileObject();
         assertNotNull(generatedFile);
 
         Class<?> generatedClass = TestUtils.compile(outerClassName, generatedFile);

@@ -62,7 +62,7 @@ public class EnhancedOneOfTest {
         DescriptorProtos.FileDescriptorProto parsedProto = ProtoUtils.parseProto(TEST_PROTO, protoPath);
         String outerClassName = TestUtils.makeOuterClassName(parsedProto, protoPath.toString());
         ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-        Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto));
+        Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto).toJavaFileObject());
         ClassAssert.assertThat(generatedClass)
                 .hasPublicStaticFinalStringField("PROTEGE_VERSION",ProtegeVersion.VERSION_STRING);
 
