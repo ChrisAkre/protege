@@ -240,6 +240,39 @@ public class ProtoUtils {
         };
     }
 
+    public static com.google.protobuf.WireFormat.FieldType getWireFormatType(DescriptorProtos.FieldDescriptorProto.Type type) {
+        return switch (type) {
+            case TYPE_DOUBLE -> com.google.protobuf.WireFormat.FieldType.DOUBLE;
+            case TYPE_FLOAT -> com.google.protobuf.WireFormat.FieldType.FLOAT;
+            case TYPE_INT64 -> com.google.protobuf.WireFormat.FieldType.INT64;
+            case TYPE_UINT64 -> com.google.protobuf.WireFormat.FieldType.UINT64;
+            case TYPE_INT32 -> com.google.protobuf.WireFormat.FieldType.INT32;
+            case TYPE_FIXED64 -> com.google.protobuf.WireFormat.FieldType.FIXED64;
+            case TYPE_FIXED32 -> com.google.protobuf.WireFormat.FieldType.FIXED32;
+            case TYPE_BOOL -> com.google.protobuf.WireFormat.FieldType.BOOL;
+            case TYPE_STRING -> com.google.protobuf.WireFormat.FieldType.STRING;
+            case TYPE_GROUP -> com.google.protobuf.WireFormat.FieldType.GROUP;
+            case TYPE_MESSAGE -> com.google.protobuf.WireFormat.FieldType.MESSAGE;
+            case TYPE_BYTES -> com.google.protobuf.WireFormat.FieldType.BYTES;
+            case TYPE_UINT32 -> com.google.protobuf.WireFormat.FieldType.UINT32;
+            case TYPE_ENUM -> com.google.protobuf.WireFormat.FieldType.ENUM;
+            case TYPE_SFIXED32 -> com.google.protobuf.WireFormat.FieldType.SFIXED32;
+            case TYPE_SFIXED64 -> com.google.protobuf.WireFormat.FieldType.SFIXED64;
+            case TYPE_SINT32 -> com.google.protobuf.WireFormat.FieldType.SINT32;
+            case TYPE_SINT64 -> com.google.protobuf.WireFormat.FieldType.SINT64;
+        };
+    }
+
+    public static int getWireType(DescriptorProtos.FieldDescriptorProto.Type type) {
+        return switch (type) {
+            case TYPE_INT32, TYPE_INT64, TYPE_UINT32, TYPE_UINT64, TYPE_SINT32, TYPE_SINT64, TYPE_BOOL, TYPE_ENUM -> 0;
+            case TYPE_DOUBLE, TYPE_FIXED64, TYPE_SFIXED64 -> 1;
+            case TYPE_STRING, TYPE_BYTES, TYPE_MESSAGE -> 2;
+            case TYPE_FLOAT, TYPE_FIXED32, TYPE_SFIXED32 -> 5;
+            default -> throw new IllegalArgumentException("Unsupported type: " + type);
+        };
+    }
+
     public static String getDefaultReturnValue(String typeName) {
         return switch (typeName) {
             case "boolean" -> "false";
