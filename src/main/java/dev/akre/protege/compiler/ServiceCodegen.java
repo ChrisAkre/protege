@@ -21,11 +21,6 @@ public record ServiceCodegen(
         return service.getName();
     }
 
-    /**
-     * Generates the service class.
-     *
-     * @return The TypeSpec for the service class.
-     */
     public TypeSpec generate() {
         var serviceName = service.getName();
 
