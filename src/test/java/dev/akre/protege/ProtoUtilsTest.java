@@ -92,4 +92,33 @@ public class ProtoUtilsTest {
                 .build();
         assertThat(ProtoUtils.isJavaGenericServicesEnabled(proto2WithOption)).isFalse();
     }
+
+    @Test
+    @DisplayName("Should correctly split and escape bytes")
+    void shouldSplitAndEscapeBytesCorrectly() {
+        // Printable ASCII
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{'a', 'b', 'c'})).containsExactly("abc");
+
+        // Special characters
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{'\n'})).containsExactly("\\n", "");
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{'\r'})).containsExactly("\\r");
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{'\t'})).containsExactly("\\t");
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{'\"'})).containsExactly("\\\"");
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{'\\'})).containsExactly("\\\\");
+
+        // Octal escaping
+        // 0 -> \000
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{0})).containsExactly("\\000");
+        // 1 -> \001
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{1})).containsExactly("\\001");
+        // 31 -> \037
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{31})).containsExactly("\\037");
+        // 127 -> \177
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{127})).containsExactly("\\177");
+        // 255 (byte -1) -> \377
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{(byte) 255})).containsExactly("\\377");
+
+        // Mixed split
+        assertThat(ProtoUtils.splitAndEscapeBytes(new byte[]{'a', '\n', 'b'})).containsExactly("a\\n", "b");
+    }
 }
