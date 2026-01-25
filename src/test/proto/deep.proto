@@ -3,7 +3,6 @@ syntax = "proto3";
 package dev.akre.it;
 
 option java_package = "dev.akre.it";
-option java_outer_classname = "DeepProtos";
 
 message Level1 {
   string l1 = 1;

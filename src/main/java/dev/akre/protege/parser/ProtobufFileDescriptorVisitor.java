@@ -413,7 +413,13 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         } else if (ctx.intLit() != null) {
             return Long.parseLong(ctx.intLit().getText());
         } else if (ctx.floatLit() != null) {
-            return Double.parseDouble(ctx.floatLit().getText());
+            String text = ctx.floatLit().getText();
+            return switch (text) {
+                case "inf", "+inf" -> Double.POSITIVE_INFINITY;
+                case "-inf" -> Double.NEGATIVE_INFINITY;
+                case "nan" -> Double.NaN;
+                default -> Double.parseDouble(text);
+            };
         } else if (ctx.strLit() != null) {
             return ByteString.copyFromUtf8(getStringLiteral(ctx.strLit().getText()));
         } else {

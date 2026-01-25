@@ -31,9 +31,6 @@ public class TestProtos {
             DESCRIPTORS = files.filter(p -> p.toString().endsWith(".proto"))
                     .map(protoPath -> {
                         try {
-                            if (protoPath.endsWith("extra_features.proto")) {
-                                System.out.println("hi");
-                            }
                             DescriptorProtos.FileDescriptorProto parsedProto = ProtoUtils.parseProto(protoPath.toFile());
                             String outerClassName = TestUtils.makeOuterClassName(parsedProto, protoPath.getFileName().toString());
                             Class<?> expectedClass;
@@ -52,6 +49,7 @@ public class TestProtos {
                                     .hasPublicStaticFinalStringField("PROTEGE_VERSION", ProtegeVersion.VERSION_STRING);
                             return Arguments.of(protoPath, parsedProto, expectedClass, generatedClass);
                         } catch (Exception e) {
+                            e.printStackTrace();
                             throw new RuntimeException("Failed to prepare parameters for " + protoPath, e);
                         }
                     }).filter(Objects::nonNull).toList();
@@ -114,7 +112,9 @@ public class TestProtos {
                     .map(message -> {
                         String messageName = message.getName();
                         Class<?> expectedMessage = TestUtils.findInnerClass(expectedClass, messageName).orElseThrow();
-                        Class<?> generatedMessage = TestUtils.findInnerClass(generatedClass, messageName).orElseThrow();
+                        Class<?> generatedMessage = TestUtils.findInnerClass(generatedClass, messageName).orElseThrow(() -> {
+                            throw new IllegalArgumentException("%s not found in class generated from %s".formatted(messageName, protoPath));
+                        });
                         return Arguments.of(protoPath, parsedProto, messageName, expectedMessage, generatedMessage);
                     });
         }).toList();

@@ -198,6 +198,11 @@ ident
     | DOUBLE | FLOAT | INT32 | INT64 | UINT32 | UINT64
     | SINT32 | SINT64 | FIXED32 | FIXED64 | SFIXED32 | SFIXED64
     | BOOL | STRING | BYTES
+    | SYNTAX | IMPORT | WEAK | PUBLIC | PACKAGE | OPTION
+    | ONEOF | MAP | RESERVED | TO | MAX | ENUM | MESSAGE
+    | SERVICE | EXTEND | EXTENSIONS | RPC | RETURNS | STREAM
+    | BOOL_LIT
+    | INF | NAN
     ;
 
 // Literals
@@ -207,6 +212,8 @@ intLit
 
 floatLit
     : FLOAT_LIT
+    | INF
+    | NAN
     ;
 
 boolLit
@@ -247,6 +254,8 @@ GROUP       : 'group';
 RPC         : 'rpc';
 RETURNS     : 'returns';
 STREAM      : 'stream';
+INF         : 'inf';
+NAN         : 'nan';
 
 // Types
 DOUBLE      : 'double';
@@ -281,8 +290,8 @@ FLOAT_LIT
     : ( MINUS | PLUS )? DECIMALS '.' DECIMALS? EXPONENT?
     | ( MINUS | PLUS )? DECIMALS EXPONENT
     | ( MINUS | PLUS )? '.' DECIMALS EXPONENT?
-    | ( MINUS | PLUS )? 'inf'
-    | ( MINUS | PLUS )? 'nan'
+    | ( MINUS | PLUS ) INF
+    | ( MINUS | PLUS ) NAN
     ;
 
 fragment DECIMALS   : [0-9]+;
