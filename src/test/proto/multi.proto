@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package dev.akre.it;
+
+option java_package = "dev.akre.it";
+option java_outer_classname = "MultiProtos";
+
+message MessageA {
+  string a = 1;
+  message InnerA {
+    int32 val = 1;
+  }
+  InnerA inner = 2;
+}
+
+message MessageB {
+  string b = 1;
+  MessageA a = 2;
+  enum Color {
+    RED = 0;
+    BLUE = 1;
+  }
+  Color color = 3;
+}
+
+enum GlobalEnum {
+  G_UNKNOWN = 0;
+  G_START = 1;
+  G_STOP = 2;
+}
+
+message MessageC {
+  GlobalEnum global = 1;
+  MessageB.Color local = 2;
+  MessageA.InnerA nested = 3;
+}

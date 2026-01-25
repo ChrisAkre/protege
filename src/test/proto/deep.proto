@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package dev.akre.it;
+
+option java_package = "dev.akre.it";
+option java_outer_classname = "DeepProtos";
+
+message Level1 {
+  string l1 = 1;
+  message Level2 {
+    string l2 = 1;
+    message Level3 {
+      string l3 = 1;
+      message Level4 {
+        string l4 = 1;
+      }
+      Level4 level4 = 2;
+    }
+    Level3 level3 = 2;
+  }
+  Level2 level2 = 2;
+}

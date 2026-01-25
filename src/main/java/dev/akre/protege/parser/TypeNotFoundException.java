@@ -1,6 +1,6 @@
 package dev.akre.protege.parser;
 
-public class TypeNotFoundException extends RuntimeException {
+public class TypeNotFoundException extends InvalidProtoException {
     private final String name;
     private String filename;
 
@@ -16,13 +16,8 @@ public class TypeNotFoundException extends RuntimeException {
         this.filename = filename;
     }
 
-    public TypeNotFoundException in(String filename) {
-        return new TypeNotFoundException(name, filename, this);
-    }
-
     @Override
     public String getMessage() {
         return filename == null ? "Type '%s' not found".formatted(name) : "Type '%s' not found in '%s'".formatted(name, filename);
     }
-
 }
