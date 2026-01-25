@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package dev.akre.it;
+
+option java_package = "dev.akre.it";
+option java_outer_classname = "ComplexProtos";
+
+message ComplexMessage {
+  string id = 1;
+
+  message NestedMessage {
+    string value = 1;
+    enum NestedEnum {
+      UNKNOWN = 0;
+      FOO = 1;
+      BAR = 2;
+    }
+    NestedEnum type = 2;
+  }
+
+  NestedMessage nested = 2;
+
+  oneof test_oneof {
+    string name = 3;
+    int32 code = 4;
+    NestedMessage sub_message = 5;
+  }
+
+  map<int32, string> int_to_string_map = 6;
+  map<string, NestedMessage> string_to_nested_map = 7;
+
+  bool flag = 9;
+  double score = 10;
+  bytes data = 11;
+}
+
+message RecursiveMessage {
+  string name = 1;
+  RecursiveMessage child = 2;
+}

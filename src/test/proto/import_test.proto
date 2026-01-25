@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package dev.akre.it;
+
+option java_package = "dev.akre.it";
+option java_outer_classname = "ImportTestProtos";
+
+message BaseMessage {
+  string base_val = 1;
+}
+
+message DerivedMessage {
+  BaseMessage base = 1;
+  string derived_val = 2;
+}
