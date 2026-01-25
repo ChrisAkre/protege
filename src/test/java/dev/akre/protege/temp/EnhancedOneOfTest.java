@@ -103,6 +103,20 @@ public class EnhancedOneOfTest {
         Class<?> builder = TestUtils.findInnerClass(mediaItem, "Builder").orElseThrow();
         ClassAssert.assertThat(builder).hasMethod("getContent", oneofInterface);
         ClassAssert.assertThat(builder).hasNoMethod("getContentCase");
+
+        // Test mergeFrom
+        var videoMsg = mediaItem.getMethod("newBuilder").invoke(null);
+        var videoBuilder = video.getMethod("newBuilder").invoke(null);
+        videoBuilder.getClass().getMethod("setDurationSeconds", int.class).invoke(videoBuilder, 120);
+        videoMsg.getClass().getMethod("setVideo", video).invoke(videoMsg, videoBuilder.getClass().getMethod("build").invoke(videoBuilder));
+        var builtVideoMsg = videoMsg.getClass().getMethod("build").invoke(videoMsg);
+
+        var mergeBuilder = mediaItem.getMethod("newBuilder").invoke(null);
+        mergeBuilder.getClass().getMethod("mergeFrom", mediaItem).invoke(mergeBuilder, builtVideoMsg);
+        var mergedMsg = mergeBuilder.getClass().getMethod("build").invoke(mergeBuilder);
+
+        boolean hasVideo = (boolean) mergedMsg.getClass().getMethod("hasVideo").invoke(mergedMsg);
+        org.junit.jupiter.api.Assertions.assertTrue(hasVideo);
     }
 
     @Test

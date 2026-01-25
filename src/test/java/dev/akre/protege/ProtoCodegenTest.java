@@ -50,7 +50,6 @@ public class ProtoCodegenTest {
         DescriptorAssert.assertThat(generatedProto).compareIgnoringCustomOptions(expected);
     }
 
-    @Disabled
     @ParameterizedTest(name = "test mutual serialization for {2} in {0}")
     @MethodSource("allMessages")
     @DisplayName("Validate parsed proto is byte-level compatible with generated proto")

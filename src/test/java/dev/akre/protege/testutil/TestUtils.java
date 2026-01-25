@@ -63,6 +63,21 @@ public class TestUtils {
         return (ServiceDescriptor) serviceGrpcClass.getMethod("getServiceDescriptor").invoke(null);
     }
 
+    @SuppressWarnings("unchecked")
+    public static MethodDescriptor<Object, Object> getMethodDescriptor(ServiceDescriptor serviceDescriptor, String rpcName) {
+        return (MethodDescriptor<Object, Object>) serviceDescriptor.getMethods().stream()
+                .filter(m -> m.getFullMethodName().endsWith("/" + rpcName))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Method descriptor not found for RPC: " + rpcName));
+    }
+
+    public static Class<?> getRequestClass(Method serviceMethod) {
+        return serviceMethod.getParameterTypes()[0];
+    }
+
+    public static Class<?> getResponseClass(Method serviceMethod) {
+        return (Class<?>) ((java.lang.reflect.ParameterizedType) serviceMethod.getGenericParameterTypes()[1]).getActualTypeArguments()[0];
+    }
 
     public static Class<?> getBlockingInterface(Class<?> serviceClass) {
         return findInnerClass(serviceClass, "BlockingInterface")
@@ -85,6 +100,29 @@ public class TestUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Object newBlockingStub(Class<?> grpcClass, Channel channel) {
+        try {
+            Method method = grpcClass.getMethod("newBlockingStub", Channel.class);
+            return method.invoke(null, channel);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String getFirstUnaryRpcName(DescriptorProtos.FileDescriptorProto parsedProto, String serviceName) {
+        DescriptorProtos.ServiceDescriptorProto serviceProto = parsedProto.getServiceList().stream()
+                .filter(s -> s.getName().equals(serviceName))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Service not found: " + serviceName));
+
+        DescriptorProtos.MethodDescriptorProto methodProto = serviceProto.getMethodList().stream()
+                .filter(m -> !m.getClientStreaming() && !m.getServerStreaming())
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No unary method found in service: " + serviceName));
+
+        return methodProto.getName();
     }
 
     public static String toCamelCase(String s) {
@@ -140,25 +178,48 @@ public class TestUtils {
 
     public static Object getRandomInstance(Class<?> messageClass) {
         try {
-            Message.Builder builder = (Message.Builder) getBuilder(messageClass);
-            return getRandomInstance(builder, 0);
+            Message defaultInstance = (Message) getDefaultInstance(messageClass);
+            Descriptors.Descriptor descriptor = defaultInstance.getDescriptorForType();
+            Message.Builder builder = com.google.protobuf.DynamicMessage.newBuilder(descriptor);
+            Random random = new Random(messageClass.getName().hashCode());
+            Message dynamicMessage = getRandomInstance(builder, 0, random);
+            return parseFrom(messageClass, dynamicMessage.toByteArray());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static Message getRandomInstance(Message.Builder builder, int depth) {
+    private static Message getRandomInstance(Message.Builder builder, int depth, Random random) {
         if (depth <= 5) {
-            builder.getDescriptorForType().getFields().forEach(field -> setRandomValue(field, builder, depth));
+            builder.getDescriptorForType().getFields().forEach(field -> setRandomValue(field, builder, depth, random));
             return builder.build();
         } else {
             return builder.getDefaultInstanceForType();
         }
     }
 
-    private static void setRandomValue(Descriptors.FieldDescriptor field, Message.Builder builder, int depth) {
-        Random random = new Random(field.hashCode());
-        if (field.isRepeated()) {
+    private static void setRandomValue(Descriptors.FieldDescriptor field, Message.Builder builder, int depth, Random random) {
+        if (field.isMapField()) {
+            if (depth >= 4) return;
+            int count = random.nextInt(3) + 1;
+            List<Message> entries = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                Message.Builder entryBuilder = builder.newBuilderForField(field);
+                // Ensure map entries ALWAYS have both key and value set
+                entryBuilder.getDescriptorForType().getFields().forEach(f -> setRandomValue(f, entryBuilder, depth + 1, random));
+                entries.add(entryBuilder.build());
+            }
+            // Sort map entries by key (field number 1) to ensure deterministic order
+            entries.sort((e1, e2) -> {
+                Comparable k1 = (Comparable) e1.getField(e1.getDescriptorForType().findFieldByNumber(1));
+                Comparable k2 = (Comparable) e2.getField(e2.getDescriptorForType().findFieldByNumber(1));
+                return k1.compareTo(k2);
+            });
+            for (Message entry : entries) {
+                builder.addRepeatedField(field, entry);
+            }
+        } else if (field.isRepeated()) {
+            if (depth >= 4) return;
             int count = random.nextInt(3) + 1;
             for (int i = 0; i < count; i++) {
                 Object value = getRandomValue(field, builder, random, depth);
@@ -167,6 +228,7 @@ public class TestUtils {
                 }
             }
         } else {
+            if (depth >= 4 && field.getJavaType() == Descriptors.FieldDescriptor.JavaType.MESSAGE) return;
             Object value = getRandomValue(field, builder, random, depth);
             if (value != null) {
                 builder.setField(field, value);
@@ -191,7 +253,7 @@ public class TestUtils {
                 return values.get(random.nextInt(values.size()));
             case MESSAGE:
                 Message.Builder nestedBuilder = parentBuilder.newBuilderForField(field);
-                return getRandomInstance(nestedBuilder, depth + 1);
+                return getRandomInstance(nestedBuilder, depth + 1, random);
             default:
                 throw new RuntimeException("Unsupported type: " + field.getJavaType());
         }

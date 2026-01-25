@@ -170,37 +170,4 @@ record CodegenContext(
         return CodegenUtils.relativeToProtoPackage(typeName, protoPackageName());
     }
 }
-
-/**
- * Context for oneof generation
- */
-record OneofContext(
-        DescriptorProtos.OneofDescriptorProto oneof,
-        int oneofIndex,
-        String pascalName,
-        String enumName,
-        ClassName messageClassName
-) {
-    static OneofContext create(
-            DescriptorProtos.OneofDescriptorProto oneof,
-            int oneofIndex,
-            ClassName messageClassName
-    ) {
-        String pascalName = ProtoUtils.toPascalCase(oneof.getName());
-        String enumName = pascalName + "Case";
-        return new OneofContext(oneof, oneofIndex, pascalName, enumName, messageClassName);
-    }
-
-    String oneofName() {
-        return oneof.getName();
-    }
-
-    ClassName getEnumClassName() {
-        return messageClassName.nestedClass(enumName);
-    }
-
-    ClassName getInterfaceClassName() {
-        return messageClassName.nestedClass(pascalName);
-    }
-}
     

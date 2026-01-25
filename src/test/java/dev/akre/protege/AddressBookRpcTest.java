@@ -81,19 +81,7 @@ public class AddressBookRpcTest {
     @Test
     public void testRpcCallWithGenericService() throws Exception {
         // 1. Implement the service logic using the generic interface
-        Addressbook.AddressBookService.Interface serviceImpl = new Addressbook.AddressBookService.Interface() {
-            @Override
-            public void getAddressBook(RpcController controller, Addressbook.GetAddressBookRequest request, RpcCallback<Addressbook.AddressBook> done) {
-                Addressbook.AddressBook response = Addressbook.AddressBook.newBuilder()
-                        .addPeople(Addressbook.AddressBook.Person.newBuilder()
-                                .setName("Jane Doe")
-                                .setId(456)
-                                .setEmail("jane.doe@example.com")
-                                .build())
-                        .build();
-                done.run(response);
-            }
-        };
+        Addressbook.AddressBookService.Interface serviceImpl = this::returnPerson;
 
         // 2. Wrap it in a Service object
         com.google.protobuf.Service service = Addressbook.AddressBookService.newReflectiveService(serviceImpl);
@@ -117,13 +105,25 @@ public class AddressBookRpcTest {
                 .build();
 
         AtomicReference<Addressbook.AddressBook> responseRef = new AtomicReference<>();
-        stub.getAddressBook(null, request, response -> responseRef.set(response));
+        stub.getAddressBook(null, request, responseRef::set);
 
         // 5. Verify the response
         assertThat(responseRef.get()).isNotNull();
         assertThat(responseRef.get().getPeopleCount()).isEqualTo(1);
         assertThat(responseRef.get().getPeople(0).getName()).isEqualTo("Jane Doe");
     }
+
+    private void returnPerson(RpcController rpcController, Addressbook.GetAddressBookRequest getAddressBookRequest, RpcCallback<Addressbook.AddressBook> addressBookRpcCallback) {
+        Addressbook.AddressBook response = Addressbook.AddressBook.newBuilder()
+                .addPeople(Addressbook.AddressBook.Person.newBuilder()
+                        .setName("Jane Doe")
+                        .setId(456)
+                        .setEmail("jane.doe@example.com")
+                        .build())
+                .build();
+        addressBookRpcCallback.run(response);
+    }
+
 
     @Test
     public void testRpcCallWithGenericBlockingService() throws Exception {

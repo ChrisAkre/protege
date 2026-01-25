@@ -387,35 +387,6 @@ public class CodegenMethods {
             return builder.build();
         }
 
-        // Oneof methods
-        static MethodSpec getOneof(OneofContext ctx, CodeBlock switchCode) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ctx.getInterfaceClassName())
-                    .addCode(switchCode)
-                    .build();
-        }
-
-        static MethodSpec getOneofCase(OneofContext ctx, CodeBlock getCaseCode) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Case")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ctx.getEnumClassName())
-                    .addCode(getCaseCode)
-                    .build();
-        }
-
-        static MethodSpec clearOneof(OneofContext ctx, ClassName builderClassName, CodeBlock clearCode) {
-            return MethodSpec.methodBuilder("clear" + ctx.pascalName())
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(builderClassName)
-                    .addCode(clearCode)
-                    .addStatement("onChanged()")
-                    .addStatement("return this")
-                    .build();
-        }
-
         // Map field methods
         static MethodSpec containsMapKey(FieldCodegen ctx) {
             return MethodSpec.methodBuilder("contains" + ctx.pascalName())

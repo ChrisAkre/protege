@@ -208,7 +208,7 @@ public class InterfaceDescriptorFactory {
 
                     DescriptorProtos.FieldOptions.Builder fieldOptions = DescriptorProtos.FieldOptions.newBuilder();
                     for (java.lang.annotation.Annotation ann : method.getAnnotations()) {
-                        if (ann.annotationType().equals(Field.class)) {
+                        if (ann.annotationType().getName().equals(Field.class.getName())) {
                             continue;
                         }
 

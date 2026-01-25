@@ -38,7 +38,7 @@ public class CanaryTest {
                 import com.google.protobuf.MessageOrBuilder;
                 import com.google.protobuf.Parser;
                 import com.google.protobuf.UnknownFieldSet;
-                import dev.akre.protege.Field;
+                import dev.akre.protege.ProtoUtils;
                 import java.io.IOException;
                 import java.io.InputStream;
                 import java.lang.Object;
@@ -153,7 +153,6 @@ public class CanaryTest {
                     }
                 
                     @Override
-                    @Field(1)
                     public String getName() {
                       java.lang.Object ref = name_;
                       if (ref instanceof String) { return (String) ref; };
@@ -184,7 +183,7 @@ public class CanaryTest {
                 
                     @Override
                     public void writeTo(CodedOutputStream output) throws IOException {
-                      if (!GeneratedMessage.isStringEmpty(name_)) {
+                      if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
                         GeneratedMessage.writeString(output, 1, name_);
                       }
                     }
@@ -196,7 +195,7 @@ public class CanaryTest {
                         return size;
                       }
                       size = 0;
-                      if (!GeneratedMessage.isStringEmpty(name_)) {
+                      if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
                         size += GeneratedMessage.computeStringSize(1, name_);
                       }
                       memoizedSize = size;
@@ -441,7 +440,7 @@ public class CanaryTest {
                         if (other == CanaryOuterClass.Canary.getDefaultInstance()) {
                           return this;
                         }
-                        if (!GeneratedMessage.isStringEmpty(other.getName())) {
+                        if (!ProtoUtils.isStringEmpty((java.lang.Object)other.getName())) {
                           setName(other.getName());
                         }
                         onChanged();
