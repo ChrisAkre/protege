@@ -70,9 +70,15 @@ record CodegenContext(
     }
 
     boolean isMapField(DescriptorProtos.FieldDescriptorProto field) {
-        if (field.getLabel() != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) return false;
-        if (field.getType() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) return false;
-        if (!field.hasTypeName()) return false;
+        if (field.getLabel() != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
+            return false;
+        }
+        if (field.getType() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
+            return false;
+        }
+        if (!field.hasTypeName()) {
+            return false;
+        }
 
         String typeName = field.getTypeName();
         if (typeName.startsWith(".")) {
@@ -174,27 +180,6 @@ record CodegenContext(
                 }
             }
             return typeName;
-        }
-    }
-
-/**
- * Context for enum generation
- */
-record EnumContext(
-        DescriptorProtos.EnumDescriptorProto enumType,
-        ClassName outerClassName,
-        String[] parentNames
-) {
-    public EnumContext(DescriptorProtos.EnumDescriptorProto enumType, CodegenContext ctx) {
-        this(enumType, ClassName.get(ctx.packageName(), ctx.outerName()), new String[]{ctx.outerName()});
-    }
-
-    public EnumContext(DescriptorProtos.EnumDescriptorProto enumType, CodegenContext ctx, String[] allNames) {
-        this(enumType, ClassName.get(ctx.packageName(), ctx.outerName()), allNames);
-    }
-
-    String getEnumName() {
-        return enumType.getName();
     }
 }
 
@@ -230,17 +215,4 @@ record OneofContext(
         return messageClassName.nestedClass(pascalName);
     }
 }
-
-/**
- * Context for service generation
- */
-record ServiceContext(
-        DescriptorProtos.ServiceDescriptorProto service,
-        String packageName,
-        String outerClassName,
-        int serviceIndex
-) {
-    String getServiceName() {
-        return service.getName();
-    }
-}
+    

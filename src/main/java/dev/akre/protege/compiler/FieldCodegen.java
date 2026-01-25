@@ -79,219 +79,267 @@ public record FieldCodegen(
     }
 
     public List<MethodSpec> getterMethods() {
-        List<MethodSpec> methods = new ArrayList<>();
         if (isMap) {
-            methods.add(MessageMethods.containsMapKey(this));
-            methods.add(MessageMethods.getMapField(this, fieldType));
-            methods.add(MessageMethods.getMapCount(this));
-            methods.add(MessageMethods.getMapOrDefault(this));
-            methods.add(MessageMethods.getMapOrThrow(this));
+            return mapGetterMethods();
+        }
+        if (isRepeated) {
+            return listGetterMethods();
+        }
+        return singularGetterMethods();
+    }
 
-            if (messageCodegen.protoCodegen().generateDeprecated()) {
-                methods.add(MessageMethods.getMapDeprecated(this, fieldType));
-            }
-        } else if (isRepeated) {
-            if (isString()) {
-                methods.add(MessageMethods.getRepeatedListString(this));
-                methods.add(MessageMethods.getRepeatedBytes(this));
-            } else {
-                methods.add(MessageMethods.getRepeatedList(this, fieldType));
-            }
-            methods.add(MessageMethods.getRepeatedCount(this));
-            methods.add(MessageMethods.getRepeatedElement(this));
+    private List<MethodSpec> mapGetterMethods() {
+        List<MethodSpec> methods = new ArrayList<>();
+        methods.add(MessageMethods.containsMapKey(this));
+        methods.add(MessageMethods.getMapField(this, fieldType));
+        methods.add(MessageMethods.getMapCount(this));
+        methods.add(MessageMethods.getMapOrDefault(this));
+        methods.add(MessageMethods.getMapOrThrow(this));
 
-            if (isMessage()) {
-                 var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
-                 methods.add(MessageMethods.getRepeatedOrBuilderList(this, orBuilderType));
-                 methods.add(MessageMethods.getRepeatedOrBuilder(this, orBuilderType));
-            }
+        if (messageCodegen.protoCodegen().generateDeprecated()) {
+            methods.add(MessageMethods.getMapDeprecated(this, fieldType));
+        }
+        return methods;
+    }
 
-            if (isEnum()) {
-                methods.add(MessageMethods.getRepeatedValueList(this));
-                methods.add(MessageMethods.getRepeatedValue(this));
-            }
+    private List<MethodSpec> listGetterMethods() {
+        List<MethodSpec> methods = new ArrayList<>();
+        if (isString()) {
+            methods.add(MessageMethods.getRepeatedListString(this));
+            methods.add(MessageMethods.getRepeatedBytes(this));
         } else {
-            // Singular
-            if (isMessage() || hasOneofIndex()) {
-                methods.add(MessageMethods.hasField(this, generateHasFieldCode()));
-            }
+            methods.add(MessageMethods.getRepeatedList(this, fieldType));
+        }
+        methods.add(MessageMethods.getRepeatedCount(this));
+        methods.add(MessageMethods.getRepeatedElement(this));
 
-            methods.add(MessageMethods.getField(this));
+        if (isMessage()) {
+            var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
+            methods.add(MessageMethods.getRepeatedOrBuilderList(this, orBuilderType));
+            methods.add(MessageMethods.getRepeatedOrBuilder(this, orBuilderType));
+        }
 
-            if (isEnum()) {
-                methods.add(MessageMethods.getFieldValue(this));
-            }
+        if (isEnum()) {
+            methods.add(MessageMethods.getRepeatedValueList(this));
+            methods.add(MessageMethods.getRepeatedValue(this));
+        }
+        return methods;
+    }
 
-            if (isMessage()) {
-                methods.add(MessageMethods.getFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
-            }
+    private List<MethodSpec> singularGetterMethods() {
+        List<MethodSpec> methods = new ArrayList<>();
+        if (isMessage() || hasOneofIndex()) {
+            methods.add(MessageMethods.hasField(this, generateHasFieldCode()));
+        }
 
-            if (isString()) {
-                methods.add(MessageMethods.getFieldBytes(this));
-            }
+        methods.add(MessageMethods.getField(this));
+
+        if (isEnum()) {
+            methods.add(MessageMethods.getFieldValue(this));
+        }
+
+        if (isMessage()) {
+            methods.add(MessageMethods.getFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
+        }
+
+        if (isString()) {
+            methods.add(MessageMethods.getFieldBytes(this));
         }
         return methods;
     }
 
     public List<MethodSpec> builderMethods() {
+        if (isMap) {
+            return mapBuilderMethods();
+        }
+        if (isRepeated) {
+            return listBuilderMethods();
+        }
+        return singularBuilderMethods();
+    }
+
+    private List<MethodSpec> mapBuilderMethods() {
         List<MethodSpec> methods = new ArrayList<>();
         ClassName builderClassName = messageCodegen.builderClassName();
 
-        if (isMap) {
-             methods.add(CodegenMethods.Builder.containsMapKey(this));
-             methods.add(CodegenMethods.Builder.getMapField(this, fieldType));
-             methods.add(CodegenMethods.Builder.getMapCount(this));
-             methods.add(CodegenMethods.Builder.getMapOrDefault(this));
-             methods.add(CodegenMethods.Builder.getMapOrThrow(this));
+        methods.add(CodegenMethods.Builder.containsMapKey(this));
+        methods.add(CodegenMethods.Builder.getMapField(this, fieldType));
+        methods.add(CodegenMethods.Builder.getMapCount(this));
+        methods.add(CodegenMethods.Builder.getMapOrDefault(this));
+        methods.add(CodegenMethods.Builder.getMapOrThrow(this));
 
-             if (messageCodegen.protoCodegen().generateDeprecated()) {
-                 methods.add(CodegenMethods.Builder.getMapDeprecated(this, fieldType));
-                 methods.add(CodegenMethods.Builder.getMutableMapDeprecated(this, fieldType));
-             }
+        if (messageCodegen.protoCodegen().generateDeprecated()) {
+            methods.add(CodegenMethods.Builder.getMapDeprecated(this, fieldType));
+            methods.add(CodegenMethods.Builder.getMutableMapDeprecated(this, fieldType));
+        }
 
-             methods.add(CodegenMethods.Builder.putMap(this, builderClassName));
-             if (valueType instanceof ClassName && valueFieldType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                 var valueBuilderType = ((ClassName) valueType).nestedClass("Builder");
-                 methods.add(CodegenMethods.Builder.putMapBuilderIfAbsent(this, valueBuilderType));
-             }
-             methods.add(CodegenMethods.Builder.removeMap(this, builderClassName));
-             methods.add(CodegenMethods.Builder.putAllMap(this, builderClassName, fieldType));
-             methods.add(CodegenMethods.Builder.clearMap(this, builderClassName));
-        } else if (isRepeated) {
-             if (isString()) {
-                 methods.add(CodegenMethods.Builder.getRepeatedListString(this));
-                 methods.add(CodegenMethods.Builder.getRepeatedBytes(this));
-                 methods.add(CodegenMethods.Builder.addRepeatedBytes(this, builderClassName));
-             } else {
-                 methods.add(CodegenMethods.Builder.getRepeatedList(this, fieldType));
-             }
+        methods.add(CodegenMethods.Builder.putMap(this, builderClassName));
+        if (valueType instanceof ClassName && valueFieldType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
+            var valueBuilderType = ((ClassName) valueType).nestedClass("Builder");
+            methods.add(CodegenMethods.Builder.putMapBuilderIfAbsent(this, valueBuilderType));
+        }
+        methods.add(CodegenMethods.Builder.removeMap(this, builderClassName));
+        methods.add(CodegenMethods.Builder.putAllMap(this, builderClassName, fieldType));
+        methods.add(CodegenMethods.Builder.clearMap(this, builderClassName));
+        return methods;
+    }
 
-             methods.add(CodegenMethods.Builder.getRepeatedCount(this));
-             methods.add(CodegenMethods.Builder.getRepeatedElement(this));
-             methods.add(CodegenMethods.Builder.setRepeatedElement(this, builderClassName));
-             methods.add(CodegenMethods.Builder.addRepeatedElement(this, builderClassName));
-             methods.add(CodegenMethods.Builder.addAllRepeatedElements(this, builderClassName));
-             methods.add(CodegenMethods.Builder.clearRepeatedField(this, builderClassName));
+    private List<MethodSpec> listBuilderMethods() {
+        List<MethodSpec> methods = new ArrayList<>();
+        ClassName builderClassName = messageCodegen.builderClassName();
 
-             if (isMessage()) {
-                 var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
-                 var elementBuilderType = ((ClassName) genericType).nestedClass("Builder");
-
-                 methods.add(CodegenMethods.Builder.getRepeatedOrBuilderList(this, orBuilderType));
-                 methods.add(CodegenMethods.Builder.getRepeatedOrBuilder(this, orBuilderType));
-                 methods.add(CodegenMethods.Builder.getRepeatedBuilder(this, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.addRepeatedBuilder(this, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.addRepeatedBuilderAtIndex(this, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.getRepeatedBuilderList(this, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.addRepeatedElementAtIndex(this, builderClassName));
-                 methods.add(CodegenMethods.Builder.setRepeatedBuilder(this, builderClassName, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.addRepeatedBuilderValue(this, builderClassName, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.addRepeatedBuilderValueAtIndex(this, builderClassName, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.removeRepeatedElement(this, builderClassName));
-             }
-
-             if (isEnum()) {
-                 methods.add(CodegenMethods.Builder.getRepeatedValueList(this));
-                 methods.add(CodegenMethods.Builder.getRepeatedValue(this));
-                 methods.add(CodegenMethods.Builder.setRepeatedValue(this, builderClassName));
-                 methods.add(CodegenMethods.Builder.addRepeatedValue(this, builderClassName));
-                 methods.add(CodegenMethods.Builder.addAllRepeatedValue(this, builderClassName));
-             }
-
-             methods.add(CodegenMethods.Builder.ensureIsMutable(this));
-
+        if (isString()) {
+            methods.add(CodegenMethods.Builder.getRepeatedListString(this));
+            methods.add(CodegenMethods.Builder.getRepeatedBytes(this));
+            methods.add(CodegenMethods.Builder.addRepeatedBytes(this, builderClassName));
         } else {
-             // Singular
-             if (isMessage() || hasOneofIndex()) {
-                 methods.add(CodegenMethods.Builder.hasField(this, generateHasFieldCode()));
-             }
+            methods.add(CodegenMethods.Builder.getRepeatedList(this, fieldType));
+        }
 
-             methods.add(CodegenMethods.Builder.getField(this));
+        methods.add(CodegenMethods.Builder.getRepeatedCount(this));
+        methods.add(CodegenMethods.Builder.getRepeatedElement(this));
+        methods.add(CodegenMethods.Builder.setRepeatedElement(this, builderClassName));
+        methods.add(CodegenMethods.Builder.addRepeatedElement(this, builderClassName));
+        methods.add(CodegenMethods.Builder.addAllRepeatedElements(this, builderClassName));
+        methods.add(CodegenMethods.Builder.clearRepeatedField(this, builderClassName));
 
-             if (isEnum()) {
-                 methods.add(CodegenMethods.Builder.getFieldValue(this));
-                 methods.add(CodegenMethods.Builder.setFieldValue(this, builderClassName));
-             }
+        if (isMessage()) {
+            var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
+            var elementBuilderType = ((ClassName) genericType).nestedClass("Builder");
 
-             if (isString()) {
-                 methods.add(CodegenMethods.Builder.getFieldBytes(this));
-                 var clearOneof = generateClearOneofCode();
-                 methods.add(CodegenMethods.Builder.setFieldBytes(this, builderClassName, clearOneof));
-             }
+            methods.add(CodegenMethods.Builder.getRepeatedOrBuilderList(this, orBuilderType));
+            methods.add(CodegenMethods.Builder.getRepeatedOrBuilder(this, orBuilderType));
+            methods.add(CodegenMethods.Builder.getRepeatedBuilder(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.addRepeatedBuilder(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.addRepeatedBuilderAtIndex(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.getRepeatedBuilderList(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.addRepeatedElementAtIndex(this, builderClassName));
+            methods.add(CodegenMethods.Builder.setRepeatedBuilder(this, builderClassName, elementBuilderType));
+            methods.add(CodegenMethods.Builder.addRepeatedBuilderValue(this, builderClassName, elementBuilderType));
+            methods.add(CodegenMethods.Builder.addRepeatedBuilderValueAtIndex(this, builderClassName, elementBuilderType));
+            methods.add(CodegenMethods.Builder.removeRepeatedElement(this, builderClassName));
+        }
 
-             var clearOneof = generateClearOneofCode();
-             methods.add(CodegenMethods.Builder.setField(this, builderClassName, clearOneof));
+        if (isEnum()) {
+            methods.add(CodegenMethods.Builder.getRepeatedValueList(this));
+            methods.add(CodegenMethods.Builder.getRepeatedValue(this));
+            methods.add(CodegenMethods.Builder.setRepeatedValue(this, builderClassName));
+            methods.add(CodegenMethods.Builder.addRepeatedValue(this, builderClassName));
+            methods.add(CodegenMethods.Builder.addAllRepeatedValue(this, builderClassName));
+        }
 
-             String defaultValue;
-             if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                 defaultValue = "\"\"";
-             } else {
-                 defaultValue = ProtoUtils.getDefaultReturnValue(fieldType.toString());
-             }
-             methods.add(CodegenMethods.Builder.clearField(this, builderClassName, defaultValue));
+        methods.add(CodegenMethods.Builder.ensureIsMutable(this));
+        return methods;
+    }
 
-             if (isMessage()) {
-                 var elementBuilderType = ((ClassName) fieldType).nestedClass("Builder");
-                 methods.add(CodegenMethods.Builder.getFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
-                 methods.add(CodegenMethods.Builder.getFieldBuilder(this, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.setFieldBuilder(this, builderClassName, elementBuilderType));
-                 methods.add(CodegenMethods.Builder.mergeField(this, builderClassName, clearOneof));
-             }
+    private List<MethodSpec> singularBuilderMethods() {
+        List<MethodSpec> methods = new ArrayList<>();
+        ClassName builderClassName = messageCodegen.builderClassName();
+
+        if (isMessage() || hasOneofIndex()) {
+            methods.add(CodegenMethods.Builder.hasField(this, generateHasFieldCode()));
+        }
+
+        methods.add(CodegenMethods.Builder.getField(this));
+
+        if (isEnum()) {
+            methods.add(CodegenMethods.Builder.getFieldValue(this));
+            methods.add(CodegenMethods.Builder.setFieldValue(this, builderClassName));
+        }
+
+        if (isString()) {
+            methods.add(CodegenMethods.Builder.getFieldBytes(this));
+            var clearOneof = generateClearOneofCode();
+            methods.add(CodegenMethods.Builder.setFieldBytes(this, builderClassName, clearOneof));
+        }
+
+        var clearOneof = generateClearOneofCode();
+        methods.add(CodegenMethods.Builder.setField(this, builderClassName, clearOneof));
+
+        String defaultValue;
+        if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
+            defaultValue = "\"\"";
+        } else {
+            defaultValue = ProtoUtils.getDefaultReturnValue(fieldType.toString());
+        }
+        methods.add(CodegenMethods.Builder.clearField(this, builderClassName, defaultValue));
+
+        if (isMessage()) {
+            var elementBuilderType = ((ClassName) fieldType).nestedClass("Builder");
+            methods.add(CodegenMethods.Builder.getFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
+            methods.add(CodegenMethods.Builder.getFieldBuilder(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.setFieldBuilder(this, builderClassName, elementBuilderType));
+            methods.add(CodegenMethods.Builder.mergeField(this, builderClassName, clearOneof));
         }
         return methods;
     }
 
     public List<MethodSpec> abstractMethods() {
-        List<MethodSpec> methods = new ArrayList<>();
         if (isMap) {
-            methods.add(MessageMethods.abstractContainsMapKey(this));
-            methods.add(MessageMethods.abstractGetMapField(this));
-            methods.add(MessageMethods.abstractGetMapCount(this));
-            methods.add(MessageMethods.abstractGetMapOrDefault(this));
-            methods.add(MessageMethods.abstractGetMapOrThrow(this));
+            return mapAbstractMethods();
+        }
+        if (isRepeated) {
+            return listAbstractMethods();
+        }
+        return singularAbstractMethods();
+    }
 
-            if (messageCodegen.protoCodegen().generateDeprecated()) {
-                methods.add(MessageMethods.abstractGetMapDeprecated(this, fieldType));
-            }
-        } else if (isRepeated) {
-            methods.add(MessageMethods.abstractGetRepeatedList(this, fieldType));
+    private List<MethodSpec> mapAbstractMethods() {
+        List<MethodSpec> methods = new ArrayList<>();
+        methods.add(MessageMethods.abstractContainsMapKey(this));
+        methods.add(MessageMethods.abstractGetMapField(this));
+        methods.add(MessageMethods.abstractGetMapCount(this));
+        methods.add(MessageMethods.abstractGetMapOrDefault(this));
+        methods.add(MessageMethods.abstractGetMapOrThrow(this));
 
-            if (isString()) {
-                methods.add(MessageMethods.abstractGetRepeatedBytes(pascalName));
-            }
+        if (messageCodegen.protoCodegen().generateDeprecated()) {
+            methods.add(MessageMethods.abstractGetMapDeprecated(this, fieldType));
+        }
+        return methods;
+    }
 
-            methods.add(MessageMethods.abstractGetRepeatedCount(this));
-            methods.add(MessageMethods.abstractGetRepeatedElement(this));
+    private List<MethodSpec> listAbstractMethods() {
+        List<MethodSpec> methods = new ArrayList<>();
+        methods.add(MessageMethods.abstractGetRepeatedList(this, fieldType));
 
-            if (isMessage()) {
-                 var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
-                 methods.add(MessageMethods.abstractGetRepeatedOrBuilderList(this, orBuilderType));
-                 methods.add(MessageMethods.abstractGetRepeatedOrBuilder(this, orBuilderType));
-            }
+        if (isString()) {
+            methods.add(MessageMethods.abstractGetRepeatedBytes(pascalName));
+        }
 
-            if (isEnum()) {
-                methods.add(MessageMethods.abstractGetRepeatedValueList(this));
-                methods.add(MessageMethods.abstractGetRepeatedValue(this));
-            }
-        } else {
-            // Singular
-            if (isMessage() || hasOneofIndex()) {
-                methods.add(MessageMethods.abstractHasField(this));
-            }
+        methods.add(MessageMethods.abstractGetRepeatedCount(this));
+        methods.add(MessageMethods.abstractGetRepeatedElement(this));
 
-            methods.add(MessageMethods.abstractGetField(this));
+        if (isMessage()) {
+            var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
+            methods.add(MessageMethods.abstractGetRepeatedOrBuilderList(this, orBuilderType));
+            methods.add(MessageMethods.abstractGetRepeatedOrBuilder(this, orBuilderType));
+        }
 
-            if (isEnum()) {
-                methods.add(MessageMethods.abstractGetFieldValue(pascalName));
-            }
+        if (isEnum()) {
+            methods.add(MessageMethods.abstractGetRepeatedValueList(this));
+            methods.add(MessageMethods.abstractGetRepeatedValue(this));
+        }
+        return methods;
+    }
 
-            if (isMessage()) {
-                methods.add(MessageMethods.abstractGetFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
-            }
+    private List<MethodSpec> singularAbstractMethods() {
+        List<MethodSpec> methods = new ArrayList<>();
+        if (isMessage() || hasOneofIndex()) {
+            methods.add(MessageMethods.abstractHasField(this));
+        }
 
-            if (isString()) {
-                methods.add(MessageMethods.abstractGetFieldBytes(pascalName));
-            }
+        methods.add(MessageMethods.abstractGetField(this));
+
+        if (isEnum()) {
+            methods.add(MessageMethods.abstractGetFieldValue(pascalName));
+        }
+
+        if (isMessage()) {
+            methods.add(MessageMethods.abstractGetFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
+        }
+
+        if (isString()) {
+            methods.add(MessageMethods.abstractGetFieldBytes(pascalName));
         }
         return methods;
     }
@@ -342,7 +390,9 @@ public record FieldCodegen(
     }
 
     public CodeBlock generateClearOneofCode() {
-         if (!field.hasOneofIndex()) return CodeBlock.of("");
+         if (!field.hasOneofIndex()) {
+             return CodeBlock.of("");
+         }
          int oneofIndex = field.getOneofIndex();
          var message = messageCodegen.message();
          var cb = CodeBlock.builder();
@@ -365,7 +415,9 @@ public record FieldCodegen(
     }
 
     private DescriptorProtos.FieldDescriptorProto.Type valueFieldType() {
-        if (entryDescriptor == null) return DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32; // Default, shouldn't happen for map
+        if (entryDescriptor == null) {
+            return DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32; // Default, shouldn't happen for map
+        }
         return entryDescriptor.getField(1).getType();
     }
 }

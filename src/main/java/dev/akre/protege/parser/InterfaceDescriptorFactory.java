@@ -101,12 +101,16 @@ public class InterfaceDescriptorFactory {
 
                 FieldDescriptorProto.Builder keyField = FieldDescriptorProto.newBuilder().setName("key").setNumber(1);
                 processType(mapEntryBuilder, mapEntryQualifiedName, keyType, keyField, "key", null);
-                if (!keyField.hasLabel()) keyField.setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                if (!keyField.hasLabel()) {
+                    keyField.setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                }
                 mapEntryBuilder.addField(keyField);
 
                 FieldDescriptorProto.Builder valueField = FieldDescriptorProto.newBuilder().setName("value").setNumber(2);
                 processType(mapEntryBuilder, mapEntryQualifiedName, valueType, valueField, "value", null);
-                if (!valueField.hasLabel()) valueField.setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                if (!valueField.hasLabel()) {
+                    valueField.setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                }
                 mapEntryBuilder.addField(valueField);
 
                 messageBuilder.addNestedType(mapEntryBuilder.build());
@@ -204,7 +208,9 @@ public class InterfaceDescriptorFactory {
 
                     DescriptorProtos.FieldOptions.Builder fieldOptions = DescriptorProtos.FieldOptions.newBuilder();
                     for (java.lang.annotation.Annotation ann : method.getAnnotations()) {
-                        if (ann.annotationType().equals(Field.class)) continue;
+                        if (ann.annotationType().equals(Field.class)) {
+                            continue;
+                        }
 
                         fieldOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_annotation", ProtoUtils.annotationToString(ann)));
                     }

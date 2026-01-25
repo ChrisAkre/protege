@@ -89,7 +89,8 @@ public record MessageCodegen(
         }
 
         for (var nestedEnum : message.getEnumTypeList()) {
-            classBuilder.addType(protoCodegen.generateEnumType(new EnumContext(nestedEnum, ctx, allNamesArray())));
+            var enumCodegen = new EnumCodegen(nestedEnum, allNames(), ctx, protoCodegen);
+            classBuilder.addType(enumCodegen.generate());
         }
 
         generateDescriptor(classBuilder);
@@ -386,10 +387,11 @@ public record MessageCodegen(
         var getSerializedSizeBuilder = MethodSpec.methodBuilder("getSerializedSize")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(int.class);
-
-        getSerializedSizeBuilder.addStatement("int size = memoizedSize");
-        getSerializedSizeBuilder.addStatement("if (size != -1) return size");
+                .returns(int.class)
+                .addStatement("int size = memoizedSize")
+                .beginControlFlow("if (size != -1)")
+                .addStatement("return size")
+                .endControlFlow();
         getSerializedSizeBuilder.addStatement("size = 0");
 
         for (var field : message.getFieldList()) {
