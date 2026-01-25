@@ -14,9 +14,24 @@ import java.util.stream.Stream;
 
 import static dev.akre.protege.ProtoUtils.toPascalCase;
 
+/**
+ * Visits the ANTLR parse tree to generate a {@link FileDescriptorProto}.
+ * <p>
+ * This visitor converts the AST produced by ANTLR into the Protobuf {@code FileDescriptorProto}
+ * model. It handles message, enum, and service definitions, as well as options and imports.
+ * <p>
+ * This class is not thread-safe and is intended for a single use per file.
+ */
 public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     private final MemberNode root;
+
+    /**
+     * Tracks the current package or message scope during traversal.
+     * <p>
+     * Uses an immutable linked list ({@link Cons}) to efficiently push and pop scope
+     * segments as the visitor descends into nested messages.
+     */
     private Cons<String> scope = Cons.nil();
 
 
@@ -25,6 +40,17 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         this.root = root;
     }
 
+    /**
+     * Parses a Proto file context into a FileDescriptorProto builder.
+     * <p>
+     * This is the main entry point for the visitor. It first builds a symbol table using
+     * {@link MemberTreeVisitor} to resolve types, then traverses the tree to build the descriptor.
+     *
+     * @param filename The name of the file being parsed.
+     * @param ctx      The ANTLR proto context.
+     * @return A builder for the FileDescriptorProto.
+     * @throws TypeNotFoundException if a referenced type cannot be resolved.
+     */
     public static FileDescriptorProto.Builder parseProto(String filename, ProtobufParser.ProtoContext ctx) {
         try {
             MemberNode root = new MemberTreeVisitor().visitProto(ctx);

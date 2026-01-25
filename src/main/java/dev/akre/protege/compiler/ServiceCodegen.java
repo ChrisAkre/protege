@@ -6,6 +6,12 @@ import dev.akre.protege.ProtoUtils;
 
 import javax.lang.model.element.Modifier;
 
+/**
+ * Generates the Service class and its inner interfaces and stubs.
+ *
+ * @param service The service descriptor.
+ * @param ctx     The codegen context.
+ */
 public record ServiceCodegen(
         DescriptorProtos.ServiceDescriptorProto service,
         CodegenContext ctx
@@ -15,6 +21,11 @@ public record ServiceCodegen(
         return service.getName();
     }
 
+    /**
+     * Generates the service class.
+     *
+     * @return The TypeSpec for the service class.
+     */
     public TypeSpec generate() {
         var serviceName = service.getName();
 
@@ -22,37 +33,22 @@ public record ServiceCodegen(
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.ABSTRACT)
                 .addSuperinterface(com.google.protobuf.Service.class);
 
-        // protected <ServiceName>()
         classBuilder.addMethod(ServiceMessages.constructor());
-        // public interface Interface
         classBuilder.addType(ServiceMessages.generateInterface(service, ctx));
-        // public interface BlockingInterface
         classBuilder.addType(ServiceMessages.generateBlockingInterface(service, ctx));
 
-        // public static final Descriptors.ServiceDescriptor getDescriptor()
         classBuilder.addMethod(ServiceMessages.getDescriptor(ctx, service));
-        // public final Descriptors.ServiceDescriptor getDescriptorForType()
         classBuilder.addMethod(ServiceMessages.getDescriptorForType());
-        // public final void callMethod(Descriptors.MethodDescriptor method, RpcController controller, Message request, RpcCallback<Message> done)
         classBuilder.addMethod(ServiceMessages.callMethod(service, ctx));
-        // public final Message getRequestPrototype(Descriptors.MethodDescriptor method)
         classBuilder.addMethod(ServiceMessages.getRequestPrototype(service, ctx));
-        // public final Message getResponsePrototype(Descriptors.MethodDescriptor method)
         classBuilder.addMethod(ServiceMessages.getResponsePrototype(service, ctx));
-        // public static Stub newStub(RpcChannel channel)
         classBuilder.addMethod(ServiceMessages.newStub());
-        // public static final class Stub extends <ServiceName> implements Interface
         classBuilder.addType(ServiceMessages.generateServiceStub(service, ctx));
-        // public static BlockingInterface newBlockingStub(BlockingRpcChannel channel)
         classBuilder.addMethod(ServiceMessages.newBlockingStub());
-        // public static final class BlockingStub implements BlockingInterface
         classBuilder.addType(ServiceMessages.generateBlockingServiceStub(service, ctx));
-        // public static Service newReflectiveService(Interface impl)
         classBuilder.addMethod(ServiceMessages.newReflectiveService(service, serviceName, ctx));
-        // public static BlockingService newReflectiveBlockingService(BlockingInterface impl)
         classBuilder.addMethod(ServiceMessages.newReflectiveBlockingService(service, ctx));
 
-        // public abstract void <methodName>(RpcController controller, <InputType> request, RpcCallback<<OutputType>> done)
         service.getMethodList().stream().map(method -> ServiceMessages.rpcMethod(method, ctx)).forEach(classBuilder::addMethod);
 
         return classBuilder.build();

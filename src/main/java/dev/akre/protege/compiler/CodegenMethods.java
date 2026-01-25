@@ -11,51 +11,27 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Static methods for generating code specifications
+ * Utility class containing static methods for generating code specifications (JavaPoet).
+ * <p>
+ * This class provides helper methods to generate various parts of the Protobuf message
+ * implementation, particularly focusing on the Builder pattern and field accessors.
  */
 public class CodegenMethods {
 
     private CodegenMethods() {
-        // Utility class
     }
 
-//    static class OuterClass {
-//        public static FieldSpec versionField() {
-//            return FieldSpec.builder(String.class, "PROTEGE_VERSION", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-//                    .initializer("$S", ProtegeVersion.VERSION_STRING)
-//                    .build();
-//        }
-//
-//        public static MethodSpec getDescriptor() {
-//            return MethodSpec.methodBuilder("getDescriptor")
-//                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-//                    .returns(Descriptors.FileDescriptor.class)
-//                    .addStatement("return fileDescriptor")
-//                    .build();
-//        }
-//
-//        public static FieldSpec fileDescriptorField(CodegenContext ctx) {
-//            var descriptorChunks =  ProtoUtils.splitAndEscapeBytes(ctx.fileDescriptor().toByteArray()).stream()
-//                    .map(s -> CodeBlock.of("\"$L\"", s))
-//                    .collect(CodeBlock.joining(",\n"));
-//
-//            var data = CodeBlock.builder().add("new String[] {\n").indent().add(descriptorChunks).unindent().add("\n}").build();
-//
-//            CodeBlock descriptorInitializer = CodeBlock.builder()
-//                    .addStatement("$T.internalBuildGeneratedFileFrom($L, new $T[0])",
-//                            Descriptors.FileDescriptor.class, data, Descriptors.FileDescriptor.class)
-//                    .build();
-//            return FieldSpec.builder(Descriptors.FileDescriptor.class, "fileDescriptor", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-//                    .initializer(descriptorInitializer)
-//                    .build();
-//        }
-//    }
-
     /**
-     * Methods for generating Builder classes
+     * Methods for generating Builder classes.
      */
     static class Builder {
 
+        /**
+         * Generates the {@code build()} method.
+         *
+         * @param messageClassName The class name of the message being built.
+         * @return The method specification.
+         */
         static MethodSpec build(ClassName messageClassName) {
             return MethodSpec.methodBuilder("build")
                     .addAnnotation(Override.class)
@@ -69,6 +45,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code buildPartial()} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @return The method specification.
+         */
         static MethodSpec buildPartial(ClassName messageClassName) {
             return MethodSpec.methodBuilder("buildPartial")
                     .addAnnotation(Override.class)
@@ -78,6 +60,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code getDefaultInstanceForType()} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @return The method specification.
+         */
         static MethodSpec getDefaultInstanceForType(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDefaultInstanceForType")
                     .addAnnotation(Override.class)
@@ -87,6 +75,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code getDescriptorForType()} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @return The method specification.
+         */
         static MethodSpec getDescriptorForType(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDescriptorForType")
                     .addAnnotation(Override.class)
@@ -96,6 +90,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code getDescriptor()} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @return The method specification.
+         */
         static MethodSpec getDescriptor(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDescriptor")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -104,6 +104,11 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code isInitialized()} method.
+         *
+         * @return The method specification.
+         */
         static MethodSpec isInitialized() {
             return MethodSpec.methodBuilder("isInitialized")
                     .addAnnotation(Override.class)
@@ -113,6 +118,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code mergeFrom(CodedInputStream, ExtensionRegistryLite)} method.
+         *
+         * @param builderClassName The class name of the builder.
+         * @return The method specification.
+         */
         static MethodSpec mergeFromCodedInput(ClassName builderClassName) {
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
@@ -125,6 +136,13 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code mergeFrom(Message)} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @param builderClassName The class name of the builder.
+         * @return The method specification.
+         */
         static MethodSpec mergeFromMessage(ClassName messageClassName, ClassName builderClassName) {
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
@@ -140,6 +158,13 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code internalGetFieldAccessorTable()} method.
+         *
+         * @param messageClassName          The class name of the message.
+         * @param fieldAccessorTableClass The class name of the field accessor table.
+         * @return The method specification.
+         */
         static MethodSpec internalGetFieldAccessorTable(ClassName messageClassName, ClassName fieldAccessorTableClass) {
             return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
                     .addAnnotation(Override.class)
@@ -149,6 +174,13 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code internalGetMapFieldReflection()} method.
+         *
+         * @param msgCodegen The message codegen context.
+         * @param ctx        The global codegen context.
+         * @return The method specification.
+         */
         static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
             var method = MethodSpec.methodBuilder("internalGetMapFieldReflection")
                     .addAnnotation(Override.class)
@@ -169,6 +201,13 @@ public class CodegenMethods {
             return method.build();
         }
 
+        /**
+         * Generates the {@code internalGetMutableMapFieldReflection()} method.
+         *
+         * @param msgCodegen The message codegen context.
+         * @param ctx        The global codegen context.
+         * @return The method specification.
+         */
         static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
             var method = MethodSpec.methodBuilder("internalGetMutableMapFieldReflection")
                     .addAnnotation(Override.class)
@@ -213,6 +252,14 @@ public class CodegenMethods {
         }
 
         // Field setters/getters
+
+        /**
+         * Generates the {@code hasField()} method.
+         *
+         * @param ctx     The field codegen context.
+         * @param hasCode The code block to check for presence.
+         * @return The method specification.
+         */
         static MethodSpec hasField(FieldCodegen ctx, CodeBlock hasCode) {
             return MethodSpec.methodBuilder("has" + ctx.pascalName())
                     .addAnnotation(Override.class)
@@ -222,6 +269,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code getField()} method.
+         *
+         * @param ctx The field codegen context.
+         * @return The method specification.
+         */
         static MethodSpec getField(FieldCodegen ctx) {
             var builder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                     .addAnnotation(Override.class)
@@ -245,6 +298,14 @@ public class CodegenMethods {
             return builder.build();
         }
 
+        /**
+         * Generates the {@code setField()} method.
+         *
+         * @param ctx              The field codegen context.
+         * @param builderClassName The class name of the builder.
+         * @param clearOneofCode   Code to clear the oneof if applicable.
+         * @return The method specification.
+         */
         static MethodSpec setField(FieldCodegen ctx, ClassName builderClassName, CodeBlock clearOneofCode) {
             var builder = MethodSpec.methodBuilder("set" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
@@ -265,6 +326,14 @@ public class CodegenMethods {
             return builder.build();
         }
 
+        /**
+         * Generates the {@code clearField()} method.
+         *
+         * @param ctx              The field codegen context.
+         * @param builderClassName The class name of the builder.
+         * @param defaultValue     The default value to set.
+         * @return The method specification.
+         */
         static MethodSpec clearField(FieldCodegen ctx, ClassName builderClassName, String defaultValue) {
             return MethodSpec.methodBuilder("clear" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
