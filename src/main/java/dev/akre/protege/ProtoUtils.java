@@ -154,7 +154,11 @@ public class ProtoUtils {
                     if (b >= 32 && b <= 126) {
                         builder.append((char) b);
                     } else {
-                        builder.append(String.format("\\%03o", b & 0xFF));
+                        builder.append('\\');
+                        int v = b & 0xFF;
+                        builder.append((char) ('0' + ((v >> 6) & 7)));
+                        builder.append((char) ('0' + ((v >> 3) & 7)));
+                        builder.append((char) ('0' + (v & 7)));
                     }
                 }
             }
