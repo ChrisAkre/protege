@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CodegenUtils {
-    private static final String JAVA_ANNOTATION_OPTION = "dev.akre.protege.java_annotation";
-    private static final String JAVA_MESSAGE_ANNOTATION_OPTION = "dev.akre.protege.java_message_annotation";
+    private static final String FIELD_ANNOTATION = "dev.akre.protege.java_annotation";
+    private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
 
     private CodegenUtils() {
         // Utility class
@@ -24,7 +24,7 @@ public class CodegenUtils {
         return options.getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream()
                         .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
-                        .collect(Collectors.joining(".")).equals(JAVA_ANNOTATION_OPTION))
+                        .collect(Collectors.joining(".")).equals(FIELD_ANNOTATION))
                 .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
                 .collect(Collectors.toList());
     }
@@ -33,7 +33,7 @@ public class CodegenUtils {
         return options.getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream()
                         .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
-                        .collect(Collectors.joining(".")).equals(JAVA_MESSAGE_ANNOTATION_OPTION))
+                        .collect(Collectors.joining(".")).equals(MESSAGE_ANNOTATION))
                 .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
                 .collect(Collectors.toList());
     }
