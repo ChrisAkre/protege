@@ -11,7 +11,7 @@ grammar Protobuf;
 // ====== Parser Rules ======
 
 proto
-    : syntax ( importStatement
+    : syntax? ( importStatement
              | packageStatement
              | optionDecl
              | messageDef

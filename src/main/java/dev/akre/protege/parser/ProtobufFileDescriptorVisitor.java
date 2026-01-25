@@ -74,6 +74,9 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
+//        if (isEmptyFile()) {
+//            return FileDescriptorProto.newBuilder();
+//        }
         String packageName = ctx.packageStatement().isEmpty() ? "" : ctx.packageStatement().getFirst().name.getText();
         Cons<String> protoScope = Cons.nil();
         if (!packageName.isEmpty()) {
@@ -116,7 +119,11 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     @Override
     public Syntax visitSyntax(ProtobufParser.SyntaxContext ctx) {
-        return new Syntax(getStringLiteral(ctx.protoVersion().getText()));
+        try {
+            return new Syntax(getStringLiteral(ctx.protoVersion().getText()));
+        } catch (NullPointerException e) {
+            throw new InvalidProtoException("missing syntax declaration");
+        }
     }
 
     @Override
