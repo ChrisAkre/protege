@@ -102,20 +102,6 @@ public class ProtoCodegen {
                 .findFirst();
     }
 
-    private boolean getBooleanOption(List<DescriptorProtos.UninterpretedOption> options, String name, boolean defaultValue) {
-        for (var option : options) {
-            String optionName = option.getNameList().stream()
-                    .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
-                    .collect(Collectors.joining("."));
-            if (optionName.equals(name)) {
-                if (option.hasIdentifierValue()) {
-                    return Boolean.parseBoolean(option.getIdentifierValue());
-                }
-            }
-        }
-        return defaultValue;
-    }
-
     public void populateOneofInterfaces(CodegenContext ctx) {
         oneofInterfacesByType.clear();
 
@@ -125,7 +111,7 @@ public class ProtoCodegen {
     }
 
     private void populateOneofInterfaces(DescriptorProtos.DescriptorProto message, CodegenContext ctx, Cons<String> parentPath) {
-        boolean enhancedOneof = getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, ctx.fileEnhancedOneof());
+        boolean enhancedOneof = CodegenUtils.getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, ctx.fileEnhancedOneof());
 
         var currentPath = parentPath.cons(message.getName());
 
@@ -143,15 +129,7 @@ public class ProtoCodegen {
                             throw new IllegalArgumentException("Enhanced oneof '" + oneof.getName() + "' in message '" + message.getName() + "' contains non-message field '" + field.getName() + "'");
                         }
                         String typeName = field.getTypeName();
-                        String relativeName = typeName;
-                        if (relativeName.startsWith(".")) {
-                            var protoPackage = ctx.fileDescriptor().getPackage();
-                            if (!protoPackage.isEmpty() && relativeName.startsWith("." + protoPackage + ".")) {
-                                relativeName = relativeName.substring(protoPackage.length() + 2);
-                            } else if (relativeName.startsWith(".")) {
-                                relativeName = relativeName.substring(1);
-                            }
-                        }
+                        String relativeName = ctx.relativeToProtoPackage(typeName);
                         if (!ctx.typeRegistry().containsKey(relativeName)) {
                             throw new IllegalArgumentException("Enhanced oneof '" + oneof.getName() + "' in message '" + message.getName() + "' contains field '" + field.getName() + "' with type '" + typeName + "' not defined in the current file.");
                         }

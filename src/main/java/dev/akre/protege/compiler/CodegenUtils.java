@@ -4,6 +4,7 @@ import com.google.protobuf.DescriptorProtos;
 import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.TypeName;
 import dev.akre.protege.ProtoUtils;
 
 import java.util.ArrayList;
@@ -139,13 +140,7 @@ public class CodegenUtils {
                 var typeName = fieldBuilder.getTypeName();
                 var isEnum = false;
                 if (typeName.startsWith(".")) {
-                    var protoPackage = fileBuilder.getPackage();
-                    var name = typeName;
-                    if (!protoPackage.isEmpty() && name.startsWith("." + protoPackage + ".")) {
-                        name = name.substring(protoPackage.length() + 2);
-                    } else if (name.startsWith(".")) {
-                        name = name.substring(1);
-                    }
+                    var name = relativeToProtoPackage(typeName, fileBuilder.getPackage());
                     if (isEnumMap.getOrDefault(name, false)) {
                         isEnum = true;
                     }
@@ -198,6 +193,55 @@ public class CodegenUtils {
         };
     }
 
+    public static TypeName getOrBuilderType(TypeName typeName) {
+        if (typeName instanceof ClassName) {
+            ClassName cn = (ClassName) typeName;
+            List<String> simpleNames = cn.simpleNames();
+            String last = simpleNames.getLast();
+            if (simpleNames.size() == 1) {
+                return ClassName.get(cn.packageName(), last + "OrBuilder");
+            } else {
+                return ClassName.get(cn.packageName(), simpleNames.getFirst(),
+                        java.util.stream.Stream.concat(
+                                simpleNames.subList(1, simpleNames.size() - 1).stream(),
+                                java.util.stream.Stream.of(last + "OrBuilder")
+                        ).toArray(String[]::new));
+            }
+        }
+        return typeName;
+    }
 
+    public static String relativeToProtoPackage(String typeName, String protoPackage) {
+        if (typeName.startsWith(".")) {
+            if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
+                return typeName.substring(protoPackage.length() + 2);
+            } else if (typeName.startsWith(".")) {
+                return typeName.substring(1);
+            }
+        }
+        return typeName;
+    }
 
+    public static CodeBlock generateClearOneofCode(DescriptorProtos.DescriptorProto message, int oneofIndex) {
+        var cb = CodeBlock.builder();
+        cb.addStatement("$LCase_ = 0", message.getOneofDecl(oneofIndex).getName());
+        for (var field : message.getFieldList()) {
+            if (field.hasOneofIndex() && field.getOneofIndex() == oneofIndex) {
+                var fieldName = field.getName() + "_";
+                if (field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
+                    // Should not happen in oneof according to protobuf spec, but just in case
+                    cb.addStatement("$L = $T.emptyList()", fieldName, java.util.Collections.class);
+                } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
+                    cb.addStatement("$L = null", fieldName);
+                } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
+                    cb.addStatement("$L = \"\"", fieldName);
+                } else {
+                    // Primitive types. This is a bit hacky without full type mapping here,
+                    // but we can use common defaults.
+                    cb.addStatement("$L = $L", fieldName, ProtoUtils.getDefaultReturnValue(ProtoCodegen.PROTO_TYPE_TO_TYPE_NAME.get(field.getType()).toString()));
+                }
+            }
+        }
+        return cb.build();
+    }
 }

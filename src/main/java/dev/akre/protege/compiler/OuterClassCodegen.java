@@ -11,9 +11,9 @@ import dev.akre.util.Cons;
 
 import javax.lang.model.element.Modifier;
 
-public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen temp) {
+public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen) {
     public TypeSpec generate() {
-        temp.populateOneofInterfaces(ctx);
+        protoCodegen.populateOneofInterfaces(ctx);
 
         var outerClassBuilder = TypeSpec.classBuilder(ctx.outerName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -24,12 +24,12 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen temp) {
         outerClassBuilder.addMethod(getDescriptor());
 
         for (var enumType : ctx.fileDescriptor().getEnumTypeList()) {
-            var enumCodegen = new EnumCodegen(enumType, Cons.of(ctx.outerName()), ctx, temp);
+            var enumCodegen = new EnumCodegen(enumType, Cons.of(ctx.outerName()), ctx, protoCodegen);
             outerClassBuilder.addType(enumCodegen.generate());
         }
 
         for (var message : ctx.fileDescriptor().getMessageTypeList()) {
-            MessageCodegen messageCodegen = new MessageCodegen(message, ctx, Cons.of(ctx.outerName()), temp);
+            MessageCodegen messageCodegen = new MessageCodegen(message, ctx, Cons.of(ctx.outerName()), protoCodegen);
             outerClassBuilder.addType(messageCodegen.generateMessageInterface());
             outerClassBuilder.addType(messageCodegen.generateMessageClass());
         }

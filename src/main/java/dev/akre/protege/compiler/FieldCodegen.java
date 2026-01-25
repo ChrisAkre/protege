@@ -114,7 +114,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.getRepeatedElement(this));
 
         if (isMessage()) {
-            var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
+            var orBuilderType = CodegenUtils.getOrBuilderType(genericType);
             methods.add(MessageMethods.getRepeatedOrBuilderList(this, orBuilderType));
             methods.add(MessageMethods.getRepeatedOrBuilder(this, orBuilderType));
         }
@@ -139,7 +139,7 @@ public record FieldCodegen(
         }
 
         if (isMessage()) {
-            methods.add(MessageMethods.getFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
+            methods.add(MessageMethods.getFieldOrBuilder(this, CodegenUtils.getOrBuilderType(fieldType)));
         }
 
         if (isString()) {
@@ -204,7 +204,7 @@ public record FieldCodegen(
         methods.add(CodegenMethods.Builder.clearRepeatedField(this, builderClassName));
 
         if (isMessage()) {
-            var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
+            var orBuilderType = CodegenUtils.getOrBuilderType(genericType);
             var elementBuilderType = ((ClassName) genericType).nestedClass("Builder");
 
             methods.add(CodegenMethods.Builder.getRepeatedOrBuilderList(this, orBuilderType));
@@ -266,7 +266,7 @@ public record FieldCodegen(
 
         if (isMessage()) {
             var elementBuilderType = ((ClassName) fieldType).nestedClass("Builder");
-            methods.add(CodegenMethods.Builder.getFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
+            methods.add(CodegenMethods.Builder.getFieldOrBuilder(this, CodegenUtils.getOrBuilderType(fieldType)));
             methods.add(CodegenMethods.Builder.getFieldBuilder(this, elementBuilderType));
             methods.add(CodegenMethods.Builder.setFieldBuilder(this, builderClassName, elementBuilderType));
             methods.add(CodegenMethods.Builder.mergeField(this, builderClassName, clearOneof));
@@ -310,7 +310,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.abstractGetRepeatedElement(this));
 
         if (isMessage()) {
-            var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
+            var orBuilderType = CodegenUtils.getOrBuilderType(genericType);
             methods.add(MessageMethods.abstractGetRepeatedOrBuilderList(this, orBuilderType));
             methods.add(MessageMethods.abstractGetRepeatedOrBuilder(this, orBuilderType));
         }
@@ -335,7 +335,7 @@ public record FieldCodegen(
         }
 
         if (isMessage()) {
-            methods.add(MessageMethods.abstractGetFieldOrBuilder(this, MessageCodegen.getOrBuilderType(fieldType)));
+            methods.add(MessageMethods.abstractGetFieldOrBuilder(this, CodegenUtils.getOrBuilderType(fieldType)));
         }
 
         if (isString()) {
@@ -393,25 +393,7 @@ public record FieldCodegen(
          if (!field.hasOneofIndex()) {
              return CodeBlock.of("");
          }
-         int oneofIndex = field.getOneofIndex();
-         var message = messageCodegen.message();
-         var cb = CodeBlock.builder();
-         cb.addStatement("$LCase_ = 0", message.getOneofDecl(oneofIndex).getName());
-         for (var f : message.getFieldList()) {
-             if (f.hasOneofIndex() && f.getOneofIndex() == oneofIndex) {
-                 var fieldName = f.getName() + "_";
-                 if (f.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
-                     cb.addStatement("$L = $T.emptyList()", fieldName, java.util.Collections.class);
-                 } else if (f.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                     cb.addStatement("$L = null", fieldName);
-                 } else if (f.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                     cb.addStatement("$L = \"\"", fieldName);
-                 } else {
-                     cb.addStatement("$L = $L", fieldName, ProtoUtils.getDefaultReturnValue(ProtoCodegen.PROTO_TYPE_TO_TYPE_NAME.get(f.getType()).toString()));
-                 }
-             }
-         }
-         return cb.build();
+         return CodegenUtils.generateClearOneofCode(messageCodegen.message(), field.getOneofIndex());
     }
 
     private DescriptorProtos.FieldDescriptorProto.Type valueFieldType() {
