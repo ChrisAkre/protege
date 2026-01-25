@@ -84,7 +84,7 @@ public record MessageCodegen(
 
         for (var nestedMessage : message.getNestedTypeList()) {
             var nestedMsgCodegen = new MessageCodegen(nestedMessage, ctx, allNames(), protoCodegen);
-            classBuilder.addType(protoCodegen.generateOrBuilderType(nestedMsgCodegen));
+            classBuilder.addType(nestedMsgCodegen.generateMessageInterface());
             classBuilder.addType(nestedMsgCodegen.generateMessageClass());
         }
 
@@ -359,107 +359,27 @@ public record MessageCodegen(
 
     void generateFieldsAndGetters(TypeSpec.Builder classBuilder) {
         for (var field : message.getFieldList()) {
-            var fieldType = ctx.getFieldType(field, currentScope());
-            var fieldCtx = FieldContext.create(field, fieldType, ctx.isMapField(field));
+            var fieldCodegen = FieldCodegen.create(field, this);
 
             // Generate private field
-            var privateFieldType = fieldType;
+            var privateFieldType = fieldCodegen.fieldType();
             if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                if (fieldCtx.isRepeated()) {
+                if (fieldCodegen.isRepeated() && !fieldCodegen.isMap()) {
                     privateFieldType = ClassName.get("com.google.protobuf", "LazyStringList");
                 } else {
                     privateFieldType = TypeName.get(Object.class);
                 }
-            } else if (fieldCtx.isMap()) {
-                var entryDescriptor = ctx().getEntryDescriptor(field);
-                var keyField = entryDescriptor.getField(0);
-                var valueField = entryDescriptor.getField(1);
-                var keyType = ctx.getFieldType(keyField, currentScope());
-                var valueType = ctx.getFieldType(valueField, currentScope());
+            } else if (fieldCodegen.isMap()) {
+                var keyType = fieldCodegen.keyType();
+                var valueType = fieldCodegen.valueType();
                 privateFieldType = ParameterizedTypeName.get(ClassName.get("com.google.protobuf", "MapField"), keyType.box(), valueType.box());
             }
 
-            var fieldSpec = FieldSpec.builder(privateFieldType, fieldCtx.internalName(), Modifier.PRIVATE).build();
+            var fieldSpec = FieldSpec.builder(privateFieldType, fieldCodegen.internalName(), Modifier.PRIVATE).build();
             classBuilder.addField(fieldSpec);
 
-            if (fieldCtx.isMap()) {
-                var entryDescriptor = ctx.getEntryDescriptor(field);
-                var keyField = entryDescriptor.getField(0);
-                var valueField = entryDescriptor.getField(1);
-
-                var keyType = ctx.getFieldType(keyField, currentScope());
-                var valueType = ctx.getFieldType(valueField, currentScope());
-
-                var mapCtx = new MapFieldContext(fieldCtx, entryDescriptor, keyType, valueType, null);
-
-                classBuilder.addMethod(MessageMethods.containsMapKey(mapCtx));
-                classBuilder.addMethod(MessageMethods.getMapField(mapCtx, fieldType));
-                classBuilder.addMethod(MessageMethods.getMapCount(mapCtx));
-                classBuilder.addMethod(MessageMethods.getMapOrDefault(mapCtx));
-                classBuilder.addMethod(MessageMethods.getMapOrThrow(mapCtx));
-
-                if (protoCodegen.generateDeprecated()) {
-                    classBuilder.addMethod(MessageMethods.getMapDeprecated(mapCtx, fieldType));
-                }
-            } else if (fieldCtx.isRepeated()) {
-                var genericType = ProtoCodegen.PROTO_TYPE_TO_TYPE_NAME.get(field.getType());
-                if (field.hasTypeName()) {
-                    genericType = ctx.resolveTypeName(field.getTypeName(), currentScope());
-                }
-                if (genericType == null) genericType = TypeName.get(Object.class);
-                genericType = genericType.box();
-
-                var repeatedCtx = new RepeatedFieldContext(fieldCtx, genericType);
-
-                if (repeatedCtx.isString()) {
-                    classBuilder.addMethod(MessageMethods.getRepeatedListString(repeatedCtx));
-                    classBuilder.addMethod(MessageMethods.getRepeatedBytes(repeatedCtx));
-                } else {
-                    classBuilder.addMethod(MessageMethods.getRepeatedList(repeatedCtx, fieldType));
-                }
-
-                classBuilder.addMethod(MessageMethods.getRepeatedCount(repeatedCtx));
-                classBuilder.addMethod(MessageMethods.getRepeatedElement(repeatedCtx));
-
-                if (repeatedCtx.isMessage()) {
-                    var orBuilderType = getOrBuilderType(genericType);
-                    classBuilder.addMethod(MessageMethods.getRepeatedOrBuilderList(repeatedCtx, orBuilderType));
-                    classBuilder.addMethod(MessageMethods.getRepeatedOrBuilder(repeatedCtx, orBuilderType));
-                }
-
-                if (repeatedCtx.isEnum()) {
-                    classBuilder.addMethod(MessageMethods.getRepeatedValueList(repeatedCtx));
-                    classBuilder.addMethod(MessageMethods.getRepeatedValue(repeatedCtx));
-                }
-            } else {
-                var singularCtx = new SingularFieldContext(fieldCtx, this);
-
-                if (singularCtx.isMessage() || singularCtx.hasOneofIndex()) {
-                    classBuilder.addMethod(MessageMethods.hasField(singularCtx, generateHasFieldCode(message, field)));
-                }
-
-                classBuilder.addMethod(MessageMethods.getField(singularCtx));
-
-                if (singularCtx.isEnum()) {
-                    classBuilder.addMethod(MessageMethods.getFieldValue(singularCtx));
-                }
-
-                if (singularCtx.isMessage()) {
-                    classBuilder.addMethod(MessageMethods.getFieldOrBuilder(singularCtx, getOrBuilderType(fieldType)));
-                }
-
-                if (singularCtx.isString()) {
-                    classBuilder.addMethod(MessageMethods.getFieldBytes(singularCtx));
-                }
-            }
+            fieldCodegen.getterMethods().forEach(classBuilder::addMethod);
         }
-    }
-
-    private CodeBlock generateHasFieldCode(DescriptorProtos.DescriptorProto message, DescriptorProtos.FieldDescriptorProto field) {
-        if (field.hasOneofIndex()) {
-            return CodeBlock.of("return $LCase_ == $L;\n", message.getOneofDecl(field.getOneofIndex()).getName(), field.getNumber());
-        }
-        return CodeBlock.of("return $L_ != null;\n", field.getName());
     }
 
     void generateGetSerializedSize(TypeSpec.Builder classBuilder) {
@@ -714,29 +634,26 @@ public record MessageCodegen(
 
         // Add fields to builder
         for (var field : message.getFieldList()) {
-            var fieldType = ctx.getFieldType(field, currentScope());
-            var fieldCtx = FieldContext.create(field, fieldType, ctx.isMapField(field));
+            var fieldCodegen = FieldCodegen.create(field, this);
+            var fieldType = fieldCodegen.fieldType();
 
             var privateFieldType = fieldType;
             if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                if (field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
+                if (fieldCodegen.isRepeated() && !fieldCodegen.isMap()) {
                     privateFieldType = ClassName.get("com.google.protobuf", "LazyStringList");
                 } else {
                     privateFieldType = TypeName.get(Object.class);
                 }
-            } else if (fieldCtx.isMap()) {
-                var entryDescriptor = ctx.getEntryDescriptor(field);
-                var keyField = entryDescriptor.getField(0);
-                var valueField = entryDescriptor.getField(1);
-                var keyType = ctx.getFieldType(keyField, currentScope());
-                var valueType = ctx.getFieldType(valueField, currentScope());
+            } else if (fieldCodegen.isMap()) {
+                var keyType = fieldCodegen.keyType();
+                var valueType = fieldCodegen.valueType();
                 privateFieldType = ParameterizedTypeName.get(ClassName.get("com.google.protobuf", "MapField"), keyType.box(), valueType.box());
             }
 
-            var fieldBuilder = FieldSpec.builder(privateFieldType, fieldCtx.internalName(), Modifier.PRIVATE);
-            if (fieldCtx.isMap()) {
+            var fieldBuilder = FieldSpec.builder(privateFieldType, fieldCodegen.internalName(), Modifier.PRIVATE);
+            if (fieldCodegen.isMap()) {
                 fieldBuilder.initializer("$T.newMapField($L_DefaultEntry)", com.google.protobuf.MapField.class, field.getName());
-            } else if (fieldCtx.isRepeated()) {
+            } else if (fieldCodegen.isRepeated()) {
                 if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
                     fieldBuilder.initializer("new $T()", com.google.protobuf.LazyStringArrayList.class);
                 } else {
@@ -807,25 +724,25 @@ public record MessageCodegen(
                 .returns(builderClassName())
                 .addStatement("super.clear()");
         for (var field : message.getFieldList()) {
-            var fieldType = ctx.getFieldType(field, currentScope());
-            var fieldCtx = FieldContext.create(field, fieldType, ctx.isMapField(field));
+            var fieldCodegen = FieldCodegen.create(field, this);
+            var fieldType = fieldCodegen.fieldType();
 
-            if (fieldCtx.isMap()) {
-                clearMethod.addStatement("$L.getMutableMap().clear()", fieldCtx.internalName());
-            } else if (fieldCtx.isRepeated()) {
+            if (fieldCodegen.isMap()) {
+                clearMethod.addStatement("$L.getMutableMap().clear()", fieldCodegen.internalName());
+            } else if (fieldCodegen.isRepeated()) {
                 if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                    clearMethod.addStatement("$L = new $T()", fieldCtx.internalName(), com.google.protobuf.LazyStringArrayList.class);
+                    clearMethod.addStatement("$L = new $T()", fieldCodegen.internalName(), com.google.protobuf.LazyStringArrayList.class);
                 } else {
-                    clearMethod.addStatement("$L = new $T<>()", fieldCtx.internalName(), java.util.ArrayList.class);
+                    clearMethod.addStatement("$L = new $T<>()", fieldCodegen.internalName(), java.util.ArrayList.class);
                 }
             } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                clearMethod.addStatement("$L = $S", fieldCtx.internalName(), "");
+                clearMethod.addStatement("$L = $S", fieldCodegen.internalName(), "");
             } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                clearMethod.addStatement("$L = null", fieldCtx.internalName());
+                clearMethod.addStatement("$L = null", fieldCodegen.internalName());
             } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM) {
-                clearMethod.addStatement("$L = $T.forNumber(0)", fieldCtx.internalName(), fieldType);
+                clearMethod.addStatement("$L = $T.forNumber(0)", fieldCodegen.internalName(), fieldType);
             } else {
-                clearMethod.addStatement("$L = $L", fieldCtx.internalName(), ProtoUtils.getDefaultReturnValue(fieldType.toString()));
+                clearMethod.addStatement("$L = $L", fieldCodegen.internalName(), ProtoUtils.getDefaultReturnValue(fieldType.toString()));
             }
         }
         clearMethod.addStatement("return this");
@@ -848,129 +765,8 @@ public record MessageCodegen(
 
     private void generateBuilderMethods(TypeSpec.Builder builderClassBuilder, ClassName builderClassName) {
         for (var field : message.getFieldList()) {
-            var fieldType = ctx.getFieldType(field, currentScope());
-            var fieldCtx = FieldContext.create(field, fieldType, ctx.isMapField(field));
-
-            if (fieldCtx.isMap()) {
-                var entryDescriptor = ctx.getEntryDescriptor(field);
-                var keyField = entryDescriptor.getField(0);
-                var valueField = entryDescriptor.getField(1);
-                var keyType = ctx.getFieldType(keyField, currentScope());
-                var valueType = ctx.getFieldType(valueField, currentScope());
-
-                var mapCtx = new MapFieldContext(fieldCtx, entryDescriptor, keyType, valueType, null);
-
-                builderClassBuilder.addMethod(CodegenMethods.Builder.containsMapKey(mapCtx));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.getMapField(mapCtx, fieldType));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.getMapCount(mapCtx));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.getMapOrDefault(mapCtx));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.getMapOrThrow(mapCtx));
-
-                if (protoCodegen.generateDeprecated()) {
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getMapDeprecated(mapCtx, fieldType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getMutableMapDeprecated(mapCtx, fieldType));
-                }
-
-                builderClassBuilder.addMethod(CodegenMethods.Builder.putMap(mapCtx, builderClassName));
-                if (valueField.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                    var valueBuilderType = ((ClassName) valueType).nestedClass("Builder");
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.putMapBuilderIfAbsent(mapCtx, valueBuilderType));
-                }
-                builderClassBuilder.addMethod(CodegenMethods.Builder.removeMap(mapCtx, builderClassName));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.putAllMap(mapCtx, builderClassName, fieldType));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.clearMap(mapCtx, builderClassName));
-
-            } else if (fieldCtx.isRepeated()) {
-                var genericType = ProtoCodegen.PROTO_TYPE_TO_TYPE_NAME.get(field.getType());
-                if (field.hasTypeName()) {
-                    genericType = ctx.resolveTypeName(field.getTypeName(), currentScope());
-                }
-                if (genericType == null) genericType = TypeName.get(Object.class);
-                genericType = genericType.box();
-
-                var repeatedCtx = new RepeatedFieldContext(fieldCtx, genericType);
-
-                if (repeatedCtx.isString()) {
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedListString(repeatedCtx));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedBytes(repeatedCtx));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.addRepeatedBytes(repeatedCtx, builderClassName));
-                } else {
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedList(repeatedCtx, fieldType));
-                }
-
-                builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedCount(repeatedCtx));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedElement(repeatedCtx));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.setRepeatedElement(repeatedCtx, builderClassName));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.addRepeatedElement(repeatedCtx, builderClassName));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.addAllRepeatedElements(repeatedCtx, builderClassName));
-                builderClassBuilder.addMethod(CodegenMethods.Builder.clearRepeatedField(repeatedCtx, builderClassName));
-
-                if (repeatedCtx.isMessage()) {
-                    var orBuilderType = getOrBuilderType(genericType);
-                    var elementBuilderType = ((ClassName) genericType).nestedClass("Builder");
-
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedOrBuilderList(repeatedCtx, orBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedOrBuilder(repeatedCtx, orBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedBuilder(repeatedCtx, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.addRepeatedBuilder(repeatedCtx, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.addRepeatedBuilderAtIndex(repeatedCtx, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedBuilderList(repeatedCtx, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.addRepeatedElementAtIndex(repeatedCtx, builderClassName));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.setRepeatedBuilder(repeatedCtx, builderClassName, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.addRepeatedBuilderValue(repeatedCtx, builderClassName, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.addRepeatedBuilderValueAtIndex(repeatedCtx, builderClassName, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.removeRepeatedElement(repeatedCtx, builderClassName));
-                }
-
-                if (repeatedCtx.isEnum()) {
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedValueList(repeatedCtx));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getRepeatedValue(repeatedCtx));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.setRepeatedValue(repeatedCtx, builderClassName));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.addRepeatedValue(repeatedCtx, builderClassName));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.addAllRepeatedValue(repeatedCtx, builderClassName));
-                }
-
-                builderClassBuilder.addMethod(CodegenMethods.Builder.ensureIsMutable(repeatedCtx));
-
-            } else {
-                var singularCtx = new SingularFieldContext(fieldCtx, this);
-
-                if (singularCtx.isMessage() || singularCtx.hasOneofIndex()) {
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.hasField(singularCtx, generateHasFieldCode(message, field)));
-                }
-
-                builderClassBuilder.addMethod(CodegenMethods.Builder.getField(singularCtx));
-
-                if (singularCtx.isEnum()) {
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getFieldValue(singularCtx));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.setFieldValue(singularCtx, builderClassName));
-                }
-
-                if (singularCtx.isString()) {
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getFieldBytes(singularCtx));
-                    var clearOneof = singularCtx.hasOneofIndex() ? generateClearOneofCode(message, singularCtx.oneofIndex()) : CodeBlock.of("");
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.setFieldBytes(singularCtx, builderClassName, clearOneof));
-                }
-
-                var clearOneof = singularCtx.hasOneofIndex() ? generateClearOneofCode(message, singularCtx.oneofIndex()) : CodeBlock.of("");
-                builderClassBuilder.addMethod(CodegenMethods.Builder.setField(singularCtx, builderClassName, clearOneof));
-
-                String defaultValue;
-                if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                    defaultValue = "\"\"";
-                } else {
-                    defaultValue = ProtoUtils.getDefaultReturnValue(fieldType.toString());
-                }
-                builderClassBuilder.addMethod(CodegenMethods.Builder.clearField(singularCtx, builderClassName, defaultValue));
-
-                if (singularCtx.isMessage()) {
-                    var elementBuilderType = ((ClassName) fieldType).nestedClass("Builder");
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getFieldOrBuilder(singularCtx, getOrBuilderType(fieldType)));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.getFieldBuilder(singularCtx, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.setFieldBuilder(singularCtx, builderClassName, elementBuilderType));
-                    builderClassBuilder.addMethod(CodegenMethods.Builder.mergeField(singularCtx, builderClassName, clearOneof));
-                }
-            }
+            var fieldCodegen = FieldCodegen.create(field, this);
+            fieldCodegen.builderMethods().forEach(builderClassBuilder::addMethod);
         }
     }
 
@@ -1095,5 +891,42 @@ public record MessageCodegen(
             }
         }
         return typeName;
+    }
+
+    TypeSpec generateMessageInterface() {
+        var interfaceBuilder = TypeSpec.interfaceBuilder(interfaceClassName())
+                .addAnnotations(CodegenUtils.getMessageAnnotations(message.getOptions()))
+                .addSuperinterface(ProtoCodegen.OR_BUILDER_INTERFACE)
+                .addModifiers(Modifier.PUBLIC);
+
+        protoCodegen.getJavaImplements(message).ifPresent(s -> interfaceBuilder.addSuperinterface(ClassName.bestGuess(s)));
+
+        String canonicalName = canonicalMessageName();
+        var oneofInterfaces = protoCodegen.oneofInterfacesByType().getOrDefault(canonicalName, java.util.Collections.emptyList());
+        if (!oneofInterfaces.isEmpty()) {
+            interfaceBuilder.addModifiers(Modifier.NON_SEALED);
+            for (var iface : oneofInterfaces) {
+                interfaceBuilder.addSuperinterface(iface);
+            }
+        }
+
+        for (var field : message.getFieldList()) {
+            var fieldCodegen = FieldCodegen.create(field, this);
+            fieldCodegen.abstractMethods().forEach(interfaceBuilder::addMethod);
+        }
+
+        for (int i = 0; i < message.getOneofDeclCount(); i++) {
+            var oneof = message.getOneofDecl(i);
+            var oneofCtx = OneofContext.create(oneof, i, messageClassName());
+
+            if (enhancedOneof()) {
+                interfaceBuilder.addMethod(MessageMethods.abstractGetOneof(oneofCtx));
+            }
+
+            if (generateOneofCase()) {
+                interfaceBuilder.addMethod(MessageMethods.abstractGetOneofCase(oneofCtx));
+            }
+        }
+        return interfaceBuilder.build();
     }
 }

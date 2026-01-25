@@ -29,7 +29,7 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen temp) {
 
         for (var message : ctx.fileDescriptor().getMessageTypeList()) {
             MessageCodegen messageCodegen = new MessageCodegen(message, ctx, Cons.of(ctx.outerName()), temp);
-            outerClassBuilder.addType(temp.generateOrBuilderType(messageCodegen));
+            outerClassBuilder.addType(messageCodegen.generateMessageInterface());
             outerClassBuilder.addType(messageCodegen.generateMessageClass());
         }
 
