@@ -45,26 +45,35 @@ public class GrpcCodegen {
 
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                // private <ServiceName>Grpc()
                 .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
 
         String fullServiceName = fileDescriptor.getPackage().isEmpty()
                 ? serviceName
                 : fileDescriptor.getPackage() + "." + serviceName;
 
+        // public static final String SERVICE_NAME
         classBuilder.addField(FieldSpec.builder(String.class, "SERVICE_NAME")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("$S", fullServiceName)
                 .build());
 
+        // public static final String PROTEGE_VERSION
         classBuilder.addField(FieldSpec.builder(String.class, "PROTEGE_VERSION")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("$T.VERSION_STRING", ProtegeVersion.class)
+                .build());
+
+        classBuilder.addField(FieldSpec.builder(ClassName.get("io.grpc", "ServiceDescriptor"), "serviceDescriptor")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.VOLATILE)
                 .build());
 
         // Method Descriptors
         for (var method : service.getMethodList()) {
             generateMethodDescriptor(classBuilder, method, fullServiceName, fileDescriptor, packageName, outerClassName, typeRegistry, isEnumMap);
         }
+
+        generateGetServiceDescriptor(classBuilder, service, packageName, className);
 
         // Stubs
         generateStubs(classBuilder, service, fileDescriptor, packageName, className, outerClassName, typeRegistry, isEnumMap);
@@ -118,7 +127,42 @@ public class GrpcCodegen {
                 ClassName.get("io.grpc.protobuf", "ProtoUtils"), inputType,
                 ClassName.get("io.grpc.protobuf", "ProtoUtils"), outputType);
 
+        // public static MethodDescriptor<<InputType>, <OutputType>> get<MethodName>Method()
         classBuilder.addMethod(methodBuilder.build());
+    }
+
+    private void generateGetServiceDescriptor(TypeSpec.Builder classBuilder,
+                                              DescriptorProtos.ServiceDescriptorProto service,
+                                              String packageName,
+                                              String className) {
+        MethodSpec.Builder getServiceDescriptorBuilder = MethodSpec.methodBuilder("getServiceDescriptor")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(ClassName.get("io.grpc", "ServiceDescriptor"));
+
+        getServiceDescriptorBuilder.addCode(
+                "$T result = serviceDescriptor;\n" +
+                "if (result == null) {\n" +
+                "  synchronized ($T.class) {\n" +
+                "    result = serviceDescriptor;\n" +
+                "    if (result == null) {\n" +
+                "      serviceDescriptor = result = $T.newBuilder(SERVICE_NAME)\n",
+                ClassName.get("io.grpc", "ServiceDescriptor"),
+                ClassName.get(packageName, className),
+                ClassName.get("io.grpc", "ServiceDescriptor")
+        );
+
+        for (var method : service.getMethodList()) {
+            getServiceDescriptorBuilder.addCode("          .addMethod(get$LMethod())\n", method.getName());
+        }
+
+        getServiceDescriptorBuilder.addCode(
+                "          .build();\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n" +
+                "return result;\n"
+        );
+        classBuilder.addMethod(getServiceDescriptorBuilder.build());
     }
 
     private void generateStubs(TypeSpec.Builder classBuilder,
@@ -132,7 +176,7 @@ public class GrpcCodegen {
         ClassName grpcClass = ClassName.get(packageName, grpcClassName);
         ClassName channelClass = ClassName.get("io.grpc", "Channel");
 
-        // newStub
+        // public static <ServiceName>Stub newStub(Channel channel)
         classBuilder.addMethod(MethodSpec.methodBuilder("newStub")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(channelClass, "channel")
@@ -140,7 +184,7 @@ public class GrpcCodegen {
                 .addStatement("return new $T(channel)", grpcClass.nestedClass(service.getName() + "Stub"))
                 .build());
 
-        // newBlockingStub
+        // public static <ServiceName>BlockingStub newBlockingStub(Channel channel)
         classBuilder.addMethod(MethodSpec.methodBuilder("newBlockingStub")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(channelClass, "channel")
@@ -162,12 +206,14 @@ public class GrpcCodegen {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(ParameterizedTypeName.get(baseClassName, stubClass));
 
+        // private <StubName>(Channel channel)
         stubBuilder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ClassName.get("io.grpc", "Channel"), "channel")
                 .addStatement("super(channel, $T.DEFAULT)", ClassName.get("io.grpc", "CallOptions"))
                 .build());
 
+        // private <StubName>(Channel channel, CallOptions callOptions)
         stubBuilder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ClassName.get("io.grpc", "Channel"), "channel")
@@ -175,6 +221,7 @@ public class GrpcCodegen {
                 .addStatement("super(channel, callOptions)")
                 .build());
 
+        // protected <StubName> build(Channel channel, CallOptions callOptions)
         stubBuilder.addMethod(MethodSpec.methodBuilder("build")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PROTECTED)
@@ -217,9 +264,13 @@ public class GrpcCodegen {
                                     ClassName.get("io.grpc.stub", "ClientCalls"), method.getName());
                 }
             }
+            // public <OutputType> <methodName>(<InputType> request)
+            // or
+            // public void <methodName>(<InputType> request, StreamObserver<<OutputType>> responseObserver)
             stubBuilder.addMethod(methodBuilder.build());
         }
 
+        // public static final class <StubName> extends AbstractAsyncStub<<StubName>> (or AbstractBlockingStub)
         classBuilder.addType(stubBuilder.build());
     }
 
@@ -258,6 +309,7 @@ public class GrpcCodegen {
                         .addStatement("$T.asyncUnimplementedUnaryCall(get$LMethod(), responseObserver)",
                                 ClassName.get("io.grpc.stub", "ServerCalls"), method.getName());
             }
+            // public void <methodName>(<InputType> request, StreamObserver<<OutputType>> responseObserver)
             implBuilder.addMethod(methodBuilder.build());
         }
 
@@ -298,8 +350,10 @@ public class GrpcCodegen {
             }
         }
         bindServiceBuilder.addStatement("return builder.build()");
+        // public final ServerServiceDefinition bindService()
         implBuilder.addMethod(bindServiceBuilder.build());
 
+        // public static abstract class <ServiceName>ImplBase implements BindableService
         classBuilder.addType(implBuilder.build());
     }
 

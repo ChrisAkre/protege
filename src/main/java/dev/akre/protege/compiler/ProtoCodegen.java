@@ -103,48 +103,6 @@ public class ProtoCodegen {
     }
 
     public void populateOneofInterfaces(CodegenContext ctx) {
-        oneofInterfacesByType.clear();
-
-        for (var message : ctx.fileDescriptor().getMessageTypeList()) {
-            populateOneofInterfaces(message, ctx, Cons.nil());
-        }
-    }
-
-    private void populateOneofInterfaces(DescriptorProtos.DescriptorProto message, CodegenContext ctx, Cons<String> parentPath) {
-        boolean enhancedOneof = CodegenUtils.getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, ctx.fileEnhancedOneof());
-
-        var currentPath = parentPath.cons(message.getName());
-
-        if (enhancedOneof) {
-            for (int i = 0; i < message.getOneofDeclCount(); i++) {
-                var oneof = message.getOneofDecl(i);
-                var pascalName = ProtoUtils.toPascalCase(oneof.getName());
-
-                var capitalizedPath = currentPath.stream().map(ProtoUtils::capitalize).toList();
-                var interfaceClassName = ClassName.get(ctx.packageName(), ctx.outerName(), capitalizedPath.toArray(new String[0])).nestedClass(pascalName);
-
-                for (var field : message.getFieldList()) {
-                    if (field.hasOneofIndex() && field.getOneofIndex() == i) {
-                        if (field.getType() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                            throw new IllegalArgumentException("Enhanced oneof '" + oneof.getName() + "' in message '" + message.getName() + "' contains non-message field '" + field.getName() + "'");
-                        }
-                        String typeName = field.getTypeName();
-                        String relativeName = ctx.relativeToProtoPackage(typeName);
-                        if (!ctx.typeRegistry().containsKey(relativeName)) {
-                            throw new IllegalArgumentException("Enhanced oneof '" + oneof.getName() + "' in message '" + message.getName() + "' contains field '" + field.getName() + "' with type '" + typeName + "' not defined in the current file.");
-                        }
-
-                        TypeName typeNameRes = ctx.resolveTypeName(field.getTypeName(), currentPath);
-                        if (typeNameRes instanceof ClassName cn) {
-                            oneofInterfacesByType.computeIfAbsent(cn.canonicalName(), k -> new ArrayList<>()).add(interfaceClassName);
-                        }
-                    }
-                }
-            }
-        }
-
-        for (var nested : message.getNestedTypeList()) {
-            populateOneofInterfaces(nested, ctx, currentPath);
-        }
+        OneofCodegen.populateOneofInterfaces(ctx, oneofInterfacesByType);
     }
 }

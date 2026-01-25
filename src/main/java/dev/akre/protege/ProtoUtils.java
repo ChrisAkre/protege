@@ -490,4 +490,14 @@ public class ProtoUtils {
         // Default: false for proto3, true for proto2
         return !"proto3".equals(fileDescriptor.getSyntax());
     }
+
+    public static boolean isStringEmpty(Object value) {
+        if (value instanceof String) {
+            return ((String) value).isEmpty();
+        }
+        if (value instanceof com.google.protobuf.ByteString) {
+            return ((com.google.protobuf.ByteString) value).isEmpty();
+        }
+        return value == null;
+    }
 }

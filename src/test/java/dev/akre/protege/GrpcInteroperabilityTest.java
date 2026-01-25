@@ -6,7 +6,6 @@ import dev.akre.protege.testutil.TestUtils;
 import io.grpc.*;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,17 +15,15 @@ import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Disabled
-public class SimpleGrpcTest {
+public class GrpcInteroperabilityTest {
 
     static Stream<Arguments> grpcServices() {
         return TestProtos.GRPC_SERVICES.stream();
     }
 
-    @ParameterizedTest(name = "Compatibility test for {6}")
+    @ParameterizedTest(name = "GRPC Compatibility test for {6} in {4}")
     @MethodSource("grpcServices")
     public void testGrpcServiceCompatibility(
             Class<?> generatedOuterClass,
@@ -37,18 +34,7 @@ public class SimpleGrpcTest {
             DescriptorProtos.FileDescriptorProto parsedProto,
             String serviceName) throws Exception {
 
-        // Get the first unary method from the service
-        DescriptorProtos.ServiceDescriptorProto serviceProto = parsedProto.getServiceList().stream()
-                .filter(s -> s.getName().equals(serviceName))
-                .findFirst()
-                .orElseThrow();
-
-        DescriptorProtos.MethodDescriptorProto methodProto = serviceProto.getMethodList().stream()
-                .filter(m -> !m.getClientStreaming() && !m.getServerStreaming())
-                .findFirst()
-                .orElseThrow();
-
-        String rpcName = methodProto.getName();
+        String rpcName = TestUtils.getFirstUnaryRpcName(parsedProto, serviceName);
 
         // Test 1: Generated Stub -> Expected Service
         runCompatibilityTest(generatedGrpcClass, expectedGrpcClass, rpcName);
@@ -57,20 +43,16 @@ public class SimpleGrpcTest {
         runCompatibilityTest(expectedGrpcClass, generatedGrpcClass, rpcName);
     }
 
-    @SuppressWarnings("unchecked")
-    private void runCompatibilityTest(Class<?> stubGrpcClass, Class<?> serviceGrpcClass, String rpcName) throws Exception {
+    void runCompatibilityTest(Class<?> stubGrpcClass, Class<?> serviceGrpcClass, String rpcName) throws Exception {
         ServiceDescriptor serviceDescriptor = TestUtils.getGrpcServiceDescriptor(serviceGrpcClass);
-        MethodDescriptor<Object, Object> methodDescriptor = (MethodDescriptor<Object, Object>) serviceDescriptor.getMethods().stream()
-                .filter(m -> m.getFullMethodName().endsWith("/" + rpcName))
-                .findFirst()
-                .orElseThrow();
+        MethodDescriptor<Object, Object> methodDescriptor = TestUtils.getMethodDescriptor(serviceDescriptor, rpcName);
 
         // Find the method in the ImplBase to get request/response types
         Class<?> implBase = TestUtils.getImplBase(serviceGrpcClass);
         Method serviceMethod = TestUtils.getServiceMethod(implBase, rpcName);
 
-        Class<?> requestClass = serviceMethod.getParameterTypes()[0];
-        Class<?> responseClass = (Class<?>) ((java.lang.reflect.ParameterizedType) serviceMethod.getGenericParameterTypes()[1]).getActualTypeArguments()[0];
+        Class<?> requestClass = TestUtils.getRequestClass(serviceMethod);
+        Class<?> responseClass = TestUtils.getResponseClass(serviceMethod);
 
         Object defaultResponse = TestUtils.getDefaultInstance(responseClass);
         Object request = TestUtils.getDefaultInstance(requestClass);
@@ -87,11 +69,20 @@ public class SimpleGrpcTest {
         try {
             ManagedChannel channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
             try {
-                Object stub = stubGrpcClass.getMethod("newBlockingStub", Channel.class).invoke(null, channel);
-                Method stubMethod = stub.getClass().getMethod(serviceMethod.getName(), requestClass);
-                Object response = stubMethod.invoke(stub, request);
+                Object stub = TestUtils.newBlockingStub(stubGrpcClass, channel);
+                Method stubMethod = TestUtils.getServiceMethod(stub.getClass(), rpcName);
+
+                // Bridge the classloader gap for the request object
+                Class<?> stubRequestClass = stubMethod.getParameterTypes()[0];
+                Object stubRequest = TestUtils.parseFrom(stubRequestClass, TestUtils.toByteArray(request));
+
+                Object response = stubMethod.invoke(stub, stubRequest);
                 assertNotNull(response);
-                assertEquals(defaultResponse, response);
+                
+                // Use byte array comparison for compatibility check
+                byte[] expectedBytes = TestUtils.toByteArray(defaultResponse);
+                byte[] actualBytes = TestUtils.toByteArray(response);
+                org.assertj.core.api.Assertions.assertThat(actualBytes).isEqualTo(expectedBytes);
             } finally {
                 channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
             }

@@ -180,10 +180,14 @@ public class CodegenUtils {
     }
 
     static CodeBlock getWriteCondition(DescriptorProtos.FieldDescriptorProto.Type type, String fieldName, MessageCodegen context) {
+        if (context.message().getOptions().getMapEntry()) {
+            return null;
+        }
         return switch (type) {
-            case TYPE_STRING -> CodeBlock.of("!$T.isStringEmpty($L)", context.protoCodegen().messageParentClass(), fieldName);
+            case TYPE_STRING -> CodeBlock.of("!$T.isStringEmpty((java.lang.Object)$L)", ProtoUtils.class, fieldName);
             case TYPE_INT32, TYPE_UINT32, TYPE_SINT32, TYPE_FIXED32, TYPE_SFIXED32 -> CodeBlock.of("$L != 0", fieldName);
-            case TYPE_ENUM, TYPE_MESSAGE -> CodeBlock.of("$L != null", fieldName);
+            case TYPE_ENUM -> CodeBlock.of("$L.getNumber() != 0", fieldName);
+            case TYPE_MESSAGE -> CodeBlock.of("$L != null", fieldName);
             case TYPE_INT64, TYPE_UINT64, TYPE_SINT64, TYPE_FIXED64, TYPE_SFIXED64 -> CodeBlock.of("$L != 0L", fieldName);
             case TYPE_FLOAT -> CodeBlock.of("java.lang.Float.floatToRawIntBits($L) != 0", fieldName);
             case TYPE_DOUBLE -> CodeBlock.of("java.lang.Double.doubleToRawLongBits($L) != 0", fieldName);

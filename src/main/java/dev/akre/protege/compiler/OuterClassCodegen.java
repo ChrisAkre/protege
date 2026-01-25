@@ -18,38 +18,45 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen) {
         var outerClassBuilder = TypeSpec.classBuilder(ctx.outerName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-        outerClassBuilder.addField(versionField());
+        // public static final String PROTEGE_VERSION
+        outerClassBuilder.addField(versionField(this));
 
-        outerClassBuilder.addField(fileDescriptorField());
-        outerClassBuilder.addMethod(getDescriptor());
+        // private static final Descriptors.FileDescriptor fileDescriptor
+        outerClassBuilder.addField(fileDescriptorField(this));
+        // public static Descriptors.FileDescriptor getDescriptor()
+        outerClassBuilder.addMethod(getDescriptor(this));
 
         for (var enumType : ctx.fileDescriptor().getEnumTypeList()) {
             var enumCodegen = new EnumCodegen(enumType, Cons.of(ctx.outerName()), ctx, protoCodegen);
+            // public enum <name> implements ProtocolMessageEnum
             outerClassBuilder.addType(enumCodegen.generate());
         }
 
         for (var message : ctx.fileDescriptor().getMessageTypeList()) {
             MessageCodegen messageCodegen = new MessageCodegen(message, ctx, Cons.of(ctx.outerName()), protoCodegen);
+            // public interface <name>OrBuilder extends MessageOrBuilder
             outerClassBuilder.addType(messageCodegen.generateMessageInterface());
+            // public static final class <name> extends GeneratedMessageV3 implements <name>OrBuilder
             outerClassBuilder.addType(messageCodegen.generateMessageClass());
         }
 
         if (ProtoUtils.isJavaGenericServicesEnabled(ctx.fileDescriptor())) {
             for (var service : ctx.fileDescriptor().getServiceList()) {
                 var serviceCodegen = new ServiceCodegen(service, ctx);
+                // public static abstract class <name> implements Service
                 outerClassBuilder.addType(serviceCodegen.generate());
             }
         }
         return outerClassBuilder.build();
     }
 
-    FieldSpec versionField() {
+    static FieldSpec versionField(OuterClassCodegen context) {
         return FieldSpec.builder(String.class, "PROTEGE_VERSION", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("$S", ProtegeVersion.VERSION_STRING)
                 .build();
     }
 
-    MethodSpec getDescriptor() {
+    static MethodSpec getDescriptor(OuterClassCodegen context) {
         return MethodSpec.methodBuilder("getDescriptor")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(Descriptors.FileDescriptor.class)
@@ -57,8 +64,8 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen) {
                 .build();
     }
 
-    FieldSpec fileDescriptorField() {
-        var descriptorChunks =  ProtoUtils.splitAndEscapeBytes(ctx.fileDescriptor().toByteArray()).stream()
+    static FieldSpec fileDescriptorField(OuterClassCodegen context) {
+        var descriptorChunks =  ProtoUtils.splitAndEscapeBytes(context.ctx().fileDescriptor().toByteArray()).stream()
                 .map(s -> CodeBlock.of("\"$L\"", s))
                 .collect(CodeBlock.joining(",\n"));
 

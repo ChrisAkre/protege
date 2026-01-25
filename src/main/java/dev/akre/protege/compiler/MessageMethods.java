@@ -140,9 +140,6 @@ public class MessageMethods {
         var getterBuilder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(Field.class)
-                        .addMember("value", "$L", ctx.fieldNumber())
-                        .build())
                 .addAnnotations(ctx.getterAnnotations())
                 .returns(ctx.fieldType());
 
@@ -153,6 +150,8 @@ public class MessageMethods {
             getterBuilder.addStatement("$T s = bs.toStringUtf8()", String.class);
             getterBuilder.addStatement("$L = s", ctx.internalName());
             getterBuilder.addStatement("return s");
+        } else if (ctx.isMessage()) {
+            getterBuilder.addStatement("return $L != null ? $L : $T.getDefaultInstance()", ctx.internalName(), ctx.internalName(), ctx.fieldType());
         } else {
             getterBuilder.addStatement("return ($T)$L", ctx.fieldType(), ctx.internalName());
         }
@@ -346,25 +345,6 @@ public class MessageMethods {
                 .build();
     }
 
-    // Oneof getters
-    public static MethodSpec getOneof(OneofContext ctx, MessageCodegen msgCodegen, CodeBlock switchCode) {
-        return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(ctx.getInterfaceClassName())
-                .addCode(switchCode)
-                .build();
-    }
-
-    public static MethodSpec getOneofCase(OneofContext ctx, CodeBlock getCaseCode) {
-        return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Case")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(ctx.getEnumClassName())
-                .addCode(getCaseCode)
-                .build();
-    }
-
     // Parse methods
     public static MethodSpec parseFrom(ClassName messageClassName, TypeName paramType, String paramName, boolean hasRegistry) {
         var builder = MethodSpec.methodBuilder("parseFrom")
@@ -417,9 +397,6 @@ public class MessageMethods {
             var methodName = ProtoUtils.getWriteMethodName(field.getType());
 
             if (context.ctx().isMapField(field)) {
-                writeToBuilder.beginControlFlow("for ($T<?, ?> entry : $L.getMap().entrySet())",
-                        Map.Entry.class, fieldName);
-
                 var innerType = context.ctx().resolveTypeName(field.getTypeName(), context.currentScope());
                 String entryTypeName = field.getTypeName();
                 if (entryTypeName.startsWith(".")) {
@@ -436,6 +413,11 @@ public class MessageMethods {
                 var keyType = context.ctx().getFieldType(keyField, context.currentScope());
                 var valueType = context.ctx().getFieldType(valueField, context.currentScope());
 
+                writeToBuilder.addStatement("$T<$T, $T> sortedMap = new $T<>($L.getMap())",
+                        Map.class, keyType.box(), valueType.box(), java.util.TreeMap.class, fieldName);
+                writeToBuilder.beginControlFlow("for ($T<$T, $T> entry : sortedMap.entrySet())",
+                        Map.Entry.class, keyType.box(), valueType.box());
+
                 writeToBuilder.addStatement("$T entryMsg = $T.newBuilder().setKey(($T)entry.getKey()).setValue(($T)entry.getValue()).build()", innerType, innerType, keyType.box(), valueType.box());
                 writeToBuilder.addStatement("output.writeMessage($L, entryMsg)", number);
                 writeToBuilder.endControlFlow();
@@ -450,7 +432,13 @@ public class MessageMethods {
                 }
                 writeToBuilder.endControlFlow();
             } else {
-                var condition = CodegenUtils.getWriteCondition(field.getType(), fieldName, context);
+                CodeBlock condition;
+                if (field.hasOneofIndex()) {
+                    var oneofName = context.message().getOneofDecl(field.getOneofIndex()).getName();
+                    condition = CodeBlock.of("$LCase_ == $L", oneofName, number);
+                } else {
+                    condition = CodegenUtils.getWriteCondition(field.getType(), fieldName, context);
+                }
                 if (condition != null) {
                     writeToBuilder.beginControlFlow("if ($L)", condition);
                 }
@@ -493,7 +481,12 @@ public class MessageMethods {
                         .addStatement("onChanged()")
                         .endControlFlow();
             } else {
-                var condition = CodegenUtils.getWriteCondition(field.getType(), "other.get" + pascalName + "()", context);
+                CodeBlock condition;
+                if (field.hasOneofIndex()) {
+                    condition = CodeBlock.of("other.has$L()", pascalName);
+                } else {
+                    condition = CodegenUtils.getWriteCondition(field.getType(), "other.get" + pascalName + "()", context);
+                }
                 if (condition != null) {
                     mergeFromSpecificMethod.beginControlFlow("if ($L)", condition);
                 }
@@ -657,21 +650,6 @@ public class MessageMethods {
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(ClassName.get("com.google.protobuf", "ByteString"))
                 .addParameter(int.class, "index")
-                .build();
-    }
-
-    // Oneof methods
-    static MethodSpec abstractGetOneof(OneofContext ctx) {
-        return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .returns(ctx.getInterfaceClassName())
-                .build();
-    }
-
-    static MethodSpec abstractGetOneofCase(OneofContext ctx) {
-        return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Case")
-                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .returns(ctx.getEnumClassName())
                 .build();
     }
 }

@@ -26,6 +26,7 @@ public class ServiceMessages {
         var interfaceBuilder = TypeSpec.interfaceBuilder("Interface")
                 .addModifiers(Modifier.PUBLIC);
         for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
+            // public abstract void <methodName>(RpcController controller, <InputType> request, RpcCallback<<OutputType>> done)
             interfaceBuilder.addMethod(rpcMethod(method, ctx));
         }
         return interfaceBuilder.build();
@@ -35,6 +36,7 @@ public class ServiceMessages {
         var blockingInterfaceBuilder = TypeSpec.interfaceBuilder("BlockingInterface")
                 .addModifiers(Modifier.PUBLIC);
         for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
+            // public abstract <OutputType> <methodName>(RpcController controller, <InputType> request) throws ServiceException
             blockingInterfaceBuilder.addMethod(blockingMethod(method, ctx));
         }
         return blockingInterfaceBuilder.build();
@@ -46,14 +48,17 @@ public class ServiceMessages {
                 .superclass(ClassName.get("", service.getName()))
                 .addSuperinterface(ClassName.get("", "Interface"));
 
+        // private Stub(RpcChannel channel)
         stubBuilder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(com.google.protobuf.RpcChannel.class, "channel")
                 .addStatement("this.channel = channel")
                 .build());
 
+        // private final RpcChannel channel
         stubBuilder.addField(com.google.protobuf.RpcChannel.class, "channel", Modifier.PRIVATE, Modifier.FINAL);
 
+        // public RpcChannel getChannel()
         stubBuilder.addMethod(MethodSpec.methodBuilder("getChannel")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(com.google.protobuf.RpcChannel.class)
@@ -65,6 +70,7 @@ public class ServiceMessages {
             var inputType = ctx.resolveTypeName(method.getInputType(), new java.util.ArrayList<>());
             var outputType = ctx.resolveTypeName(method.getOutputType(), new java.util.ArrayList<>());
 
+            // public void <methodName>(RpcController controller, <InputType> request, RpcCallback<<OutputType>> done)
             stubBuilder.addMethod(MethodSpec.methodBuilder(methodName)
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -83,12 +89,14 @@ public class ServiceMessages {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(ClassName.get("", "BlockingInterface"));
 
+        // private BlockingStub(BlockingRpcChannel channel)
         stubBuilder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(com.google.protobuf.BlockingRpcChannel.class, "channel")
                 .addStatement("this.channel = channel")
                 .build());
 
+        // private final BlockingRpcChannel channel
         stubBuilder.addField(com.google.protobuf.BlockingRpcChannel.class, "channel", Modifier.PRIVATE, Modifier.FINAL);
 
         for (var method : service.getMethodList()) {
@@ -96,6 +104,7 @@ public class ServiceMessages {
             var inputType = ctx.resolveTypeName(method.getInputType(), new java.util.ArrayList<>());
             var outputType = ctx.resolveTypeName(method.getOutputType(), new java.util.ArrayList<>());
 
+            // public <OutputType> <methodName>(RpcController controller, <InputType> request) throws ServiceException
             stubBuilder.addMethod(MethodSpec.methodBuilder(methodName)
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -119,6 +128,7 @@ public class ServiceMessages {
             var inputType = ctx.resolveTypeName(method.getInputType(), new java.util.ArrayList<>());
             var outputType = ctx.resolveTypeName(method.getOutputType(), new java.util.ArrayList<>());
 
+            // public void <methodName>(RpcController controller, <InputType> request, RpcCallback<<OutputType>> done)
             builder.addMethod(MethodSpec.methodBuilder(methodName)
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -138,6 +148,7 @@ public class ServiceMessages {
         var builder = TypeSpec.anonymousClassBuilder("")
                 .addSuperinterface(com.google.protobuf.BlockingService.class);
 
+        // public final Descriptors.ServiceDescriptor getDescriptorForType()
         builder.addMethod(MethodSpec.methodBuilder("getDescriptorForType")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -172,6 +183,7 @@ public class ServiceMessages {
                 .addStatement("throw new $T($S)", AssertionError.class, "Can't get here.")
                 .endControlFlow();
         callBlockingMethod.endControlFlow();
+        // public final Message callBlockingMethod(Descriptors.MethodDescriptor method, RpcController controller, Message request) throws ServiceException
         builder.addMethod(callBlockingMethod.build());
 
         var getRequestPrototype = MethodSpec.methodBuilder("getRequestPrototype")
@@ -192,6 +204,7 @@ public class ServiceMessages {
         }
         getRequestPrototype.addStatement("default: throw new $T($S)", AssertionError.class, "Can't get here.");
         getRequestPrototype.endControlFlow();
+        // public final Message getRequestPrototype(Descriptors.MethodDescriptor method)
         builder.addMethod(getRequestPrototype.build());
 
         var getResponsePrototype = MethodSpec.methodBuilder("getResponsePrototype")
@@ -212,6 +225,7 @@ public class ServiceMessages {
         }
         getResponsePrototype.addStatement("default: throw new $T($S)", AssertionError.class, "Can't get here.");
         getResponsePrototype.endControlFlow();
+        // public final Message getResponsePrototype(Descriptors.MethodDescriptor method)
         builder.addMethod(getResponsePrototype.build());
 
         return CodeBlock.builder()
