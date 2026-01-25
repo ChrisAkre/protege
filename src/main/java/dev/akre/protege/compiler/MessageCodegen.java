@@ -285,8 +285,8 @@ public record MessageCodegen(
                                 field.getName(),
                                 com.google.protobuf.MapEntry.class,
                                 entryDescriptor.getName(),
-                                com.google.protobuf.WireFormat.FieldType.class, getWireFormatType(keyField.getType()), getDefaultValue(keyField),
-                                com.google.protobuf.WireFormat.FieldType.class, getWireFormatType(valueField.getType()), getDefaultValue(valueField))
+                                com.google.protobuf.WireFormat.FieldType.class, ProtoUtils.getWireFormatType(keyField.getType()), getDefaultValue(keyField),
+                                com.google.protobuf.WireFormat.FieldType.class, ProtoUtils.getWireFormatType(valueField.getType()), getDefaultValue(valueField))
                         .build());
             }
         }
@@ -307,29 +307,6 @@ public record MessageCodegen(
                 yield CodeBlock.of("$T.forNumber(0)", type);
             }
             default -> CodeBlock.of("null");
-        };
-    }
-
-    private com.google.protobuf.WireFormat.FieldType getWireFormatType(DescriptorProtos.FieldDescriptorProto.Type type) {
-        return switch (type) {
-            case TYPE_DOUBLE -> com.google.protobuf.WireFormat.FieldType.DOUBLE;
-            case TYPE_FLOAT -> com.google.protobuf.WireFormat.FieldType.FLOAT;
-            case TYPE_INT64 -> com.google.protobuf.WireFormat.FieldType.INT64;
-            case TYPE_UINT64 -> com.google.protobuf.WireFormat.FieldType.UINT64;
-            case TYPE_INT32 -> com.google.protobuf.WireFormat.FieldType.INT32;
-            case TYPE_FIXED64 -> com.google.protobuf.WireFormat.FieldType.FIXED64;
-            case TYPE_FIXED32 -> com.google.protobuf.WireFormat.FieldType.FIXED32;
-            case TYPE_BOOL -> com.google.protobuf.WireFormat.FieldType.BOOL;
-            case TYPE_STRING -> com.google.protobuf.WireFormat.FieldType.STRING;
-            case TYPE_GROUP -> com.google.protobuf.WireFormat.FieldType.GROUP;
-            case TYPE_MESSAGE -> com.google.protobuf.WireFormat.FieldType.MESSAGE;
-            case TYPE_BYTES -> com.google.protobuf.WireFormat.FieldType.BYTES;
-            case TYPE_UINT32 -> com.google.protobuf.WireFormat.FieldType.UINT32;
-            case TYPE_ENUM -> com.google.protobuf.WireFormat.FieldType.ENUM;
-            case TYPE_SFIXED32 -> com.google.protobuf.WireFormat.FieldType.SFIXED32;
-            case TYPE_SFIXED64 -> com.google.protobuf.WireFormat.FieldType.SFIXED64;
-            case TYPE_SINT32 -> com.google.protobuf.WireFormat.FieldType.SINT32;
-            case TYPE_SINT64 -> com.google.protobuf.WireFormat.FieldType.SINT64;
         };
     }
 
@@ -509,7 +486,7 @@ public record MessageCodegen(
         constructor.addCode("case 0:\n  done = true;\n  break;\n");
 
         for (var field : message.getFieldList()) {
-            int wireType = getWireType(field.getType());
+            int wireType = ProtoUtils.getWireType(field.getType());
             int tag = (field.getNumber() << 3) | wireType;
             constructor.addCode("case $L: {\n", tag);
 
@@ -539,7 +516,7 @@ public record MessageCodegen(
                 }
             } else {
                 if (field.hasOneofIndex()) {
-                    constructor.addCode(generateClearOneofCode(message, field.getOneofIndex()));
+                    constructor.addCode(CodegenUtils.generateClearOneofCode(message, field.getOneofIndex()));
                     constructor.addStatement("$LCase_ = $L", message.getOneofDecl(field.getOneofIndex()).getName(), field.getNumber());
                 }
                 if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
@@ -591,38 +568,7 @@ public record MessageCodegen(
         classBuilder.addMethod(constructor.build());
     }
 
-    private int getWireType(DescriptorProtos.FieldDescriptorProto.Type type) {
-        return switch (type) {
-            case TYPE_INT32, TYPE_INT64, TYPE_UINT32, TYPE_UINT64, TYPE_SINT32, TYPE_SINT64, TYPE_BOOL, TYPE_ENUM -> 0;
-            case TYPE_DOUBLE, TYPE_FIXED64, TYPE_SFIXED64 -> 1;
-            case TYPE_STRING, TYPE_BYTES, TYPE_MESSAGE -> 2;
-            case TYPE_FLOAT, TYPE_FIXED32, TYPE_SFIXED32 -> 5;
-            default -> throw new IllegalArgumentException("Unsupported type: " + type);
-        };
-    }
 
-    private CodeBlock generateClearOneofCode(DescriptorProtos.DescriptorProto message, int oneofIndex) {
-        var cb = CodeBlock.builder();
-        cb.addStatement("$LCase_ = 0", message.getOneofDecl(oneofIndex).getName());
-        for (var field : message.getFieldList()) {
-            if (field.hasOneofIndex() && field.getOneofIndex() == oneofIndex) {
-                var fieldName = field.getName() + "_";
-                if (field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
-                    // Should not happen in oneof according to protobuf spec, but just in case
-                    cb.addStatement("$L = $T.emptyList()", fieldName, java.util.Collections.class);
-                } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                    cb.addStatement("$L = null", fieldName);
-                } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                    cb.addStatement("$L = \"\"", fieldName);
-                } else {
-                    // Primitive types. This is a bit hacky without full type mapping here,
-                    // but we can use common defaults.
-                    cb.addStatement("$L = $L", fieldName, ProtoUtils.getDefaultReturnValue(ProtoCodegen.PROTO_TYPE_TO_TYPE_NAME.get(field.getType()).toString()));
-                }
-            }
-        }
-        return cb.build();
-    }
 
     public ClassName builderClassName() {
         return messageClassName().nestedClass("Builder");
@@ -713,7 +659,7 @@ public record MessageCodegen(
                 builderClassBuilder.addMethod(CodegenMethods.Builder.getOneofCase(oneofCtx, generateGetCaseCode(message, i, oneof.getName(), oneofCtx.enumName())));
             }
 
-            builderClassBuilder.addMethod(CodegenMethods.Builder.clearOneof(oneofCtx, builderClassName(), generateClearOneofCode(message, i)));
+            builderClassBuilder.addMethod(CodegenMethods.Builder.clearOneof(oneofCtx, builderClassName(), CodegenUtils.generateClearOneofCode(message, i)));
         }
 
         builderClassBuilder.addMethod(CodegenMethods.Builder.build(messageClassName));
@@ -798,7 +744,7 @@ public record MessageCodegen(
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
                         TypeName typeName = ctx.resolveTypeName(field.getTypeName(), currentScope());
                         if (typeName instanceof ClassName cn) {
-                            TypeName orBuilderType = getOrBuilderType(cn);
+                            TypeName orBuilderType = CodegenUtils.getOrBuilderType(cn);
                             if (orBuilderType instanceof ClassName orBuilderCn) {
                                 interfaceBuilder.addPermittedSubclass(orBuilderCn);
                             }
@@ -876,24 +822,6 @@ public record MessageCodegen(
         return CodeBlock.of("return $L.forNumber($LCase_);\n", enumName, oneofName);
     }
 
-    public static TypeName getOrBuilderType(TypeName typeName) {
-
-        if (typeName instanceof ClassName) {
-            ClassName cn = (ClassName) typeName;
-            List<String> simpleNames = cn.simpleNames();
-            String last = simpleNames.getLast();
-            if (simpleNames.size() == 1) {
-                return ClassName.get(cn.packageName(), last + "OrBuilder");
-            } else {
-                return ClassName.get(cn.packageName(), simpleNames.getFirst(),
-                        java.util.stream.Stream.concat(
-                                simpleNames.subList(1, simpleNames.size() - 1).stream(),
-                                java.util.stream.Stream.of(last + "OrBuilder")
-                        ).toArray(String[]::new));
-            }
-        }
-        return typeName;
-    }
 
     TypeSpec generateMessageInterface() {
         var interfaceBuilder = TypeSpec.interfaceBuilder(interfaceClassName())

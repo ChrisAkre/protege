@@ -81,28 +81,14 @@ record CodegenContext(
             return false;
         }
 
-        String typeName = field.getTypeName();
-        if (typeName.startsWith(".")) {
-            var protoPackage = fileDescriptor.getPackage();
-            if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
-                typeName = typeName.substring(protoPackage.length() + 2);
-            } else if (typeName.startsWith(".")) {
-                typeName = typeName.substring(1);
-            }
-        }
+        String typeName = relativeToProtoPackage(field.getTypeName());
         return isMapEntryMap.getOrDefault(typeName, false);
     }
 
 
     TypeName resolveTypeName(String protoTypeName, List<String> currentScope) {
         if (protoTypeName.startsWith(".")) {
-            var typeName = protoTypeName;
-            var protoPackage = fileDescriptor.getPackage();
-            if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
-                typeName = typeName.substring(protoPackage.length() + 2);
-            } else if (typeName.startsWith(".")) {
-                typeName = typeName.substring(1);
-            }
+            var typeName = relativeToProtoPackage(protoTypeName);
             if (typeRegistry.containsKey(typeName)) {
                 return typeRegistry.get(typeName);
             }
@@ -139,15 +125,7 @@ record CodegenContext(
 
     TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
         if (isMapField(field)) {
-            String entryTypeName = field.getTypeName();
-            if (entryTypeName.startsWith(".")) {
-                var protoPackage = fileDescriptor.getPackage();
-                if (!protoPackage.isEmpty() && entryTypeName.startsWith("." + protoPackage + ".")) {
-                    entryTypeName = entryTypeName.substring(protoPackage.length() + 2);
-                } else if (entryTypeName.startsWith(".")) {
-                    entryTypeName = entryTypeName.substring(1);
-                }
-            }
+            String entryTypeName = relativeToProtoPackage(field.getTypeName());
             var entryDescriptor = messageDescriptorRegistry.get(entryTypeName);
             var keyField = entryDescriptor.getField(0);
             var valueField = entryDescriptor.getField(1);
@@ -189,15 +167,7 @@ record CodegenContext(
     }
 
     public String relativeToProtoPackage(String typeName) {
-        String protoPackage = protoPackageName();
-            if (typeName.startsWith(".")) {
-                if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
-                    typeName = typeName.substring(protoPackage.length() + 2);
-                } else if (typeName.startsWith(".")) {
-                    typeName = typeName.substring(1);
-                }
-            }
-            return typeName;
+        return CodegenUtils.relativeToProtoPackage(typeName, protoPackageName());
     }
 }
 
