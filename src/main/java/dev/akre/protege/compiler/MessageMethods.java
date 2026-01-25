@@ -474,7 +474,9 @@ public class MessageMethods {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(context.builderClassName())
                 .addParameter(context.messageClassName(), "other")
-                .addStatement("if (other == $T.getDefaultInstance()) return this", context.messageClassName());
+                .beginControlFlow("if (other == $T.getDefaultInstance())", context.messageClassName())
+                .addStatement("return this")
+                .endControlFlow();
 
         for (var field : context.message().getFieldList()) {
             var fieldName = field.getName();

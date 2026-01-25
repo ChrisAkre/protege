@@ -192,7 +192,9 @@ public class CanaryTest {
                     @Override
                     public int getSerializedSize() {
                       int size = memoizedSize;
-                      if (size != -1) return size;
+                      if (size != -1) {
+                        return size;
+                      }
                       size = 0;
                       if (!GeneratedMessage.isStringEmpty(name_)) {
                         size += GeneratedMessage.computeStringSize(1, name_);
@@ -436,7 +438,9 @@ public class CanaryTest {
                       }
                 
                       public CanaryOuterClass.Canary.Builder mergeFrom(CanaryOuterClass.Canary other) {
-                        if (other == CanaryOuterClass.Canary.getDefaultInstance()) return this;
+                        if (other == CanaryOuterClass.Canary.getDefaultInstance()) {
+                          return this;
+                        }
                         if (!GeneratedMessage.isStringEmpty(other.getName())) {
                           setName(other.getName());
                         }

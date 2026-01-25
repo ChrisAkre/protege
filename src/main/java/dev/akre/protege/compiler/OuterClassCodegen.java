@@ -24,7 +24,8 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen temp) {
         outerClassBuilder.addMethod(getDescriptor());
 
         for (var enumType : ctx.fileDescriptor().getEnumTypeList()) {
-            outerClassBuilder.addType(temp.generateEnumType(new EnumContext(enumType, ctx)));
+            var enumCodegen = new EnumCodegen(enumType, Cons.of(ctx.outerName()), ctx, temp);
+            outerClassBuilder.addType(enumCodegen.generate());
         }
 
         for (var message : ctx.fileDescriptor().getMessageTypeList()) {
@@ -35,7 +36,8 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen temp) {
 
         if (ProtoUtils.isJavaGenericServicesEnabled(ctx.fileDescriptor())) {
             for (var service : ctx.fileDescriptor().getServiceList()) {
-                temp.generateServiceTypes(outerClassBuilder, service, ctx);
+                var serviceCodegen = new ServiceCodegen(service, ctx);
+                outerClassBuilder.addType(serviceCodegen.generate());
             }
         }
         return outerClassBuilder.build();

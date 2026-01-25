@@ -41,7 +41,9 @@ class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode
             MemberNode current = this;
             for (String part : parts) {
                 current = current.children().get(part);
-                if (current == null) return Optional.empty();
+                if (current == null) {
+                    return Optional.empty();
+                }
             }
             return Optional.of(current);
         }

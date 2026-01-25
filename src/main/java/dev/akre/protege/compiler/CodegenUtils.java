@@ -55,7 +55,9 @@ public class CodegenUtils {
                 StringBuilder currentPart = new StringBuilder();
                 for (int i = 0; i < content.length(); i++) {
                     char c = content.charAt(i);
-                    if (c == '"') inQuotes = !inQuotes;
+                    if (c == '"') {
+                        inQuotes = !inQuotes;
+                    }
                     if (c == ',' && !inQuotes) {
                         parts.add(currentPart.toString());
                         currentPart = new StringBuilder();
