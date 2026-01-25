@@ -12,8 +12,8 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 
 ## Project Identity
 
-* **The Name "Protege":** This is a phonetic pun pronounced as **"Proto-J"**. It stands for **Proto**col Buffers for **J
-  **ava. When generating documentation or interacting with the project, maintain this branding and recognize that the
+* **The Name "Protege":** This is a phonetic pun pronounced as **"Proto-J"**. It stands for **Proto**col Buffers for
+  **J**ava. When generating documentation or interacting with the project, maintain this branding and recognize that the
   name reflects its primary function.
 
 ## Tech Stack
