@@ -1,8 +1,8 @@
 package dev.akre.it;
 
 import dev.akre.it.generated.HelloServiceGrpc;
-import dev.akre.it.generated.ServiceOuterClass.HelloRequest;
-import dev.akre.it.generated.ServiceOuterClass.HelloResponse;
+import dev.akre.it.generated.Service.HelloRequest;
+import dev.akre.it.generated.Service.HelloResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;

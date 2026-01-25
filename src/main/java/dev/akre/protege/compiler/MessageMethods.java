@@ -397,6 +397,7 @@ public class MessageMethods {
             var methodName = ProtoUtils.getWriteMethodName(field.getType());
 
             if (context.ctx().isMapField(field)) {
+                writeToBuilder.beginControlFlow("");
                 var innerType = context.ctx().resolveTypeName(field.getTypeName(), context.currentScope());
                 String entryTypeName = field.getTypeName();
                 if (entryTypeName.startsWith(".")) {
@@ -420,6 +421,7 @@ public class MessageMethods {
 
                 writeToBuilder.addStatement("$T entryMsg = $T.newBuilder().setKey(($T)entry.getKey()).setValue(($T)entry.getValue()).build()", innerType, innerType, keyType.box(), valueType.box());
                 writeToBuilder.addStatement("output.writeMessage($L, entryMsg)", number);
+                writeToBuilder.endControlFlow();
                 writeToBuilder.endControlFlow();
             } else if (isRepeated) {
                 writeToBuilder.beginControlFlow("for (int i = 0; i < $L.size(); i++)", fieldName);

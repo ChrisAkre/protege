@@ -19,13 +19,12 @@ import static dev.akre.protege.compiler.CodegenUtils.getBooleanOption;
 
 public record MessageCodegen(
         DescriptorProtos.DescriptorProto message,
-        String messageName,
         Cons<String> scope,
         CodegenContext ctx,
         ProtoCodegen protoCodegen) {
 
     MessageCodegen(DescriptorProtos.DescriptorProto message, CodegenContext ctx, Cons<String> scope, ProtoCodegen protoCodegen) {
-        this(message, ProtoUtils.toPascalCase(message.getName()), scope, ctx, protoCodegen);
+        this(message, scope, ctx, protoCodegen);
     }
 
     public Cons<String> allNames() {
@@ -55,12 +54,12 @@ public record MessageCodegen(
         return className(scope.cons(interfaceName()));
     }
 
-    String getMessageName() {
-        return ProtoUtils.toPascalCase(message.getName());
+    String messageName() {
+        return message.getName();
     }
 
     public String interfaceName() {
-        return getMessageName() + "OrBuilder";
+        return messageName() + "OrBuilder";
     }
 
     public String[] allNamesArray() {
@@ -76,7 +75,7 @@ public record MessageCodegen(
     }
 
     public TypeSpec generateMessageClass() {
-        var classBuilder = TypeSpec.classBuilder(messageName)
+        var classBuilder = TypeSpec.classBuilder(messageName())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(protoCodegen.messageParentClass())
                 .addSuperinterface(interfaceClassName());
@@ -425,6 +424,7 @@ public record MessageCodegen(
             var type = field.getType();
 
             if (ctx.isMapField(field)) {
+                getSerializedSizeBuilder.beginControlFlow("");
                 var innerType = ctx.resolveTypeName(field.getTypeName(), currentScope());
                 var entryDescriptor = ctx.getEntryDescriptor(field);
                 var keyField = entryDescriptor.getField(0);
@@ -437,6 +437,7 @@ public record MessageCodegen(
                 getSerializedSizeBuilder.beginControlFlow("for ($T<$T, $T> entry : sortedMap.entrySet())", Map.Entry.class, keyType.box(), valueType.box());
                 getSerializedSizeBuilder.addStatement("$T entryMsg = $T.newBuilder().setKey(($T)entry.getKey()).setValue(($T)entry.getValue()).build()", innerType, innerType, keyType.box(), valueType.box());
                 getSerializedSizeBuilder.addStatement("size += com.google.protobuf.CodedOutputStream.computeMessageSize($L, entryMsg)", number);
+                getSerializedSizeBuilder.endControlFlow();
                 getSerializedSizeBuilder.endControlFlow();
             } else if (isRepeated) {
                 getSerializedSizeBuilder.beginControlFlow("for (int i = 0; i < $L.size(); i++)", fieldName);
