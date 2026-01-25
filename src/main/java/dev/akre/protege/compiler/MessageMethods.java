@@ -127,7 +127,7 @@ public class MessageMethods {
     }
 
     // Field getters
-    public static MethodSpec hasField(SingularFieldContext ctx, CodeBlock hasCode) {
+    public static MethodSpec hasField(FieldCodegen ctx, CodeBlock hasCode) {
         return MethodSpec.methodBuilder("has" + ctx.pascalName())
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -136,7 +136,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getField(SingularFieldContext ctx) {
+    public static MethodSpec getField(FieldCodegen ctx) {
         var getterBuilder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -160,7 +160,7 @@ public class MessageMethods {
         return getterBuilder.build();
     }
 
-    public static MethodSpec getFieldValue(SingularFieldContext ctx) {
+    public static MethodSpec getFieldValue(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Value")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -169,7 +169,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getFieldOrBuilder(SingularFieldContext ctx, TypeName orBuilderType) {
+    public static MethodSpec getFieldOrBuilder(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -178,7 +178,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getFieldBytes(SingularFieldContext ctx) {
+    public static MethodSpec getFieldBytes(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Bytes")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -195,7 +195,7 @@ public class MessageMethods {
     }
 
     // Map field getters
-    public static MethodSpec containsMapKey(MapFieldContext ctx) {
+    public static MethodSpec containsMapKey(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("contains" + ctx.pascalName())
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -205,7 +205,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getMapField(MapFieldContext ctx, TypeName fieldType) {
+    public static MethodSpec getMapField(FieldCodegen ctx, TypeName fieldType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -215,7 +215,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getMapCount(MapFieldContext ctx) {
+    public static MethodSpec getMapCount(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -224,7 +224,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getMapOrDefault(MapFieldContext ctx) {
+    public static MethodSpec getMapOrDefault(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrDefault")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -235,7 +235,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getMapOrThrow(MapFieldContext ctx) {
+    public static MethodSpec getMapOrThrow(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrThrow")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -248,7 +248,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getMapDeprecated(MapFieldContext ctx, TypeName fieldType) {
+    public static MethodSpec getMapDeprecated(FieldCodegen ctx, TypeName fieldType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
                 .addAnnotation(Deprecated.class)
@@ -259,7 +259,7 @@ public class MessageMethods {
     }
 
     // Repeated field getters
-    public static MethodSpec getRepeatedListString(RepeatedFieldContext ctx) {
+    public static MethodSpec getRepeatedListString(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -269,7 +269,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getRepeatedList(RepeatedFieldContext ctx, TypeName fieldType) {
+    public static MethodSpec getRepeatedList(FieldCodegen ctx, TypeName fieldType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -279,7 +279,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getRepeatedCount(RepeatedFieldContext ctx) {
+    public static MethodSpec getRepeatedCount(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -288,7 +288,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getRepeatedElement(RepeatedFieldContext ctx) {
+    public static MethodSpec getRepeatedElement(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -298,7 +298,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getRepeatedOrBuilderList(RepeatedFieldContext ctx, TypeName orBuilderType) {
+    public static MethodSpec getRepeatedOrBuilderList(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilderList")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -307,7 +307,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getRepeatedOrBuilder(RepeatedFieldContext ctx, TypeName orBuilderType) {
+    public static MethodSpec getRepeatedOrBuilder(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -317,7 +317,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getRepeatedValueList(RepeatedFieldContext ctx) {
+    public static MethodSpec getRepeatedValueList(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "ValueList")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -326,7 +326,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getRepeatedValue(RepeatedFieldContext ctx) {
+    public static MethodSpec getRepeatedValue(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Value")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -336,7 +336,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getRepeatedBytes(RepeatedFieldContext ctx) {
+    public static MethodSpec getRepeatedBytes(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Bytes")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -511,14 +511,14 @@ public class MessageMethods {
     }
 
 
-    static MethodSpec abstractHasField(SingularFieldContext ctx) {
+    static MethodSpec abstractHasField(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("has" + ctx.pascalName())
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(boolean.class)
                 .build();
     }
 
-    static MethodSpec abstractGetField(SingularFieldContext ctx) {
+    static MethodSpec abstractGetField(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .addAnnotations(ctx.getterAnnotations())
@@ -526,7 +526,7 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetFieldOrBuilder(SingularFieldContext ctx, TypeName orBuilderType) {
+    static MethodSpec abstractGetFieldOrBuilder(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(orBuilderType)
@@ -548,7 +548,7 @@ public class MessageMethods {
     }
 
     // Map field methods
-    static MethodSpec abstractContainsMapKey(MapFieldContext ctx) {
+    static MethodSpec abstractContainsMapKey(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("contains" + ctx.pascalName())
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(boolean.class)
@@ -556,7 +556,7 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetMapField(MapFieldContext ctx) {
+    static MethodSpec abstractGetMapField(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .addAnnotations(ctx.getterAnnotations())
@@ -564,14 +564,14 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetMapCount(MapFieldContext ctx) {
+    static MethodSpec abstractGetMapCount(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(int.class)
                 .build();
     }
 
-    static MethodSpec abstractGetMapOrDefault(MapFieldContext ctx) {
+    static MethodSpec abstractGetMapOrDefault(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrDefault")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(ctx.valueType())
@@ -580,7 +580,7 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetMapOrThrow(MapFieldContext ctx) {
+    static MethodSpec abstractGetMapOrThrow(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrThrow")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(ctx.valueType())
@@ -588,7 +588,7 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetMapDeprecated(MapFieldContext ctx, TypeName fieldType) {
+    static MethodSpec abstractGetMapDeprecated(FieldCodegen ctx, TypeName fieldType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Deprecated.class)
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -597,7 +597,7 @@ public class MessageMethods {
     }
 
     // Repeated field methods
-    static MethodSpec abstractGetRepeatedList(RepeatedFieldContext ctx, TypeName listType) {
+    static MethodSpec abstractGetRepeatedList(FieldCodegen ctx, TypeName listType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .addAnnotations(ctx.getterAnnotations())
@@ -605,14 +605,14 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetRepeatedCount(RepeatedFieldContext ctx) {
+    static MethodSpec abstractGetRepeatedCount(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(int.class)
                 .build();
     }
 
-    static MethodSpec abstractGetRepeatedElement(RepeatedFieldContext ctx) {
+    static MethodSpec abstractGetRepeatedElement(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(ctx.genericType())
@@ -620,14 +620,14 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetRepeatedOrBuilderList(RepeatedFieldContext ctx, TypeName orBuilderType) {
+    static MethodSpec abstractGetRepeatedOrBuilderList(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilderList")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(ClassName.get(List.class), WildcardTypeName.subtypeOf(orBuilderType)))
                 .build();
     }
 
-    static MethodSpec abstractGetRepeatedOrBuilder(RepeatedFieldContext ctx, TypeName orBuilderType) {
+    static MethodSpec abstractGetRepeatedOrBuilder(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(orBuilderType)
@@ -635,14 +635,14 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetRepeatedValueList(RepeatedFieldContext ctx) {
+    static MethodSpec abstractGetRepeatedValueList(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "ValueList")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(List.class, Integer.class))
                 .build();
     }
 
-    static MethodSpec abstractGetRepeatedValue(RepeatedFieldContext ctx) {
+    static MethodSpec abstractGetRepeatedValue(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Value")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(int.class)

@@ -35,6 +35,10 @@ public class ProtoCodegen {
 
     private final Map<String, List<ClassName>> oneofInterfacesByType = new HashMap<>();
 
+    public Map<String, List<ClassName>> oneofInterfacesByType() {
+        return oneofInterfacesByType;
+    }
+
     static {
         PROTO_TYPE_TO_TYPE_NAME = Map.ofEntries(
                 Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING, ClassName.get(String.class)),
@@ -146,125 +150,7 @@ public class ProtoCodegen {
         return enumBuilder.build();
     }
 
-    TypeSpec generateOrBuilderType(MessageCodegen msgCodegen) {
-        var interfaceBuilder = TypeSpec.interfaceBuilder(msgCodegen.interfaceClassName())
-                .addAnnotations(CodegenUtils.getMessageAnnotations(msgCodegen.message().getOptions()))
-                .addSuperinterface(OR_BUILDER_INTERFACE)
-                .addModifiers(Modifier.PUBLIC);
-
-
-        getJavaImplements(msgCodegen.message()).ifPresent(s -> interfaceBuilder.addSuperinterface(ClassName.bestGuess(s)));
-
-
-        String canonicalName = msgCodegen.canonicalMessageName();
-        var oneofInterfaces = oneofInterfacesByType.getOrDefault(canonicalName, Collections.emptyList());
-        if (!oneofInterfaces.isEmpty()) {
-            interfaceBuilder.addModifiers(Modifier.NON_SEALED);
-            for (var iface : oneofInterfaces) {
-                interfaceBuilder.addSuperinterface(iface);
-            }
-        }
-
-        for (var field : msgCodegen.message().getFieldList()) {
-            var fieldType = msgCodegen.ctx().getFieldType(field, msgCodegen.currentScope());
-            var fieldCtx = FieldContext.create(field, fieldType, msgCodegen.ctx().isMapField(field));
-
-            if (fieldCtx.isMap()) {
-                String entryTypeName = field.getTypeName();
-                if (entryTypeName.startsWith(".")) {
-                    var protoPackage = msgCodegen.ctx().fileDescriptor().getPackage();
-                    if (!protoPackage.isEmpty() && entryTypeName.startsWith("." + protoPackage + ".")) {
-                        entryTypeName = entryTypeName.substring(protoPackage.length() + 2);
-                    } else if (entryTypeName.startsWith(".")) {
-                        entryTypeName = entryTypeName.substring(1);
-                    }
-                }
-                var entryDescriptor = msgCodegen.ctx().messageDescriptorRegistry().get(entryTypeName);
-                var keyField = entryDescriptor.getField(0);
-                var valueField = entryDescriptor.getField(1);
-
-                var keyType = msgCodegen.ctx().getFieldType(keyField, msgCodegen.currentScope());
-                var valueType = msgCodegen.ctx().getFieldType(valueField, msgCodegen.currentScope());
-
-                var mapCtx = new MapFieldContext(fieldCtx, entryDescriptor, keyType, valueType, null);
-
-                interfaceBuilder.addMethod(MessageMethods.abstractContainsMapKey(mapCtx));
-                interfaceBuilder.addMethod(MessageMethods.abstractGetMapField(mapCtx));
-                interfaceBuilder.addMethod(MessageMethods.abstractGetMapCount(mapCtx));
-                interfaceBuilder.addMethod(MessageMethods.abstractGetMapOrDefault(mapCtx));
-                interfaceBuilder.addMethod(MessageMethods.abstractGetMapOrThrow(mapCtx));
-
-                if (generateDeprecated) {
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetMapDeprecated(mapCtx, fieldType));
-                }
-            } else if (fieldCtx.isRepeated()) {
-                var genericType = PROTO_TYPE_TO_TYPE_NAME.get(field.getType());
-                if (field.hasTypeName()) {
-                    genericType = msgCodegen.ctx().resolveTypeName(field.getTypeName(), msgCodegen.currentScope());
-                }
-                if (genericType == null) genericType = TypeName.get(Object.class);
-                genericType = genericType.box();
-
-                var repeatedCtx = new RepeatedFieldContext(fieldCtx, genericType);
-
-                interfaceBuilder.addMethod(MessageMethods.abstractGetRepeatedList(repeatedCtx, fieldType));
-
-                if (repeatedCtx.isString()) {
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetRepeatedBytes(fieldCtx.pascalName()));
-                }
-
-                interfaceBuilder.addMethod(MessageMethods.abstractGetRepeatedCount(repeatedCtx));
-                interfaceBuilder.addMethod(MessageMethods.abstractGetRepeatedElement(repeatedCtx));
-
-                if (repeatedCtx.isMessage()) {
-                    var orBuilderType = MessageCodegen.getOrBuilderType(genericType);
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetRepeatedOrBuilderList(repeatedCtx, orBuilderType));
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetRepeatedOrBuilder(repeatedCtx, orBuilderType));
-                }
-
-                if (repeatedCtx.isEnum()) {
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetRepeatedValueList(repeatedCtx));
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetRepeatedValue(repeatedCtx));
-                }
-            } else {
-                var singularCtx = new SingularFieldContext(fieldCtx, msgCodegen);
-
-                if (singularCtx.isMessage() || singularCtx.hasOneofIndex()) {
-                    interfaceBuilder.addMethod(MessageMethods.abstractHasField(singularCtx));
-                }
-
-                interfaceBuilder.addMethod(MessageMethods.abstractGetField(singularCtx));
-
-                if (singularCtx.isEnum()) {
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetFieldValue(fieldCtx.pascalName()));
-                }
-
-                if (singularCtx.isMessage()) {
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetFieldOrBuilder(singularCtx, MessageCodegen.getOrBuilderType(fieldType)));
-                }
-
-                if (singularCtx.isString()) {
-                    interfaceBuilder.addMethod(MessageMethods.abstractGetFieldBytes(fieldCtx.pascalName()));
-                }
-            }
-        }
-
-        for (int i = 0; i < msgCodegen.message().getOneofDeclCount(); i++) {
-            var oneof = msgCodegen.message().getOneofDecl(i);
-            var oneofCtx = OneofContext.create(oneof, i, msgCodegen.messageClassName());
-
-            if (msgCodegen.enhancedOneof()) {
-                interfaceBuilder.addMethod(MessageMethods.abstractGetOneof(oneofCtx));
-            }
-
-            if (msgCodegen.generateOneofCase()) {
-                interfaceBuilder.addMethod(MessageMethods.abstractGetOneofCase(oneofCtx));
-            }
-        }
-        return interfaceBuilder.build();
-    }
-
-    private Optional<String> getJavaImplements(DescriptorProtos.DescriptorProto message) {
+    public Optional<String> getJavaImplements(DescriptorProtos.DescriptorProto message) {
         return message.getOptions().getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream().anyMatch(n -> n.getNamePart().endsWith("java_implements")))
                 .map(DescriptorProtos.UninterpretedOption::getStringValue)
