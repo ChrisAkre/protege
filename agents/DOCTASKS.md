@@ -4,6 +4,7 @@
 * Project is a Java-based code generation library for Protocol Buffers.
 * Uses Maven, ANTLR v4, and JavaPoet.
 * Documentation should be clear, minimal, and machine-friendly.
+* Single-line comments showing the signature of the method or field being added in codegen are helpful.
 
 ## Pending Approval
 

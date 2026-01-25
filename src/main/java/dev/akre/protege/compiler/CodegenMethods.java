@@ -26,12 +26,6 @@ public class CodegenMethods {
      */
     static class Builder {
 
-        /**
-         * Generates the {@code build()} method.
-         *
-         * @param messageClassName The class name of the message being built.
-         * @return The method specification.
-         */
         static MethodSpec build(ClassName messageClassName) {
             return MethodSpec.methodBuilder("build")
                     .addAnnotation(Override.class)
@@ -45,12 +39,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code buildPartial()} method.
-         *
-         * @param messageClassName The class name of the message.
-         * @return The method specification.
-         */
         static MethodSpec buildPartial(ClassName messageClassName) {
             return MethodSpec.methodBuilder("buildPartial")
                     .addAnnotation(Override.class)
@@ -60,12 +48,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code getDefaultInstanceForType()} method.
-         *
-         * @param messageClassName The class name of the message.
-         * @return The method specification.
-         */
         static MethodSpec getDefaultInstanceForType(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDefaultInstanceForType")
                     .addAnnotation(Override.class)
@@ -75,12 +57,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code getDescriptorForType()} method.
-         *
-         * @param messageClassName The class name of the message.
-         * @return The method specification.
-         */
         static MethodSpec getDescriptorForType(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDescriptorForType")
                     .addAnnotation(Override.class)
@@ -90,12 +66,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code getDescriptor()} method.
-         *
-         * @param messageClassName The class name of the message.
-         * @return The method specification.
-         */
         static MethodSpec getDescriptor(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDescriptor")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -104,11 +74,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code isInitialized()} method.
-         *
-         * @return The method specification.
-         */
         static MethodSpec isInitialized() {
             return MethodSpec.methodBuilder("isInitialized")
                     .addAnnotation(Override.class)
@@ -118,12 +83,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code mergeFrom(CodedInputStream, ExtensionRegistryLite)} method.
-         *
-         * @param builderClassName The class name of the builder.
-         * @return The method specification.
-         */
         static MethodSpec mergeFromCodedInput(ClassName builderClassName) {
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
@@ -136,13 +95,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code mergeFrom(Message)} method.
-         *
-         * @param messageClassName The class name of the message.
-         * @param builderClassName The class name of the builder.
-         * @return The method specification.
-         */
         static MethodSpec mergeFromMessage(ClassName messageClassName, ClassName builderClassName) {
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
@@ -158,13 +110,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code internalGetFieldAccessorTable()} method.
-         *
-         * @param messageClassName          The class name of the message.
-         * @param fieldAccessorTableClass The class name of the field accessor table.
-         * @return The method specification.
-         */
         static MethodSpec internalGetFieldAccessorTable(ClassName messageClassName, ClassName fieldAccessorTableClass) {
             return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
                     .addAnnotation(Override.class)
@@ -174,13 +119,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code internalGetMapFieldReflection()} method.
-         *
-         * @param msgCodegen The message codegen context.
-         * @param ctx        The global codegen context.
-         * @return The method specification.
-         */
         static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
             var method = MethodSpec.methodBuilder("internalGetMapFieldReflection")
                     .addAnnotation(Override.class)
@@ -201,13 +139,6 @@ public class CodegenMethods {
             return method.build();
         }
 
-        /**
-         * Generates the {@code internalGetMutableMapFieldReflection()} method.
-         *
-         * @param msgCodegen The message codegen context.
-         * @param ctx        The global codegen context.
-         * @return The method specification.
-         */
         static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
             var method = MethodSpec.methodBuilder("internalGetMutableMapFieldReflection")
                     .addAnnotation(Override.class)
@@ -253,13 +184,6 @@ public class CodegenMethods {
 
         // Field setters/getters
 
-        /**
-         * Generates the {@code hasField()} method.
-         *
-         * @param ctx     The field codegen context.
-         * @param hasCode The code block to check for presence.
-         * @return The method specification.
-         */
         static MethodSpec hasField(FieldCodegen ctx, CodeBlock hasCode) {
             return MethodSpec.methodBuilder("has" + ctx.pascalName())
                     .addAnnotation(Override.class)
@@ -269,12 +193,6 @@ public class CodegenMethods {
                     .build();
         }
 
-        /**
-         * Generates the {@code getField()} method.
-         *
-         * @param ctx The field codegen context.
-         * @return The method specification.
-         */
         static MethodSpec getField(FieldCodegen ctx) {
             var builder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                     .addAnnotation(Override.class)
@@ -298,14 +216,6 @@ public class CodegenMethods {
             return builder.build();
         }
 
-        /**
-         * Generates the {@code setField()} method.
-         *
-         * @param ctx              The field codegen context.
-         * @param builderClassName The class name of the builder.
-         * @param clearOneofCode   Code to clear the oneof if applicable.
-         * @return The method specification.
-         */
         static MethodSpec setField(FieldCodegen ctx, ClassName builderClassName, CodeBlock clearOneofCode) {
             var builder = MethodSpec.methodBuilder("set" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
@@ -326,14 +236,6 @@ public class CodegenMethods {
             return builder.build();
         }
 
-        /**
-         * Generates the {@code clearField()} method.
-         *
-         * @param ctx              The field codegen context.
-         * @param builderClassName The class name of the builder.
-         * @param defaultValue     The default value to set.
-         * @return The method specification.
-         */
         static MethodSpec clearField(FieldCodegen ctx, ClassName builderClassName, String defaultValue) {
             return MethodSpec.methodBuilder("clear" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)

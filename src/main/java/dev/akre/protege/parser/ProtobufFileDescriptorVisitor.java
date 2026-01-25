@@ -100,9 +100,6 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
-//        if (isEmptyFile()) {
-//            return FileDescriptorProto.newBuilder();
-//        }
         String packageName = ctx.packageStatement().isEmpty() ? "" : ctx.packageStatement().getFirst().name.getText();
         Cons<String> protoScope = Cons.nil();
         if (!packageName.isEmpty()) {
@@ -145,11 +142,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     @Override
     public Syntax visitSyntax(ProtobufParser.SyntaxContext ctx) {
-        try {
-            return new Syntax(getStringLiteral(ctx.protoVersion().getText()));
-        } catch (NullPointerException e) {
-            throw new InvalidProtoException("missing syntax declaration");
-        }
+        return new Syntax(getStringLiteral(ctx.protoVersion().getText()));
     }
 
     @Override
@@ -439,13 +432,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         } else if (ctx.intLit() != null) {
             return Long.parseLong(ctx.intLit().getText());
         } else if (ctx.floatLit() != null) {
-            String text = ctx.floatLit().getText();
-            return switch (text) {
-                case "inf", "+inf" -> Double.POSITIVE_INFINITY;
-                case "-inf" -> Double.NEGATIVE_INFINITY;
-                case "nan" -> Double.NaN;
-                default -> Double.parseDouble(text);
-            };
+            return Double.parseDouble(ctx.floatLit().getText());
         } else if (ctx.strLit() != null) {
             return ByteString.copyFromUtf8(getStringLiteral(ctx.strLit().getText()));
         } else {

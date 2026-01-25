@@ -118,29 +118,10 @@ public class ProtoUtils {
             return fileDescriptorProto.getOptions().getJavaOuterClassname();
         }
         String fileName = fileDescriptorProto.getName();
-        String baseName = (fileName.contains("/")
+        String baseName = fileName.contains("/")
                 ? fileName.substring(fileName.lastIndexOf("/") + 1)
-                : fileName).replace(".proto", "");
-        return getNames(fileDescriptorProto).anyMatch(baseName::equalsIgnoreCase)
-                ? (toPascalCase(baseName) + "OuterClass")
-                : toPascalCase(baseName);
-
-    }
-
-    private static Stream<String> getNames(Object descriptor) {
-        return switch (descriptor) {
-            case DescriptorProtos.FileDescriptorProto f -> Stream.of(
-                    f.getMessageTypeList().stream().flatMap(ProtoUtils::getNames),
-                    f.getEnumTypeList().stream().flatMap(ProtoUtils::getNames))
-                    .flatMap(s -> s);
-            case DescriptorProtos.DescriptorProto m -> Stream.of(
-                            Stream.of(m.getName()),
-                            m.getNestedTypeList().stream().flatMap(ProtoUtils::getNames),
-                            m.getEnumTypeList().stream().flatMap(ProtoUtils::getNames))
-                    .flatMap(s -> s);
-            case DescriptorProtos.EnumDescriptorProto e -> Stream.of(e.getName());
-            default -> throw new IllegalArgumentException("unexpected: " + descriptor);
-        };
+                : fileName;
+        return toPascalCase(baseName.replace(".proto", "")) + "OuterClass";
     }
 
     public static String toPascalCase(String s) {

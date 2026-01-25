@@ -134,9 +134,7 @@ public class TestUtils {
     }
 
     public static String makeOuterClassName(DescriptorProtos.FileDescriptorProto fileDescriptorProto, String fileName) {
-        String javaPackage = ProtoUtils.getJavaPackage(fileDescriptorProto);
-        String javaOuterClassName = ProtoUtils.getJavaOuterClassName(fileDescriptorProto);
-        return javaPackage.isEmpty() ? javaOuterClassName : javaPackage + "." + javaOuterClassName;
+        return ProtoUtils.getJavaPackage(fileDescriptorProto) + "." + ProtoUtils.getJavaOuterClassName(fileDescriptorProto);
     }
 
     public static Class<?> compile(String mainClassName, List<JavaFileObject> sourceFiles) throws Exception {

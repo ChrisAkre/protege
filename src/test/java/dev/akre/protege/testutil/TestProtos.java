@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -33,26 +32,16 @@ public class TestProtos {
                         try {
                             DescriptorProtos.FileDescriptorProto parsedProto = ProtoUtils.parseProto(protoPath.toFile());
                             String outerClassName = TestUtils.makeOuterClassName(parsedProto, protoPath.getFileName().toString());
-                            Class<?> expectedClass;
-                            try {
-                                expectedClass = Class.forName(outerClassName);
-                            } catch (ClassNotFoundException e) {
-                                if (!parsedProto.hasSyntax()) {
-                                    // probably a commented out file
-                                    return null;
-                                }
-                                throw e;
-                            }
+                            Class<?> expectedClass = Class.forName(outerClassName);
                             ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
                             Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto).toJavaFileObject());
                             ClassAssert.assertThat(generatedClass)
                                     .hasPublicStaticFinalStringField("PROTEGE_VERSION", ProtegeVersion.VERSION_STRING);
                             return Arguments.of(protoPath, parsedProto, expectedClass, generatedClass);
                         } catch (Exception e) {
-                            e.printStackTrace();
                             throw new RuntimeException("Failed to prepare parameters for " + protoPath, e);
                         }
-                    }).filter(Objects::nonNull).toList();
+                    }).toList();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -112,9 +101,7 @@ public class TestProtos {
                     .map(message -> {
                         String messageName = message.getName();
                         Class<?> expectedMessage = TestUtils.findInnerClass(expectedClass, messageName).orElseThrow();
-                        Class<?> generatedMessage = TestUtils.findInnerClass(generatedClass, messageName).orElseThrow(() -> {
-                            throw new IllegalArgumentException("%s not found in class generated from %s".formatted(messageName, protoPath));
-                        });
+                        Class<?> generatedMessage = TestUtils.findInnerClass(generatedClass, messageName).orElseThrow();
                         return Arguments.of(protoPath, parsedProto, messageName, expectedMessage, generatedMessage);
                     });
         }).toList();
