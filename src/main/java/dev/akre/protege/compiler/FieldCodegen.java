@@ -18,6 +18,7 @@ public record FieldCodegen(
         boolean isMap,
         boolean isRepeated,
         List<AnnotationSpec> getterAnnotations,
+        List<AnnotationSpec> fieldAnnotations,
         // Map specific
         DescriptorProtos.DescriptorProto entryDescriptor,
         TypeName keyType,
@@ -38,6 +39,7 @@ public record FieldCodegen(
         boolean isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
         boolean isMap = ctx.isMapField(field);
         List<AnnotationSpec> getterAnnotations = CodegenUtils.getGetterAnnotations(field.getOptions());
+        List<AnnotationSpec> fieldAnnotations = CodegenUtils.getFieldAnnotations(field.getOptions());
 
         DescriptorProtos.DescriptorProto entryDescriptor = null;
         TypeName keyType = null;
@@ -70,6 +72,7 @@ public record FieldCodegen(
                 isMap,
                 isRepeated,
                 getterAnnotations,
+                fieldAnnotations,
                 entryDescriptor,
                 keyType,
                 valueType,

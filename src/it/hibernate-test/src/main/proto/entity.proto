@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package dev.akre.it.hibernate;
+
+import "options.proto";
+
+option java_package = "dev.akre.it.hibernate";
+option java_outer_classname = "EntityProtos";
+
+message User {
+  option (dev.akre.protege.java_class_annotation) = "@jakarta.persistence.Entity";
+  option (dev.akre.protege.java_class_annotation) = "@jakarta.persistence.Access(jakarta.persistence.AccessType.FIELD)";
+  option (dev.akre.protege.java_class_annotation) = "@jakarta.persistence.Table(name = \"users\")";
+
+  int64 id = 1 [
+    (dev.akre.protege.java_field_annotation) = "@jakarta.persistence.Id",
+    (dev.akre.protege.java_field_annotation) = "@jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)"
+  ];
+
+  string name = 2 [
+    (dev.akre.protege.java_field_annotation) = "@jakarta.persistence.Column(nullable = false)",
+    (dev.akre.protege.java_field_annotation) = "@org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.VARCHAR)"
+  ];
+}
