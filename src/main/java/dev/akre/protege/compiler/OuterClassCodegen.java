@@ -1,5 +1,6 @@
 package dev.akre.protege.compiler;
 
+import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
@@ -11,9 +12,14 @@ import dev.akre.util.Cons;
 
 import javax.lang.model.element.Modifier;
 
-public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen, CodegenMetadata config) implements CodegenMetadata.Config {
+public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen,
+                                CodegenMetadata config) implements CodegenConfig {
+    public DescriptorProtos.FileDescriptorProto descriptor() {
+        return config.fileDescriptor();
+    }
+
     public TypeSpec generate() {
-        protoCodegen.populateOneofInterfaces(ctx);
+        OneofCodegen.populateOneofInterfaces(this, ctx, protoCodegen.oneofInterfacesByType(), config);
 
         var outerClassBuilder = TypeSpec.classBuilder(ctx.outerName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -27,13 +33,13 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen, C
         outerClassBuilder.addMethod(getDescriptor(this));
 
         for (var enumType : ctx.fileDescriptor().getEnumTypeList()) {
-            var enumCodegen = new EnumCodegen(enumType, Cons.of(ctx.outerName()), ctx, protoCodegen);
+            var enumCodegen = new EnumCodegen(enumType, Cons.of(ctx.outerName()), ctx, protoCodegen, config);
             // public enum <name> implements ProtocolMessageEnum
             outerClassBuilder.addType(enumCodegen.generate());
         }
 
         for (var message : ctx.fileDescriptor().getMessageTypeList()) {
-            MessageCodegen messageCodegen = new MessageCodegen(message, ctx, Cons.of(ctx.outerName()), protoCodegen);
+            MessageCodegen messageCodegen = new MessageCodegen(message, ctx, Cons.of(ctx.outerName()), protoCodegen, config);
             // public interface <name>OrBuilder extends MessageOrBuilder
             outerClassBuilder.addType(messageCodegen.generateMessageInterface());
             // public static final class <name> extends GeneratedMessageV3 implements <name>OrBuilder

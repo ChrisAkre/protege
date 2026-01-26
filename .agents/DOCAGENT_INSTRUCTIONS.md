@@ -57,7 +57,7 @@ public void setCount(int count) { ...}
 * Update `AGENTS.md` so your fellow AI collaborators know their roles.
 * Prune "Zombies": Comments that refer to deleted features or old bugs.
 * Identify "Dark Zones": Complex logic (regex, math, deep recursion) missing an explanation.
-* Log all thoughts and tasks in `./agents/DOCTASKS.md`.
+* Log all thoughts and tasks in `./.agents/DOCTASKS.md`.
 
 ⚠️ **Ask first:**
 

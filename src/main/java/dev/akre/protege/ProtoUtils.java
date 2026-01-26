@@ -520,30 +520,34 @@ public class ProtoUtils {
         return value == null;
     }
 
+    public static <T> Stream<T> descriptorChildren(Object descriptor, Class<T> descriptorClass) {
+        return descriptorChildren(descriptor).filter(descriptorClass::isInstance).map(descriptorClass::cast);
+    }
+
     public static Stream<Object> descriptorChildren(Object descriptor) {
         return switch (descriptor) {
-            case DescriptorProtos.FileDescriptorProto f ->
-                    Stream.concat(f.getMessageTypeList().stream(), f.getEnumTypeList().stream());
-            case DescriptorProtos.DescriptorProto m ->
-                    Stream.concat(m.getNestedTypeList().stream(), m.getEnumTypeList().stream());
+            case DescriptorProtos.FileDescriptorProto f -> Stream.concat(
+                    f.getMessageTypeList().stream(),
+                    f.getEnumTypeList().stream());
+            case DescriptorProtos.DescriptorProto m -> Stream.of(
+                        m.getNestedTypeList().stream(),
+                        m.getEnumTypeList().stream(),
+                        m.getFieldList().stream(),
+                        m.getOneofDeclList().stream())
+                    .flatMap(s -> s);
             case DescriptorProtos.EnumDescriptorProto ignored -> Stream.empty();
             case DescriptorProtos.FieldDescriptorProto ignored -> Stream.empty();
+            case DescriptorProtos.OneofDescriptorProto ignored -> Stream.empty();
             default -> throw new IllegalStateException();
         };
     }
 
     public static Predicate<List<DescriptorProtos.UninterpretedOption.NamePart>> nameList(String key) {
-        String[] parts = key.split("\\.");
         return l -> {
-            if (l.size() != parts.length) {
-                return false;
-            }
-            for (int i = 0; i < parts.length; i++) {
-                if (!l.get(i).getNamePart().equals(parts[i])) {
-                    return false;
-                }
-            }
-            return true;
+            String optionName = l.stream()
+                    .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
+                    .collect(Collectors.joining("."));
+            return optionName.equals(key);
         };
     }
 }

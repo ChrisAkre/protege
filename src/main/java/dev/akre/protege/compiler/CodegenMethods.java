@@ -3,7 +3,6 @@ package dev.akre.protege.compiler;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.palantir.javapoet.*;
-import dev.akre.protege.ProtoUtils;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -157,7 +156,7 @@ public class CodegenMethods {
                     .addParameter(int.class, "fieldNumber")
                     .beginControlFlow("switch (fieldNumber)");
 
-            for (var field : msgCodegen.message().getFieldList()) {
+            for (var field : msgCodegen.descriptor().getFieldList()) {
                 if (isMapField(field, ctx)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
@@ -177,7 +176,7 @@ public class CodegenMethods {
                     .addParameter(int.class, "fieldNumber")
                     .beginControlFlow("switch (fieldNumber)");
 
-            for (var field : msgCodegen.message().getFieldList()) {
+            for (var field : msgCodegen.descriptor().getFieldList()) {
                 if (isMapField(field, ctx)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
@@ -254,7 +253,7 @@ public class CodegenMethods {
             if (ctx.hasOneofIndex()) {
                 builder.addCode(clearOneofCode);
                 builder.addStatement("$LCase_ = $L",
-                        ctx.messageCodegen().message().getOneofDecl(ctx.oneofIndex()).getName(),
+                        ctx.messageCodegen().descriptor().getOneofDecl(ctx.oneofIndex()).getName(),
                         ctx.fieldNumber());
             }
 
@@ -321,7 +320,7 @@ public class CodegenMethods {
             if (ctx.hasOneofIndex()) {
                 builder.addCode(clearOneofCode);
                 builder.addStatement("$LCase_ = $L",
-                        ctx.messageCodegen().message().getOneofDecl(ctx.oneofIndex()).getName(),
+                        ctx.messageCodegen().descriptor().getOneofDecl(ctx.oneofIndex()).getName(),
                         ctx.fieldNumber());
             }
 
@@ -375,7 +374,7 @@ public class CodegenMethods {
             if (ctx.hasOneofIndex()) {
                 builder.addCode(clearOneofCode);
                 builder.addStatement("$LCase_ = $L",
-                        ctx.messageCodegen().message().getOneofDecl(ctx.oneofIndex()).getName(),
+                        ctx.messageCodegen().descriptor().getOneofDecl(ctx.oneofIndex()).getName(),
                         ctx.fieldNumber());
             }
 

@@ -13,18 +13,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static dev.akre.protege.compiler.CodegenContext.JAVA_ENHANCED_ONEOF_OPTION;
-import static dev.akre.protege.compiler.CodegenContext.JAVA_GENERATE_ONEOF_CASE_OPTION;
-import static dev.akre.protege.compiler.CodegenUtils.getBooleanOption;
-
 public record MessageCodegen(
-        DescriptorProtos.DescriptorProto message,
+        DescriptorProtos.DescriptorProto descriptor,
         Cons<String> scope,
         CodegenContext ctx,
-        ProtoCodegen protoCodegen) {
+        ProtoCodegen protoCodegen,
+        CodegenMetadata config
+) implements CodegenConfig {
 
-    MessageCodegen(DescriptorProtos.DescriptorProto message, CodegenContext ctx, Cons<String> scope, ProtoCodegen protoCodegen) {
-        this(message, scope, ctx, protoCodegen);
+    MessageCodegen(DescriptorProtos.DescriptorProto message, CodegenContext ctx, Cons<String> scope, ProtoCodegen protoCodegen, CodegenMetadata config) {
+        this(message, scope, ctx, protoCodegen, config);
     }
 
     public Cons<String> allNames() {
@@ -42,20 +40,13 @@ public record MessageCodegen(
         };
     }
 
-    boolean enhancedOneof() {
-        return getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, ctx.fileEnhancedOneof());
-    }
-
-    boolean generateOneofCase() {
-        return getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_GENERATE_ONEOF_CASE_OPTION, ctx.fileGenerateOneofCase());
-    }
 
     ClassName interfaceClassName() {
         return className(scope.cons(interfaceName()));
     }
 
     String messageName() {
-        return message.getName();
+        return descriptor.getName();
     }
 
     public String interfaceName() {
@@ -77,21 +68,21 @@ public record MessageCodegen(
     public TypeSpec generateMessageClass() {
         var classBuilder = TypeSpec.classBuilder(messageName())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .superclass(protoCodegen.messageParentClass())
+                .superclass(getMessageSuperclass())
                 .addSuperinterface(interfaceClassName());
 
-        classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(message.getOptions()));
+        classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()));
 
-        for (var nestedMessage : message.getNestedTypeList()) {
-            var nestedMsgCodegen = new MessageCodegen(nestedMessage, ctx, allNames(), protoCodegen);
+        for (var nestedMessage : descriptor.getNestedTypeList()) {
+            var nestedMsgCodegen = new MessageCodegen(nestedMessage, ctx, allNames(), protoCodegen, config);
             // public interface <MessageName>OrBuilder extends MessageOrBuilder
             classBuilder.addType(nestedMsgCodegen.generateMessageInterface());
             // public static final class <MessageName> extends GeneratedMessageV3 implements <MessageName>OrBuilder
             classBuilder.addType(nestedMsgCodegen.generateMessageClass());
         }
 
-        for (var nestedEnum : message.getEnumTypeList()) {
-            var enumCodegen = new EnumCodegen(nestedEnum, allNames(), ctx, protoCodegen);
+        for (var nestedEnum : descriptor.getEnumTypeList()) {
+            var enumCodegen = new EnumCodegen(nestedEnum, allNames(), ctx, protoCodegen, config);
             // public enum <EnumName> implements ProtocolMessageEnum
             classBuilder.addType(enumCodegen.generate());
         }
@@ -102,7 +93,7 @@ public record MessageCodegen(
         generateInternalFieldAccessorTable(classBuilder);
         generateFieldsAndGetters(classBuilder);
 
-        for (int i = 0; i < message.getOneofDeclCount(); i++) {
+        for (int i = 0; i < descriptor.getOneofDeclCount(); i++) {
             // private int <oneofName>Case_
             classBuilder.addField(oneofCaseField(this, i));
         }
@@ -133,7 +124,7 @@ public record MessageCodegen(
     }
 
     static FieldSpec oneofCaseField(MessageCodegen context, int i) {
-        return FieldSpec.builder(int.class, context.message().getOneofDecl(i).getName() + "Case_", Modifier.PRIVATE).initializer("0").build();
+        return FieldSpec.builder(int.class, context.descriptor().getOneofDecl(i).getName() + "Case_", Modifier.PRIVATE).initializer("0").build();
     }
 
     private void generateDescriptor(TypeSpec.Builder classBuilder) {
@@ -178,8 +169,8 @@ public record MessageCodegen(
         classBuilder.addField(FieldSpec.builder(protoCodegen.getFieldAccessorTableClass(), "internal_fieldAccessorTable", Modifier.PRIVATE, Modifier.STATIC).build());
 
         String allNames = java.util.stream.Stream.concat(
-                        message.getFieldList().stream().map(f -> ProtoUtils.toPascalCase(f.getName())),
-                        message.getOneofDeclList().stream().map(o -> ProtoUtils.toPascalCase(o.getName())))
+                        descriptor.getFieldList().stream().map(f -> ProtoUtils.toPascalCase(f.getName())),
+                        descriptor.getOneofDeclList().stream().map(o -> ProtoUtils.toPascalCase(o.getName())))
                 .map(n -> "\"" + n + "\"")
                 .collect(Collectors.joining(", "));
 
@@ -203,7 +194,7 @@ public record MessageCodegen(
         // public Builder newBuilderForType()
         classBuilder.addMethod(MessageMethods.newBuilderForType(builderClassName));
         // protected Builder newBuilderForType(GeneratedMessageV3.BuilderParent parent)
-        classBuilder.addMethod(MessageMethods.newBuilderForTypeWithParent(protoCodegen.messageParentClass(), builderClassName));
+        classBuilder.addMethod(MessageMethods.newBuilderForTypeWithParent(this));
         // public <MessageName> getDefaultInstanceForType()
         classBuilder.addMethod(MessageMethods.getDefaultInstanceForType(messageClassName));
         // public final UnknownFieldSet getUnknownFields()
@@ -294,7 +285,7 @@ public record MessageCodegen(
                 .returns(com.google.protobuf.MapFieldReflectionAccessor.class)
                 .addParameter(int.class, "fieldNumber")
                 .beginControlFlow("switch (fieldNumber)")
-                .addCode(message.getFieldList().stream()
+                .addCode(descriptor.getFieldList().stream()
                         .filter(ctx::isMapField)
                         .map(f -> "case " + f.getNumber() + ": return " + f.getName() + "_;\n")
                         .collect(Collectors.joining()))
@@ -304,7 +295,7 @@ public record MessageCodegen(
     }
 
     void generateMapFieldPrototypes(TypeSpec.Builder classBuilder) {
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             if (ctx.isMapField(field)) {
                 var entryDescriptor = ctx.getEntryDescriptor(field);
                 var keyField = entryDescriptor.getField(0);
@@ -352,7 +343,7 @@ public record MessageCodegen(
         var constructor = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE);
 
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             var fieldName = field.getName() + "_";
             if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING
                     && field.getLabel() != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
@@ -378,7 +369,7 @@ public record MessageCodegen(
     }
 
     void generateFieldsAndGetters(TypeSpec.Builder classBuilder) {
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             var fieldCodegen = FieldCodegen.create(field, this);
 
             // Generate private field
@@ -417,7 +408,7 @@ public record MessageCodegen(
                 .endControlFlow();
         getSerializedSizeBuilder.addStatement("size = 0");
 
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             var fieldName = field.getName() + "_";
             var number = field.getNumber();
             var isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
@@ -442,7 +433,7 @@ public record MessageCodegen(
             } else if (isRepeated) {
                 getSerializedSizeBuilder.beginControlFlow("for (int i = 0; i < $L.size(); i++)", fieldName);
                 if (type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                    getSerializedSizeBuilder.addStatement("size += $T.computeStringSize($L, $L.get(i))", protoCodegen.messageParentClass(), number, fieldName);
+                    getSerializedSizeBuilder.addStatement("size += $T.computeStringSize($L, $L.get(i))", getMessageSuperclass(), number, fieldName);
                 } else if (type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM) {
                     var computeMethod = ProtoUtils.getComputeMethodName(type);
                     getSerializedSizeBuilder.addStatement("size += com.google.protobuf.CodedOutputStream.$L($L, $L.get(i).getNumber())", computeMethod, number, fieldName);
@@ -454,7 +445,7 @@ public record MessageCodegen(
             } else {
                 CodeBlock condition;
                 if (field.hasOneofIndex()) {
-                    var oneofName = message.getOneofDecl(field.getOneofIndex()).getName();
+                    var oneofName = descriptor.getOneofDecl(field.getOneofIndex()).getName();
                     condition = CodeBlock.of("$LCase_ == $L", oneofName, number);
                 } else {
                     condition = CodegenUtils.getWriteCondition(type, fieldName, this);
@@ -463,7 +454,7 @@ public record MessageCodegen(
                     getSerializedSizeBuilder.beginControlFlow("if ($L)", condition);
                 }
                 if (type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                    getSerializedSizeBuilder.addStatement("size += $T.computeStringSize($L, $L)", protoCodegen.messageParentClass(), number, fieldName);
+                    getSerializedSizeBuilder.addStatement("size += $T.computeStringSize($L, $L)", getMessageSuperclass(), number, fieldName);
                 } else if (type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM) {
                     var computeMethod = ProtoUtils.getComputeMethodName(type);
                     getSerializedSizeBuilder.addStatement("size += com.google.protobuf.CodedOutputStream.$L($L, $L.getNumber())", computeMethod, number, fieldName);
@@ -493,7 +484,7 @@ public record MessageCodegen(
                 .addParameter(builderClassName, "builder")
                 .addStatement("super(builder)");
 
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             var fieldName = field.getName() + "_";
             if (ctx.isMapField(field)) {
                 constructor.addStatement("this.$L = builder.$L.copy()", fieldName, fieldName);
@@ -508,8 +499,8 @@ public record MessageCodegen(
                 constructor.addStatement("this.$L = builder.$L", fieldName, fieldName);
             }
         }
-        for (int i = 0; i < message.getOneofDeclCount(); i++) {
-            var oneofName = message.getOneofDecl(i).getName() + "Case_";
+        for (int i = 0; i < descriptor.getOneofDeclCount(); i++) {
+            var oneofName = descriptor.getOneofDecl(i).getName() + "Case_";
             constructor.addStatement("this.$L = builder.$L", oneofName, oneofName);
         }
         // private <MessageName>(Builder builder)
@@ -524,7 +515,7 @@ public record MessageCodegen(
                 .addException(IOException.class);
 
         constructor.addStatement("this()");
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             if (ctx.isMapField(field)) {
                 constructor.addStatement("this.$L_ = $T.newMapField($L_DefaultEntry)", field.getName(), com.google.protobuf.MapField.class, field.getName());
             } else if (field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
@@ -543,7 +534,7 @@ public record MessageCodegen(
         constructor.beginControlFlow("switch (tag)");
         constructor.addCode("case 0:\n  done = true;\n  break;\n");
 
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             int wireType = ProtoUtils.getWireType(field.getType());
             int tag = (field.getNumber() << 3) | wireType;
             constructor.addCode("case $L: {\n", tag);
@@ -574,8 +565,8 @@ public record MessageCodegen(
                 }
             } else {
                 if (field.hasOneofIndex()) {
-                    constructor.addCode(CodegenUtils.generateClearOneofCode(message, field.getOneofIndex()));
-                    constructor.addStatement("$LCase_ = $L", message.getOneofDecl(field.getOneofIndex()).getName(), field.getNumber());
+                    constructor.addCode(CodegenUtils.generateClearOneofCode(descriptor, field.getOneofIndex()));
+                    constructor.addStatement("$LCase_ = $L", descriptor.getOneofDecl(field.getOneofIndex()).getName(), field.getNumber());
                 }
                 if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
                     var fieldType = ctx.getFieldType(field, currentScope());
@@ -610,7 +601,7 @@ public record MessageCodegen(
         constructor.nextControlFlow("catch ($T e)", IOException.class);
         constructor.addStatement("throw new $T(e).setUnfinishedMessage(this)", com.google.protobuf.InvalidProtocolBufferException.class);
         constructor.nextControlFlow("finally");
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             if (ctx.isMapField(field)) {
                 constructor.addStatement("this.$L_.makeImmutable()", field.getName());
             } else if (field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
@@ -636,11 +627,11 @@ public record MessageCodegen(
     TypeSpec generateBuilderClass(ClassName messageClassName, ClassName interfaceClassName) {
         var builderClassBuilder = TypeSpec.classBuilder("Builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .superclass(ParameterizedTypeName.get(protoCodegen.messageParentClass().nestedClass("Builder"), builderClassName()))
+                .superclass(ParameterizedTypeName.get(getMessageSuperclass().nestedClass("Builder"), builderClassName()))
                 .addSuperinterface(interfaceClassName);
 
         // Add fields to builder
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             var fieldCodegen = FieldCodegen.create(field, this);
             var fieldType = fieldCodegen.fieldType();
 
@@ -679,7 +670,7 @@ public record MessageCodegen(
             builderClassBuilder.addField(fieldBuilder.build());
         }
 
-        for (int i = 0; i < message.getOneofDeclCount(); i++) {
+        for (int i = 0; i < descriptor.getOneofDeclCount(); i++) {
             // private int <oneofName>Case_
             builderClassBuilder.addField(oneofCaseField(this, i));
         }
@@ -694,21 +685,21 @@ public record MessageCodegen(
         // private Builder(GeneratedMessageV3.BuilderParent parent)
         builderClassBuilder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
-                .addParameter(protoCodegen.messageParentClass().nestedClass("BuilderParent"), "parent")
+                .addParameter(getMessageSuperclass().nestedClass("BuilderParent"), "parent")
                 .addStatement("super(parent)")
                 .build());
 
         // Methods for each field
         generateBuilderMethods(builderClassBuilder, builderClassName());
 
-        for (int i = 0; i < message.getOneofDeclCount(); i++) {
-            var oneof = message.getOneofDecl(i);
+        for (int i = 0; i < descriptor.getOneofDeclCount(); i++) {
+            var oneof = descriptor.getOneofDecl(i);
             var oneofCtx = OneofCodegen.create(oneof, i, this);
 
-            if (enhancedOneof()) {
+            if (isEnhancedOneof(descriptor)) {
                 var switchCode = CodeBlock.builder();
                 switchCode.beginControlFlow("switch ($LCase_)", oneofCtx.oneofName());
-                for (var field : message.getFieldList()) {
+                for (var field : descriptor.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
                         switchCode.addStatement("case $L: return get$L()", field.getNumber(), ProtoUtils.toPascalCase(field.getName()));
                     }
@@ -719,13 +710,13 @@ public record MessageCodegen(
                 builderClassBuilder.addMethod(OneofMessages.getOneof(oneofCtx, switchCode.build()));
             }
 
-            if (generateOneofCase()) {
+            if (isGenerateOneofCase(descriptor)) {
                 // public <OneofName>Case get<OneofName>Case()
-                builderClassBuilder.addMethod(OneofMessages.getOneofCase(oneofCtx, generateGetCaseCode(message, i, oneof.getName(), oneofCtx.enumName())));
+                builderClassBuilder.addMethod(OneofMessages.getOneofCase(oneofCtx, generateGetCaseCode(descriptor, i, oneof.getName(), oneofCtx.enumName())));
             }
 
             // public Builder clear<OneofName>()
-            builderClassBuilder.addMethod(OneofMessages.clearOneof(oneofCtx, builderClassName(), CodegenUtils.generateClearOneofCode(message, i)));
+            builderClassBuilder.addMethod(OneofMessages.clearOneof(oneofCtx, builderClassName(), CodegenUtils.generateClearOneofCode(descriptor, i)));
         }
 
         // public <MessageName> build()
@@ -739,7 +730,7 @@ public record MessageCodegen(
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClassName())
                 .addStatement("super.clear()");
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             var fieldCodegen = FieldCodegen.create(field, this);
             var fieldType = fieldCodegen.fieldType();
 
@@ -790,8 +781,9 @@ public record MessageCodegen(
         return builderClassBuilder.build();
     }
 
+
     private void generateBuilderMethods(TypeSpec.Builder builderClassBuilder, ClassName builderClassName) {
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             var fieldCodegen = FieldCodegen.create(field, this);
             // public Builder set<FieldName>(<FieldType> value)
             // public Builder clear<FieldName>()
@@ -801,20 +793,20 @@ public record MessageCodegen(
     }
 
     void generateOneofs(TypeSpec.Builder classBuilder) {
-        for (int i = 0; i < message.getOneofDeclCount(); i++) {
-            var oneof = message.getOneofDecl(i);
+        for (int i = 0; i < descriptor.getOneofDeclCount(); i++) {
+            var oneof = descriptor.getOneofDecl(i);
             var oneofCtx = OneofCodegen.create(oneof, i, this);
 
-            if (enhancedOneof()) {
-                for (var field : message.getFieldList()) {
+            if (isEnhancedOneof(descriptor)) {
+                for (var field : descriptor.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
                         if (field.getType() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                            throw new IllegalArgumentException("Enhanced oneof '" + oneofCtx.oneofName() + "' in message '" + message.getName() + "' contains non-message field '" + field.getName() + "'");
+                            throw new IllegalArgumentException("Enhanced oneof '" + oneofCtx.oneofName() + "' in message '" + descriptor.getName() + "' contains non-message field '" + field.getName() + "'");
                         }
                         String typeName = field.getTypeName();
                         String relativeName = ctx.relativeToProtoPackage(field.getTypeName());
                         if (!ctx.typeRegistry().containsKey(relativeName)) {
-                            throw new IllegalArgumentException("Enhanced oneof '" + oneofCtx.oneofName() + "' in message '" + message.getName() + "' contains field '" + field.getName() + "' with type '" + typeName + "' not defined in the current file.");
+                            throw new IllegalArgumentException("Enhanced oneof '" + oneofCtx.oneofName() + "' in message '" + descriptor.getName() + "' contains field '" + field.getName() + "' with type '" + typeName + "' not defined in the current file.");
                         }
                     }
                 }
@@ -822,7 +814,7 @@ public record MessageCodegen(
                 var interfaceBuilder = TypeSpec.interfaceBuilder(oneofCtx.pascalName())
                         .addModifiers(Modifier.PUBLIC, Modifier.SEALED);
 
-                for (var field : message.getFieldList()) {
+                for (var field : descriptor.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
                         TypeName typeName = ctx.resolveTypeName(field.getTypeName(), currentScope());
                         if (typeName instanceof ClassName cn) {
@@ -837,12 +829,12 @@ public record MessageCodegen(
                 classBuilder.addType(interfaceBuilder.build());
             }
 
-            if (generateOneofCase()) {
+            if (isGenerateOneofCase(descriptor)) {
                 var enumBuilder = TypeSpec.enumBuilder(oneofCtx.enumName())
                         .addModifiers(Modifier.PUBLIC)
                         .addSuperinterface(com.google.protobuf.Internal.EnumLite.class);
 
-                for (var field : message.getFieldList()) {
+                for (var field : descriptor.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
                         enumBuilder.addEnumConstant(field.getName().toUpperCase(),
                                 TypeSpec.anonymousClassBuilder("$L", field.getNumber()).build());
@@ -873,7 +865,7 @@ public record MessageCodegen(
                         .returns(messageClassName().nestedClass(oneofCtx.enumName()));
 
                 forNumberBuilder.beginControlFlow("switch (value)");
-                for (var field : message.getFieldList()) {
+                for (var field : descriptor.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
                         forNumberBuilder.addStatement("case $L: return $L", field.getNumber(), field.getName().toUpperCase());
                     }
@@ -888,13 +880,13 @@ public record MessageCodegen(
                 classBuilder.addType(enumBuilder.build());
 
                 // public <OneofName>Case get<OneofName>Case()
-                classBuilder.addMethod(OneofMessages.getOneofCase(oneofCtx, generateGetCaseCode(message, i, oneofCtx.oneofName(), oneofCtx.enumName())));
+                classBuilder.addMethod(OneofMessages.getOneofCase(oneofCtx, generateGetCaseCode(descriptor, i, oneofCtx.oneofName(), oneofCtx.enumName())));
             }
 
-            if (enhancedOneof()) {
+            if (isEnhancedOneof(descriptor)) {
                 var switchCode = CodeBlock.builder();
                 switchCode.beginControlFlow("switch ($LCase_)", oneofCtx.oneofName());
-                for (var field : message.getFieldList()) {
+                for (var field : descriptor.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
                         switchCode.addStatement("case $L: return get$L()", field.getNumber(), ProtoUtils.toPascalCase(field.getName()));
                     }
@@ -915,11 +907,11 @@ public record MessageCodegen(
 
     TypeSpec generateMessageInterface() {
         var interfaceBuilder = TypeSpec.interfaceBuilder(interfaceClassName())
-                .addAnnotations(CodegenUtils.getMessageAnnotations(message.getOptions()))
+                .addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()))
                 .addSuperinterface(ProtoCodegen.OR_BUILDER_INTERFACE)
                 .addModifiers(Modifier.PUBLIC);
 
-        protoCodegen.getJavaImplements(message).ifPresent(s -> interfaceBuilder.addSuperinterface(ClassName.bestGuess(s)));
+        getJavaImplements().ifPresent(s -> interfaceBuilder.addSuperinterface(ClassName.bestGuess(s)));
 
         String canonicalName = canonicalMessageName();
         var oneofInterfaces = protoCodegen.oneofInterfacesByType().getOrDefault(canonicalName, java.util.Collections.emptyList());
@@ -930,7 +922,7 @@ public record MessageCodegen(
             }
         }
 
-        for (var field : message.getFieldList()) {
+        for (var field : descriptor.getFieldList()) {
             var fieldCodegen = FieldCodegen.create(field, this);
             // <FieldType> get<FieldName>()
             // boolean has<FieldName>()
@@ -938,16 +930,16 @@ public record MessageCodegen(
             fieldCodegen.abstractMethods().forEach(interfaceBuilder::addMethod);
         }
 
-        for (int i = 0; i < message.getOneofDeclCount(); i++) {
-            var oneof = message.getOneofDecl(i);
+        for (int i = 0; i < descriptor.getOneofDeclCount(); i++) {
+            var oneof = descriptor.getOneofDecl(i);
             var oneofCtx = OneofCodegen.create(oneof, i, this);
 
-            if (enhancedOneof()) {
+            if (isEnhancedOneof(descriptor)) {
                 // <OneofName> get<OneofName>()
                 interfaceBuilder.addMethod(OneofMessages.abstractGetOneof(oneofCtx));
             }
 
-            if (generateOneofCase()) {
+            if (isGenerateOneofCase(descriptor)) {
                 // <OneofName>Case get<OneofName>Case()
                 interfaceBuilder.addMethod(OneofMessages.abstractGetOneofCase(oneofCtx));
             }

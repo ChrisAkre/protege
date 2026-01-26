@@ -180,7 +180,7 @@ public class CodegenUtils {
     }
 
     static CodeBlock getWriteCondition(DescriptorProtos.FieldDescriptorProto.Type type, String fieldName, MessageCodegen context) {
-        if (context.message().getOptions().getMapEntry()) {
+        if (context.descriptor().getOptions().getMapEntry()) {
             return null;
         }
         return switch (type) {
