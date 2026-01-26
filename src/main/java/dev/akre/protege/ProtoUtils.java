@@ -519,4 +519,31 @@ public class ProtoUtils {
         }
         return value == null;
     }
+
+    public static Stream<Object> descriptorChildren(Object descriptor) {
+        return switch (descriptor) {
+            case DescriptorProtos.FileDescriptorProto f ->
+                    Stream.concat(f.getMessageTypeList().stream(), f.getEnumTypeList().stream());
+            case DescriptorProtos.DescriptorProto m ->
+                    Stream.concat(m.getNestedTypeList().stream(), m.getEnumTypeList().stream());
+            case DescriptorProtos.EnumDescriptorProto ignored -> Stream.empty();
+            case DescriptorProtos.FieldDescriptorProto ignored -> Stream.empty();
+            default -> throw new IllegalStateException();
+        };
+    }
+
+    public static Predicate<List<DescriptorProtos.UninterpretedOption.NamePart>> nameList(String key) {
+        String[] parts = key.split("\\.");
+        return l -> {
+            if (l.size() != parts.length) {
+                return false;
+            }
+            for (int i = 0; i < parts.length; i++) {
+                if (!l.get(i).getNamePart().equals(parts[i])) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
 }
