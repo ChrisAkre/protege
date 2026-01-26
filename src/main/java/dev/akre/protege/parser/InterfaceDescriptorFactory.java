@@ -16,6 +16,13 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Generates Protobuf descriptors from annotated Java interfaces.
+ * <p>
+ * This class uses reflection to scan Java classes (typically interfaces) annotated with
+ * {@link dev.akre.protege.GenProto} and {@link dev.akre.protege.Field} to build
+ * corresponding {@link FileDescriptorProto} objects.
+ */
 public class InterfaceDescriptorFactory {
 
     private final Map<Type, DescriptorProtos.DescriptorProto> messages = new LinkedHashMap<>();
@@ -24,11 +31,21 @@ public class InterfaceDescriptorFactory {
     private final Set<Type> nestedEnums = new HashSet<>();
 
 
+    /**
+     * Creates a new InterfaceDescriptorFactory.
+     */
     public InterfaceDescriptorFactory() {
 
     }
 
 
+    /**
+     * Updates an existing FileDescriptorProto with definitions from a Java class.
+     *
+     * @param descriptor The base descriptor to update.
+     * @param cls        The Java class to inspect.
+     * @return The updated FileDescriptorProto.
+     */
     public FileDescriptorProto update(FileDescriptorProto descriptor, Class<?> cls) {
         FileDescriptorProto.Builder builder = descriptor.toBuilder();
 
@@ -64,6 +81,12 @@ public class InterfaceDescriptorFactory {
         return builder.build();
     }
 
+    /**
+     * Creates a FileDescriptorProto from a Java class.
+     *
+     * @param cls The Java class to inspect.
+     * @return A new FileDescriptorProto.
+     */
     public FileDescriptorProto create(Class<?> cls) {
         GenProto genProto = cls.getAnnotation(GenProto.class);
         String name = (genProto != null && !genProto.value().isEmpty())
@@ -72,6 +95,13 @@ public class InterfaceDescriptorFactory {
         return create(cls, name);
     }
 
+    /**
+     * Creates a FileDescriptorProto from a Java class with a specific file name.
+     *
+     * @param cls  The Java class to inspect.
+     * @param name The desired file name (without .proto extension).
+     * @return A new FileDescriptorProto.
+     */
     public FileDescriptorProto create(Class<?> cls, String name) {
         FileDescriptorProto.Builder fileDescriptorProtoBuilder = FileDescriptorProto.newBuilder();
         fileDescriptorProtoBuilder.setName(name + ".proto");
@@ -263,5 +293,3 @@ public class InterfaceDescriptorFactory {
         return result;
     }
 }
-
-    

@@ -5,9 +5,28 @@ import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
 
+/**
+ * A read-only collection interface for {@link Cons}.
+ * <p>
+ * Ensures that consumers cannot modify the structural integrity of the immutable list
+ * while providing standard collection interoperability.
+ *
+ * @param <T> The type of elements.
+ */
 interface UnmodifiableCons<T> extends Collection<T> {
+
+    /**
+     * Returns a view of this collection in reverse order.
+     *
+     * @return A reversed view.
+     */
     UnmodifiableCons<T> reversed();
 
+    /**
+     * Returns an iterator over the elements in descending order (Head to Tail).
+     *
+     * @return An iterator.
+     */
     Iterator<T> descendingIterator();
 
     @Override
@@ -60,6 +79,11 @@ interface UnmodifiableCons<T> extends Collection<T> {
         return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.IMMUTABLE | Spliterator.ORDERED | Spliterator.NONNULL);
     }
 
+    /**
+     * Returns a spliterator over the elements in descending order.
+     *
+     * @return A spliterator.
+     */
     default Spliterator<T> descendingSpliterator() {
         return Spliterators.spliteratorUnknownSize(descendingIterator(), Spliterator.IMMUTABLE | Spliterator.ORDERED | Spliterator.NONNULL);
     }

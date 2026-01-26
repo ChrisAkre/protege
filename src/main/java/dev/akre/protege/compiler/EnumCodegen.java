@@ -8,6 +8,16 @@ import dev.akre.util.Cons;
 
 import javax.lang.model.element.Modifier;
 
+/**
+ * Generates Java code for Protobuf enums.
+ * <p>
+ * This class handles the creation of the enum class, including:
+ * <ul>
+ *   <li>Enum constants</li>
+ *   <li>Value storage and retrieval</li>
+ *   <li>Integration with ProtocolMessageEnum</li>
+ * </ul>
+ */
 public record EnumCodegen(
         DescriptorProtos.EnumDescriptorProto descriptor,
         Cons<String> scope,
@@ -15,18 +25,38 @@ public record EnumCodegen(
         ProtoCodegen protoCodegen,
         CodegenMetadata config
 ) implements CodegenConfig {
+    /**
+     * Gets the simple name of the enum.
+     *
+     * @return The enum name.
+     */
     public String getEnumName() {
         return descriptor.getName();
     }
 
+    /**
+     * Gets the outer class name if one exists.
+     *
+     * @return The outer class name.
+     */
     public ClassName outerClassName() {
         return ClassName.get(ctx.packageName(), ctx.outerName());
     }
 
+    /**
+     * Gets the names of parent messages.
+     *
+     * @return An array of parent names.
+     */
     public String[] parentNames() {
         return scope.stream().toArray(String[]::new);
     }
 
+    /**
+     * Generates the enum type specification.
+     *
+     * @return The TypeSpec for the enum.
+     */
     public TypeSpec generate() {
         var enumName = getEnumName();
         var enumBuilder = TypeSpec.enumBuilder(enumName)

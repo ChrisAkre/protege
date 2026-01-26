@@ -13,12 +13,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Generates gRPC service stubs and base classes.
+ * <p>
+ * This generator produces:
+ * <ul>
+ *   <li>Service descriptors</li>
+ *   <li>Blocking and async stubs</li>
+ *   <li>ImplBase for server-side implementation</li>
+ * </ul>
+ */
 public record GrpcCodegen(Filer filer, CodegenMetadata config) implements CodegenConfig {
     public DescriptorProtos.FileDescriptorProto descriptor() {
         return config.fileDescriptor();
     }
 
 
+    /**
+     * Generates the gRPC service definition file.
+     *
+     * @throws IOException If an I/O error occurs.
+     */
     public void generateFile() throws IOException {
         var fileDescriptor = config.fileDescriptor();
         var packageName = ProtoUtils.getJavaPackage(fileDescriptor);

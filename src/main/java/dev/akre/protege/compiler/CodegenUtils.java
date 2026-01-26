@@ -12,6 +12,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utility methods for generating Java code from Protobuf descriptors.
+ * <p>
+ * This class handles:
+ * <ul>
+ *   <li>Annotation parsing and extraction</li>
+ *   <li>Type registry management</li>
+ *   <li>Field type resolution</li>
+ *   <li>Code block generation for write conditions</li>
+ * </ul>
+ */
 public class CodegenUtils {
     private static final String FIELD_ANNOTATION = "dev.akre.protege.java_annotation";
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
@@ -197,6 +208,15 @@ public class CodegenUtils {
         };
     }
 
+    /**
+     * Converts a message type name to its corresponding *OrBuilder interface type.
+     * <p>
+     * Used when generating method signatures that accept both the concrete message class
+     * and its builder (via the interface).
+     *
+     * @param typeName The concrete message type (e.g., {@code MyMessage})
+     * @return The *OrBuilder type (e.g., {@code MyMessageOrBuilder}), or the original type if not a ClassName.
+     */
     public static TypeName getOrBuilderType(TypeName typeName) {
         if (typeName instanceof ClassName) {
             ClassName cn = (ClassName) typeName;
@@ -215,6 +235,13 @@ public class CodegenUtils {
         return typeName;
     }
 
+    /**
+     * Strips the leading package name from a fully qualified Protobuf type name.
+     *
+     * @param typeName     The fully qualified type name (e.g., {@code .my.pkg.Message})
+     * @param protoPackage The package to strip (e.g., {@code my.pkg})
+     * @return The relative type name (e.g., {@code Message})
+     */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
             if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
@@ -226,6 +253,13 @@ public class CodegenUtils {
         return typeName;
     }
 
+    /**
+     * Generates code to clear fields associated with a specific oneof group.
+     *
+     * @param message    The message containing the oneof.
+     * @param oneofIndex The index of the oneof group to clear.
+     * @return A CodeBlock that resets the oneof case and clears its fields.
+     */
     public static CodeBlock generateClearOneofCode(DescriptorProtos.DescriptorProto message, int oneofIndex) {
         var cb = CodeBlock.builder();
         cb.addStatement("$LCase_ = 0", message.getOneofDecl(oneofIndex).getName());

@@ -14,6 +14,12 @@ import java.util.stream.Stream;
 
 import static dev.akre.protege.ProtoUtils.toPascalCase;
 
+/**
+ * Visitor that traverses the ANTLR parse tree to build a FileDescriptorProto.
+ * <p>
+ * This class handles the conversion of parsed Protobuf elements (messages, enums, services, options)
+ * into their corresponding DescriptorProtos.
+ */
 public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     private final MemberNode root;
@@ -25,6 +31,13 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         this.root = root;
     }
 
+    /**
+     * Parses a .proto file from an ANTLR context.
+     *
+     * @param filename The name of the file being parsed.
+     * @param ctx      The root context of the parsed proto file.
+     * @return A builder for the FileDescriptorProto.
+     */
     public static FileDescriptorProto.Builder parseProto(String filename, ProtobufParser.ProtoContext ctx) {
         try {
             MemberNode root = new MemberTreeVisitor().visitProto(ctx);
@@ -34,8 +47,17 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
+    /**
+     * Interface for file options.
+     */
     public interface FileOption {
+        /**
+         * Sets the option on the FileOptions builder.
+         *
+         * @param options The options builder.
+         */
         void set(FileOptions.Builder options);
+
         static FileOption javaPackage(String value) {
             return options -> options.setJavaPackage(value);
         }
@@ -46,9 +68,21 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
             return options -> options.setJavaGenericServices(value);
         }
     }
+
+    /** Record representing the syntax version. */
     public record Syntax(String version) {}
+    /** Record representing the package name. */
     public record Package(String name) {}
+
+    /**
+     * Record representing an import statement.
+     */
     public record Import(String path, boolean weak, boolean _public) {
+        /**
+         * Adds this import as a dependency to the file builder.
+         *
+         * @param fileBuilder The file builder.
+         */
         public void addDependency(FileDescriptorProto.Builder fileBuilder) {
             int last = fileBuilder.getDependencyCount();
             fileBuilder.addDependency(path());
@@ -59,9 +93,20 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
             }
         }
     }
+    /** Record representing an identifier. */
     public record Identifier(String name) {}
+    /** Record representing a map field. */
     public record MapField(FieldDescriptorProto.Builder field, DescriptorProto entry) {}
+
+    /**
+     * Record representing a oneof declaration.
+     */
     public record Oneof(OneofDescriptorProto.Builder descriptor, List<FieldDescriptorProto.Builder> fields) {
+        /**
+         * Adds this oneof and its fields to a message builder.
+         *
+         * @param messageBuilder The message builder.
+         */
         public void addTo(DescriptorProto.Builder messageBuilder) {
             int oneofIndex = messageBuilder.getOneofDeclCount();
             messageBuilder.addOneofDecl(descriptor);

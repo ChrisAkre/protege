@@ -7,6 +7,12 @@ import dev.akre.protege.ProtoUtils;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Generates Java code for a single Protobuf field.
+ * <p>
+ * This class abstracts the complexity of different field types (singular, repeated, map, oneof)
+ * and generates the appropriate getter, setter (builder), and cleaner methods.
+ */
 public record FieldCodegen(
         DescriptorProtos.FieldDescriptorProto descriptor,
         TypeName fieldType,
@@ -27,6 +33,13 @@ public record FieldCodegen(
         CodegenMetadata config
 ) implements CodegenConfig {
 
+    /**
+     * Creates a new FieldCodegen instance.
+     *
+     * @param field          The field descriptor.
+     * @param messageCodegen The parent message context.
+     * @return A new FieldCodegen.
+     */
     public static FieldCodegen create(DescriptorProtos.FieldDescriptorProto field, MessageCodegen messageCodegen) {
         var ctx = messageCodegen.ctx();
         var fieldType = ctx.getFieldType(field, messageCodegen.currentScope());
@@ -78,6 +91,11 @@ public record FieldCodegen(
         );
     }
 
+    /**
+     * Generates getter methods for this field.
+     *
+     * @return A list of getter MethodSpecs.
+     */
     public List<MethodSpec> getterMethods() {
         if (isMap) {
             return mapGetterMethods();
@@ -148,6 +166,11 @@ public record FieldCodegen(
         return methods;
     }
 
+    /**
+     * Generates builder methods (setters, clearers) for this field.
+     *
+     * @return A list of builder MethodSpecs.
+     */
     public List<MethodSpec> builderMethods() {
         if (isMap) {
             return mapBuilderMethods();
@@ -274,6 +297,11 @@ public record FieldCodegen(
         return methods;
     }
 
+    /**
+     * Generates abstract getter methods for the interface.
+     *
+     * @return A list of abstract MethodSpecs.
+     */
     public List<MethodSpec> abstractMethods() {
         if (isMap) {
             return mapAbstractMethods();
@@ -345,22 +373,48 @@ public record FieldCodegen(
     }
 
     // Helper methods
+
+    /**
+     * Gets the field number.
+     *
+     * @return The field number.
+     */
     public int fieldNumber() {
         return descriptor.getNumber();
     }
 
+    /**
+     * Gets the field type.
+     *
+     * @return The field type.
+     */
     public DescriptorProtos.FieldDescriptorProto.Type type() {
         return descriptor.getType();
     }
 
+    /**
+     * Checks if the field is part of a oneof.
+     *
+     * @return true if part of a oneof, false otherwise.
+     */
     public boolean hasOneofIndex() {
         return descriptor.hasOneofIndex();
     }
 
+    /**
+     * Gets the index of the oneof this field belongs to.
+     *
+     * @return The oneof index.
+     */
     public int oneofIndex() {
         return descriptor.getOneofIndex();
     }
 
+    /**
+     * Checks if the field is a string.
+     *
+     * @return true if string, false otherwise.
+     */
     public boolean isString() {
         if (isRepeated && !isMap) {
              return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING;
@@ -368,6 +422,11 @@ public record FieldCodegen(
         return type() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING;
     }
 
+    /**
+     * Checks if the field is a message.
+     *
+     * @return true if message, false otherwise.
+     */
     public boolean isMessage() {
         if (isRepeated && !isMap) {
              return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE;
@@ -375,6 +434,11 @@ public record FieldCodegen(
         return type() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE;
     }
 
+    /**
+     * Checks if the field is an enum.
+     *
+     * @return true if enum, false otherwise.
+     */
     public boolean isEnum() {
         if (isRepeated && !isMap) {
              return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM;
@@ -389,6 +453,11 @@ public record FieldCodegen(
         return CodeBlock.of("return $L_ != null;\n", descriptor.getName());
     }
 
+    /**
+     * Generates code to clear the oneof field if it is set.
+     *
+     * @return The CodeBlock to clear the oneof.
+     */
     public CodeBlock generateClearOneofCode() {
          if (!descriptor.hasOneofIndex()) {
              return CodeBlock.of("");

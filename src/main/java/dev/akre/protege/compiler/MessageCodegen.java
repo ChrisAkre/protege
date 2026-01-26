@@ -13,6 +13,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Generates Java code for a Protobuf message.
+ * <p>
+ * This is the core generator for message classes, handling:
+ * <ul>
+ *   <li>Message class definition (POJO/GeneratedMessageV3)</li>
+ *   <li>Builder class generation</li>
+ *   <li>Interface definition (*OrBuilder)</li>
+ *   <li>Nested types (messages and enums)</li>
+ *   <li>Serialization/Deserialization logic</li>
+ * </ul>
+ */
 public record MessageCodegen(
         DescriptorProtos.DescriptorProto descriptor,
         Cons<String> scope,
@@ -25,10 +37,20 @@ public record MessageCodegen(
         this(message, scope, ctx, protoCodegen, config);
     }
 
+    /**
+     * Gets all names in the scope chain.
+     *
+     * @return A list of names.
+     */
     public Cons<String> allNames() {
         return scope.cons(messageName());
     }
 
+    /**
+     * Gets the class name of the message.
+     *
+     * @return The message class name.
+     */
     public ClassName messageClassName() {
         return className(allNames());
     }
@@ -49,22 +71,47 @@ public record MessageCodegen(
         return descriptor.getName();
     }
 
+    /**
+     * Gets the interface name (MessageOrBuilder).
+     *
+     * @return The interface name.
+     */
     public String interfaceName() {
         return messageName() + "OrBuilder";
     }
 
+    /**
+     * Gets all names as an array.
+     *
+     * @return An array of names.
+     */
     public String[] allNamesArray() {
         return allNames().stream().toArray(String[]::new);
     }
 
+    /**
+     * Gets the current scope.
+     *
+     * @return A list of scope names.
+     */
     public List<String> currentScope() {
         return scope().stream().toList();
     }
 
+    /**
+     * Gets the canonical message name.
+     *
+     * @return The canonical name.
+     */
     public String canonicalMessageName() {
         return ctx().packageName() + "." + allNames().stream().collect(Collectors.joining("."));
     }
 
+    /**
+     * Generates the message class TypeSpec.
+     *
+     * @return The message class TypeSpec.
+     */
     public TypeSpec generateMessageClass() {
         var classBuilder = TypeSpec.classBuilder(messageName())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -278,6 +325,11 @@ public record MessageCodegen(
         classBuilder.addMethod(MessageMethods.parseDelimitedFrom(messageClassName, true));
     }
 
+    /**
+     * Generates internal map field reflection method.
+     *
+     * @return The method spec.
+     */
     public MethodSpec internalGetMapFieldReflection() {
         return MethodSpec.methodBuilder("internalGetMapFieldReflection")
                 .addAnnotation(Override.class)
@@ -620,6 +672,11 @@ public record MessageCodegen(
 
 
 
+    /**
+     * Gets the builder class name.
+     *
+     * @return The builder class name.
+     */
     public ClassName builderClassName() {
         return messageClassName().nestedClass("Builder");
     }

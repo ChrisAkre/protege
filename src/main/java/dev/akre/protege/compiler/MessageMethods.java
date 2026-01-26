@@ -11,8 +11,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utility methods for generating methods in message and builder classes.
+ * <p>
+ * This class isolates the complexity of generating standard Protobuf methods
+ * (getters, setters, serialization, etc.) from the main code generation logic.
+ */
 public class MessageMethods {
 
+    private MessageMethods() {}
+
+    /**
+     * Generates the {@code getDescriptor()} method.
+     * @return The method spec.
+     */
     public static MethodSpec getDescriptor() {
         return MethodSpec.methodBuilder("getDescriptor")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -21,12 +33,22 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code memoizedSize} field.
+     * @return The field spec.
+     */
     public static FieldSpec memoizedSizeField() {
         return FieldSpec.builder(int.class, "memoizedSize", Modifier.PRIVATE)
                 .initializer("-1")
                 .build();
     }
 
+    /**
+     * Generates the {@code toBuilder()} method.
+     * @param messageClassName The message class name.
+     * @param builderClassName The builder class name.
+     * @return The method spec.
+     */
     public static MethodSpec toBuilder(ClassName messageClassName, ClassName builderClassName) {
         return MethodSpec.methodBuilder("toBuilder")
                 .addAnnotation(Override.class)
@@ -36,6 +58,10 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code getParserForType()} method.
+     * @return The method spec.
+     */
     public static MethodSpec getParserForType() {
         return MethodSpec.methodBuilder("getParserForType")
                 .addAnnotation(Override.class)
@@ -45,6 +71,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code newBuilderForType()} method.
+     * @param builderClassName The builder class name.
+     * @return The method spec.
+     */
     public static MethodSpec newBuilderForType(ClassName builderClassName) {
         return MethodSpec.methodBuilder("newBuilderForType")
                 .addAnnotation(Override.class)
@@ -54,6 +85,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code newBuilderForType(BuilderParent parent)} method.
+     * @param context The message codegen context.
+     * @return The method spec.
+     */
     public static MethodSpec newBuilderForTypeWithParent(MessageCodegen context) {
         return MethodSpec.methodBuilder("newBuilderForType")
                 .addAnnotation(Override.class)
@@ -64,6 +100,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code getDefaultInstanceForType()} method.
+     * @param messageClassName The message class name.
+     * @return The method spec.
+     */
     public static MethodSpec getDefaultInstanceForType(ClassName messageClassName) {
         return MethodSpec.methodBuilder("getDefaultInstanceForType")
                 .addAnnotation(Override.class)
@@ -73,6 +114,10 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code getUnknownFields()} method.
+     * @return The method spec.
+     */
     public static MethodSpec getUnknownFields() {
         return MethodSpec.methodBuilder("getUnknownFields")
                 .addAnnotation(Override.class)
@@ -82,6 +127,10 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code isInitialized()} method.
+     * @return The method spec.
+     */
     public static MethodSpec isInitialized() {
         return MethodSpec.methodBuilder("isInitialized")
                 .addAnnotation(Override.class)
@@ -91,6 +140,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code newBuilder()} static method.
+     * @param messageClassName The message class name.
+     * @param builderClassName The builder class name.
+     * @return The method spec.
+     */
     public static MethodSpec newBuilder(ClassName messageClassName, ClassName builderClassName) {
         return MethodSpec.methodBuilder("newBuilder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -99,6 +154,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code newBuilder(prototype)} static method.
+     * @param messageClassName The message class name.
+     * @param builderClassName The builder class name.
+     * @return The method spec.
+     */
     public static MethodSpec newBuilderWithPrototype(ClassName messageClassName, ClassName builderClassName) {
         return MethodSpec.methodBuilder("newBuilder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -108,6 +169,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code parser()} method.
+     * @param messageClassName The message class name.
+     * @return The method spec.
+     */
     public static MethodSpec parser(ClassName messageClassName) {
         return MethodSpec.methodBuilder("parser")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -116,6 +182,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code internalGetFieldAccessorTable} method.
+     * @param messageClassName The message class name.
+     * @param fieldAccessorTableClass The accessor table class.
+     * @return The method spec.
+     */
     public static MethodSpec internalGetFieldAccessorTable(ClassName messageClassName, ClassName fieldAccessorTableClass) {
         return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
                 .addAnnotation(Override.class)
@@ -126,6 +198,13 @@ public class MessageMethods {
     }
 
     // Field getters
+
+    /**
+     * Generates the {@code hasField} method for singular fields.
+     * @param ctx The field context.
+     * @param hasCode The code block to check presence.
+     * @return The method spec.
+     */
     public static MethodSpec hasField(FieldCodegen ctx, CodeBlock hasCode) {
         return MethodSpec.methodBuilder("has" + ctx.pascalName())
                 .addAnnotation(Override.class)
@@ -135,6 +214,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the getter method for a singular field.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getField(FieldCodegen ctx) {
         var getterBuilder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
@@ -158,6 +242,11 @@ public class MessageMethods {
         return getterBuilder.build();
     }
 
+    /**
+     * Generates the value getter for enum fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getFieldValue(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Value")
                 .addAnnotation(Override.class)
@@ -167,6 +256,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the OrBuilder getter for message fields.
+     * @param ctx The field context.
+     * @param orBuilderType The OrBuilder type.
+     * @return The method spec.
+     */
     public static MethodSpec getFieldOrBuilder(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
                 .addAnnotation(Override.class)
@@ -176,6 +271,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the bytes getter for string fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getFieldBytes(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Bytes")
                 .addAnnotation(Override.class)
@@ -193,6 +293,12 @@ public class MessageMethods {
     }
 
     // Map field getters
+
+    /**
+     * Generates the {@code containsKey} method for map fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec containsMapKey(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("contains" + ctx.pascalName())
                 .addAnnotation(Override.class)
@@ -203,6 +309,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code getMap} method.
+     * @param ctx The field context.
+     * @param fieldType The map type.
+     * @return The method spec.
+     */
     public static MethodSpec getMapField(FieldCodegen ctx, TypeName fieldType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                 .addAnnotation(Override.class)
@@ -213,6 +325,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code getCount} method for map fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getMapCount(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
                 .addAnnotation(Override.class)
@@ -222,6 +339,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code getOrDefault} method for map fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getMapOrDefault(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrDefault")
                 .addAnnotation(Override.class)
@@ -233,6 +355,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the {@code getOrThrow} method for map fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getMapOrThrow(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrThrow")
                 .addAnnotation(Override.class)
@@ -246,6 +373,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the deprecated {@code getMap} method.
+     * @param ctx The field context.
+     * @param fieldType The map type.
+     * @return The method spec.
+     */
     public static MethodSpec getMapDeprecated(FieldCodegen ctx, TypeName fieldType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
@@ -257,6 +390,12 @@ public class MessageMethods {
     }
 
     // Repeated field getters
+
+    /**
+     * Generates the list getter for string repeated fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedListString(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
@@ -267,6 +406,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the list getter for repeated fields.
+     * @param ctx The field context.
+     * @param fieldType The list type.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedList(FieldCodegen ctx, TypeName fieldType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
@@ -277,6 +422,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the count getter for repeated fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedCount(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Count")
                 .addAnnotation(Override.class)
@@ -286,6 +436,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the element getter for repeated fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedElement(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
@@ -296,6 +451,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the OrBuilder list getter for repeated message fields.
+     * @param ctx The field context.
+     * @param orBuilderType The OrBuilder type.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedOrBuilderList(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilderList")
                 .addAnnotation(Override.class)
@@ -305,6 +466,12 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the OrBuilder getter for a specific element in repeated message fields.
+     * @param ctx The field context.
+     * @param orBuilderType The OrBuilder type.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedOrBuilder(FieldCodegen ctx, TypeName orBuilderType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "OrBuilder")
                 .addAnnotation(Override.class)
@@ -315,6 +482,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the value list getter for repeated enum fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedValueList(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "ValueList")
                 .addAnnotation(Override.class)
@@ -324,6 +496,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the value getter for a specific element in repeated enum fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedValue(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Value")
                 .addAnnotation(Override.class)
@@ -334,6 +511,11 @@ public class MessageMethods {
                 .build();
     }
 
+    /**
+     * Generates the bytes getter for a specific element in repeated string fields.
+     * @param ctx The field context.
+     * @return The method spec.
+     */
     public static MethodSpec getRepeatedBytes(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Bytes")
                 .addAnnotation(Override.class)
@@ -345,6 +527,15 @@ public class MessageMethods {
     }
 
     // Parse methods
+
+    /**
+     * Generates {@code parseFrom} methods.
+     * @param messageClassName The message class name.
+     * @param paramType The parameter type.
+     * @param paramName The parameter name.
+     * @param hasRegistry Whether it accepts extension registry.
+     * @return The method spec.
+     */
     public static MethodSpec parseFrom(ClassName messageClassName, TypeName paramType, String paramName, boolean hasRegistry) {
         var builder = MethodSpec.methodBuilder("parseFrom")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -365,6 +556,12 @@ public class MessageMethods {
         return builder.build();
     }
 
+    /**
+     * Generates {@code parseDelimitedFrom} methods.
+     * @param messageClassName The message class name.
+     * @param hasRegistry Whether it accepts extension registry.
+     * @return The method spec.
+     */
     public static MethodSpec parseDelimitedFrom(ClassName messageClassName, boolean hasRegistry) {
         var builder = MethodSpec.methodBuilder("parseDelimitedFrom")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
