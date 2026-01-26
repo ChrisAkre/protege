@@ -3,7 +3,6 @@ package dev.akre.protege.compiler;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.palantir.javapoet.*;
-import dev.akre.protege.Field;
 import dev.akre.protege.ProtoUtils;
 
 import javax.lang.model.element.Modifier;
@@ -55,13 +54,13 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec newBuilderForTypeWithParent(ClassName messageParentClass, ClassName builderClassName) {
+    public static MethodSpec newBuilderForTypeWithParent(MessageCodegen context) {
         return MethodSpec.methodBuilder("newBuilderForType")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PROTECTED)
-                .returns(builderClassName)
-                .addParameter(messageParentClass.nestedClass("BuilderParent"), "parent")
-                .addStatement("return new $T(parent)", builderClassName)
+                .returns(context.builderClassName())
+                .addParameter(context.getMessageSuperclass().nestedClass("BuilderParent"), "parent")
+                .addStatement("return new $T(parent)", context.builderClassName())
                 .build();
     }
 
@@ -390,7 +389,7 @@ public class MessageMethods {
                 .addParameter(ClassName.get("com.google.protobuf", "CodedOutputStream"), "output")
                 .addException(IOException.class);
 
-        for (var field : context.message().getFieldList()) {
+        for (var field : context.descriptor().getFieldList()) {
             var fieldName = field.getName() + "_";
             var number = field.getNumber();
             var isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
@@ -426,7 +425,7 @@ public class MessageMethods {
             } else if (isRepeated) {
                 writeToBuilder.beginControlFlow("for (int i = 0; i < $L.size(); i++)", fieldName);
                 if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                    writeToBuilder.addStatement("$T.writeString(output, $L, $L.get(i))", context.protoCodegen().messageParentClass(), number, fieldName);
+                    writeToBuilder.addStatement("$T.writeString(output, $L, $L.get(i))", context.getMessageSuperclass(), number, fieldName);
                 } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM) {
                     writeToBuilder.addStatement("output.$N($L, $L.get(i).getNumber())", methodName, number, fieldName);
                 } else {
@@ -436,7 +435,7 @@ public class MessageMethods {
             } else {
                 CodeBlock condition;
                 if (field.hasOneofIndex()) {
-                    var oneofName = context.message().getOneofDecl(field.getOneofIndex()).getName();
+                    var oneofName = context.descriptor().getOneofDecl(field.getOneofIndex()).getName();
                     condition = CodeBlock.of("$LCase_ == $L", oneofName, number);
                 } else {
                     condition = CodegenUtils.getWriteCondition(field.getType(), fieldName, context);
@@ -445,7 +444,7 @@ public class MessageMethods {
                     writeToBuilder.beginControlFlow("if ($L)", condition);
                 }
                 if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                    writeToBuilder.addStatement("$T.writeString(output, $L, $L)", context.protoCodegen().messageParentClass(), number, fieldName);
+                    writeToBuilder.addStatement("$T.writeString(output, $L, $L)", context.getMessageSuperclass(), number, fieldName);
                 } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM) {
                     writeToBuilder.addStatement("output.$N($L, $L.getNumber())", methodName, number, fieldName);
                 } else {
@@ -468,7 +467,7 @@ public class MessageMethods {
                 .addStatement("return this")
                 .endControlFlow();
 
-        for (var field : context.message().getFieldList()) {
+        for (var field : context.descriptor().getFieldList()) {
             var fieldName = field.getName();
             var pascalName = ProtoUtils.toPascalCase(fieldName);
             if (context.ctx().isMapField(field)) {

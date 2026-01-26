@@ -10,15 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static dev.akre.protege.compiler.CodegenContext.JAVA_ENHANCED_ONEOF_OPTION;
-
 public record OneofCodegen(
-        DescriptorProtos.OneofDescriptorProto oneof,
+        DescriptorProtos.OneofDescriptorProto descriptor,
         int oneofIndex,
         String pascalName,
         String enumName,
-        MessageCodegen messageCodegen
-) {
+        MessageCodegen messageCodegen,
+        CodegenMetadata config
+) implements CodegenConfig {
     public static OneofCodegen create(
             DescriptorProtos.OneofDescriptorProto oneof,
             int oneofIndex,
@@ -26,11 +25,11 @@ public record OneofCodegen(
     ) {
         String pascalName = ProtoUtils.toPascalCase(oneof.getName());
         String enumName = pascalName + "Case";
-        return new OneofCodegen(oneof, oneofIndex, pascalName, enumName, messageCodegen);
+        return new OneofCodegen(oneof, oneofIndex, pascalName, enumName, messageCodegen, messageCodegen.config());
     }
 
     public String oneofName() {
-        return oneof.getName();
+        return descriptor.getName();
     }
 
     public ClassName getEnumClassName() {
@@ -41,30 +40,36 @@ public record OneofCodegen(
         return messageCodegen.messageClassName().nestedClass(pascalName);
     }
 
-    public static void populateOneofInterfaces(CodegenContext ctx, Map<String, List<ClassName>> oneofInterfacesByType) {
+    public static void populateOneofInterfaces(OuterClassCodegen context, CodegenContext ctx, Map<String, List<ClassName>> oneofInterfacesByType, CodegenMetadata config) {
         oneofInterfacesByType.clear();
 
-        for (var message : ctx.fileDescriptor().getMessageTypeList()) {
-            populateOneofInterfaces(message, ctx, Cons.nil(), oneofInterfacesByType);
-        }
+//        for (var message : ctx.fileDescriptor().getMessageTypeList()) {
+//            populateOneofInterfaces(context, message, ctx, Cons.nil(), oneofInterfacesByType);
+//        }
+
+        ProtoUtils.descriptorChildren(context.descriptor(), DescriptorProtos.DescriptorProto.class)
+                .forEach(message -> populateOneofInterfaces(context, message, ctx, Cons.nil(), oneofInterfacesByType));
     }
 
     private static void populateOneofInterfaces(
+            OuterClassCodegen context,
             DescriptorProtos.DescriptorProto message,
             CodegenContext ctx,
             Cons<String> parentPath,
             Map<String, List<ClassName>> oneofInterfacesByType) {
-        boolean enhancedOneof = CodegenUtils.getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, ctx.fileEnhancedOneof());
 
         var currentPath = parentPath.cons(message.getName());
 
-        if (enhancedOneof) {
             for (int i = 0; i < message.getOneofDeclCount(); i++) {
+
                 var oneof = message.getOneofDecl(i);
+                if (!context.isEnhancedOneof(oneof)) {
+                    continue;
+                }
                 var pascalName = ProtoUtils.toPascalCase(oneof.getName());
 
                 var capitalizedPath = currentPath.stream().map(ProtoUtils::capitalize).toList();
-                var interfaceClassName = ClassName.get(ctx.packageName(), ctx.outerName(), capitalizedPath.toArray(new String[0])).nestedClass(pascalName);
+                var interfaceClassName = ClassName.get(context.getJavaPackage(), context.getOuterName(), capitalizedPath.toArray(new String[0])).nestedClass(pascalName);
 
                 for (var field : message.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
@@ -83,11 +88,6 @@ public record OneofCodegen(
                         }
                     }
                 }
-            }
-        }
-
-        for (var nested : message.getNestedTypeList()) {
-            populateOneofInterfaces(nested, ctx, currentPath, oneofInterfacesByType);
         }
     }
 }

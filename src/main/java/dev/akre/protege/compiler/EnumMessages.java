@@ -35,7 +35,7 @@ public class EnumMessages {
                 .returns(ClassName.get("", ctx.getEnumName()));
 
         forNumberBuilder.beginControlFlow("switch (value)");
-        for (var value : ctx.enumType().getValueList()) {
+        for (var value : ctx.descriptor().getValueList()) {
             forNumberBuilder.addStatement("case $L: return $L", value.getNumber(), value.getName());
         }
         forNumberBuilder.addStatement("default: return null");

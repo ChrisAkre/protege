@@ -1,6 +1,7 @@
 package dev.akre.protege;
 
 import com.google.auto.service.AutoService;
+import dev.akre.protege.compiler.CodegenMetadata;
 import dev.akre.protege.compiler.GrpcCodegen;
 import dev.akre.protege.compiler.ProtoCodegen;
 
@@ -52,11 +53,13 @@ public class ProtoCompilerProcessor extends AbstractProcessor {
                     .toList();
 
             ProtoCodegen codegen = new ProtoCodegen(processingEnv.getFiler());
-            GrpcCodegen grpcCodegen = new GrpcCodegen(processingEnv.getFiler());
             for (Path protoFile : protoFiles) {
                 var fileDescriptor = ProtoUtils.parseProto(protoFile.toFile());
                 codegen.generateFile(fileDescriptor);
-                grpcCodegen.generateFile(fileDescriptor);
+
+                CodegenMetadata config = CodegenMetadata.build(fileDescriptor)
+                        .build();
+                new GrpcCodegen(processingEnv.getFiler(), config).generateFile();
             }
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(javax.tools.Diagnostic.Kind.ERROR, "Failed to compile protos: " + e.getMessage());

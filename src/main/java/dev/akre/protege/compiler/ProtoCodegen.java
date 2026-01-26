@@ -73,21 +73,17 @@ public class ProtoCodegen {
         this.messageParentClass = messageParentClass;
     }
 
-    public ClassName messageParentClass() {
-        return messageParentClass;
-    }
 
     public ClassName getFieldAccessorTableClass() {
         return messageParentClass.nestedClass("FieldAccessorTable");
     }
 
-    public boolean generateDeprecated() {
-        return generateDeprecated;
-    }
 
     public JavaFile generateFile(DescriptorProtos.FileDescriptorProto fileDescriptor) throws IOException {
         var ctx = CodegenContext.create(fileDescriptor, messageParentClass, generateDeprecated);
-        CodegenMetadata config = CodegenMetadata.build(fileDescriptor).build();
+        CodegenMetadata config = CodegenMetadata.build(fileDescriptor)
+                .setGenerateDeprecated(generateDeprecated)
+                .build();
         var outerClass = new OuterClassCodegen(ctx, this, config).generate();
 
         var javaFile = JavaFile.builder(ctx.packageName(), outerClass).build();
@@ -103,7 +99,4 @@ public class ProtoCodegen {
                 .findFirst();
     }
 
-    public void populateOneofInterfaces(CodegenContext ctx) {
-        OneofCodegen.populateOneofInterfaces(ctx, oneofInterfacesByType);
-    }
 }
