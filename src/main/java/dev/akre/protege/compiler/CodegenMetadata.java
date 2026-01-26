@@ -14,20 +14,27 @@ import static java.util.function.Predicate.not;
 
 public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
                               Map<String, Object> defaults, Map<String, Object> overrides,
-                              Map<String, Object> descriptorMap) {
+                              Map<String, Object> descriptorMap) implements CodegenConfig {
     public static final Option FIELD_ANNOTATION = Option.customString("dev.akre.protege.java_field_annotation");
     public static final Option MESSAGE_ANNOTATION = Option.customString("dev.akre.protege.java_message_annotation");
     public static final Option JAVA_GENERATE_DEPRECATED = Option.customBoolean("dev.akre.protege.java_generate_deprecated");
     public static final Option PACKAGE = Option.fileOption("package", DescriptorProtos.FileDescriptorProto::getPackage);
     public static final Option JAVA_PACKAGE = Option.fileOption("java_package", f -> f.getOptions().getJavaPackage());
     public static final Option FIELD_ANNOTATIONS = Option.customStringList(FIELD_ANNOTATION.key());
+    public static final Option ENHANCED_ONEOF = Option.customBoolean("dev.akre.protege.java_enhanced_oneof");
+    public static final Option ONEOF_CASE = Option.customBoolean("dev.akre.protege.java_oneof_case");
 
     public static CodegenMetadata.Builder build(DescriptorProtos.FileDescriptorProto fileDescriptor) {
         return new Builder(fileDescriptor);
     }
 
     static Optional<Boolean> getBooleanDescriptorOption(Predicate<List<NamePart>> key, Cons<Object> descriptor) {
-        return getDescriptorOptions(key, descriptor).findFirst().map(o -> Boolean.valueOf(o.getStringValue().toStringUtf8()));
+        return getDescriptorOptions(key, descriptor).findFirst().map(o -> {
+            if (o.hasIdentifierValue()) {
+                return Boolean.valueOf(o.getIdentifierValue());
+            }
+            return Boolean.valueOf(o.getStringValue().toStringUtf8());
+        });
     }
 
     static Optional<String> getDescriptorStringOption(Predicate<List<NamePart>> key, Cons<Object> descriptor) {
@@ -48,13 +55,18 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
     static Stream<DescriptorProtos.UninterpretedOption> getDescriptorOptions(Predicate<List<NamePart>> key, Cons<Object> descriptor) {
-        return (switch (descriptor.head()) {
+        Stream<DescriptorProtos.UninterpretedOption> options = (switch (descriptor.head()) {
             case DescriptorProtos.FileDescriptorProto f -> f.getOptions().getUninterpretedOptionList();
             case DescriptorProtos.DescriptorProto m -> m.getOptions().getUninterpretedOptionList();
             case DescriptorProtos.EnumDescriptorProto e -> e.getOptions().getUninterpretedOptionList();
             case DescriptorProtos.FieldDescriptorProto f -> f.getOptions().getUninterpretedOptionList();
             default -> throw new IllegalStateException();
         }).stream().filter(o -> key.test(o.getNameList()));
+
+        if (!descriptor.tail().isEmpty()) {
+            options = Stream.concat(options, getDescriptorOptions(key, descriptor.tail()));
+        }
+        return options;
     }
 
     boolean getBoolean(Option key, Object descriptor) {
@@ -67,6 +79,10 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
 
     List<String> getList(Option key, Object descriptor) {
         return key.<List<String>>get(overrides).or(() -> key.lookup(hierarchy().get(descriptor))).or(() -> key.get(defaults)).orElse(List.of());
+    }
+
+    public CodegenMetadata config() {
+        return this;
     }
 
     public Optional<Boolean> getBooleanDefault(String key) {
@@ -91,30 +107,6 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         }
     }
 
-    public interface Config {
-        CodegenMetadata config();
-
-        default boolean isGenerateDeprecated(Object descriptor) {
-            return config().getBoolean(JAVA_GENERATE_DEPRECATED, descriptor);
-        }
-
-        default String getPackage(Object descriptor) {
-            return config().getString(PACKAGE, descriptor);
-        }
-
-        default String getJavaPackage(Object descriptor) {
-            return config().getString(JAVA_PACKAGE, descriptor);
-        }
-
-        default List<String> getFieldAnnotations(Object descriptor) {
-            return config().getList(FIELD_ANNOTATIONS, descriptor);
-        }
-
-        default DescriptorProtos.DescriptorProto getMessageDescriptor(String name) {
-            return (DescriptorProtos.DescriptorProto)config().descriptorMap.get(name);
-        }
-
-    }
 
     public record Option(String key, Type type, Function<Cons<Object>, Optional<?>> lookup) {
         public static Option customBoolean(String key) {
@@ -161,6 +153,8 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
 
         public Builder(DescriptorProtos.FileDescriptorProto fileDescriptor) {
             this.fileDescriptor = fileDescriptor;
+            ENHANCED_ONEOF.setValue(defaults, false);
+            ONEOF_CASE.setValue(defaults, true);
         }
 
         static Map<String, Object> buildDescriptorMap(DescriptorProtos.FileDescriptorProto fileDescriptor) {

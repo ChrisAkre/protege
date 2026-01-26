@@ -21,10 +21,12 @@ public record MessageCodegen(
         DescriptorProtos.DescriptorProto message,
         Cons<String> scope,
         CodegenContext ctx,
-        ProtoCodegen protoCodegen) {
+        ProtoCodegen protoCodegen,
+        CodegenMetadata config
+) implements CodegenConfig {
 
-    MessageCodegen(DescriptorProtos.DescriptorProto message, CodegenContext ctx, Cons<String> scope, ProtoCodegen protoCodegen) {
-        this(message, scope, ctx, protoCodegen);
+    MessageCodegen(DescriptorProtos.DescriptorProto message, CodegenContext ctx, Cons<String> scope, ProtoCodegen protoCodegen, CodegenMetadata config) {
+        this(message, scope, ctx, protoCodegen, config);
     }
 
     public Cons<String> allNames() {
@@ -42,13 +44,6 @@ public record MessageCodegen(
         };
     }
 
-    boolean enhancedOneof() {
-        return getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, ctx.fileEnhancedOneof());
-    }
-
-    boolean generateOneofCase() {
-        return getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_GENERATE_ONEOF_CASE_OPTION, ctx.fileGenerateOneofCase());
-    }
 
     ClassName interfaceClassName() {
         return className(scope.cons(interfaceName()));
@@ -83,7 +78,7 @@ public record MessageCodegen(
         classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(message.getOptions()));
 
         for (var nestedMessage : message.getNestedTypeList()) {
-            var nestedMsgCodegen = new MessageCodegen(nestedMessage, ctx, allNames(), protoCodegen);
+            var nestedMsgCodegen = new MessageCodegen(nestedMessage, ctx, allNames(), protoCodegen, config);
             // public interface <MessageName>OrBuilder extends MessageOrBuilder
             classBuilder.addType(nestedMsgCodegen.generateMessageInterface());
             // public static final class <MessageName> extends GeneratedMessageV3 implements <MessageName>OrBuilder
@@ -91,7 +86,7 @@ public record MessageCodegen(
         }
 
         for (var nestedEnum : message.getEnumTypeList()) {
-            var enumCodegen = new EnumCodegen(nestedEnum, allNames(), ctx, protoCodegen);
+            var enumCodegen = new EnumCodegen(nestedEnum, allNames(), ctx, protoCodegen, config);
             // public enum <EnumName> implements ProtocolMessageEnum
             classBuilder.addType(enumCodegen.generate());
         }
@@ -705,7 +700,7 @@ public record MessageCodegen(
             var oneof = message.getOneofDecl(i);
             var oneofCtx = OneofCodegen.create(oneof, i, this);
 
-            if (enhancedOneof()) {
+            if (isEnhancedOneof(message)) {
                 var switchCode = CodeBlock.builder();
                 switchCode.beginControlFlow("switch ($LCase_)", oneofCtx.oneofName());
                 for (var field : message.getFieldList()) {
@@ -719,7 +714,7 @@ public record MessageCodegen(
                 builderClassBuilder.addMethod(OneofMessages.getOneof(oneofCtx, switchCode.build()));
             }
 
-            if (generateOneofCase()) {
+            if (isGenerateOneofCase(message)) {
                 // public <OneofName>Case get<OneofName>Case()
                 builderClassBuilder.addMethod(OneofMessages.getOneofCase(oneofCtx, generateGetCaseCode(message, i, oneof.getName(), oneofCtx.enumName())));
             }
@@ -805,7 +800,7 @@ public record MessageCodegen(
             var oneof = message.getOneofDecl(i);
             var oneofCtx = OneofCodegen.create(oneof, i, this);
 
-            if (enhancedOneof()) {
+            if (isEnhancedOneof(message)) {
                 for (var field : message.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
                         if (field.getType() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
@@ -837,7 +832,7 @@ public record MessageCodegen(
                 classBuilder.addType(interfaceBuilder.build());
             }
 
-            if (generateOneofCase()) {
+            if (isGenerateOneofCase(message)) {
                 var enumBuilder = TypeSpec.enumBuilder(oneofCtx.enumName())
                         .addModifiers(Modifier.PUBLIC)
                         .addSuperinterface(com.google.protobuf.Internal.EnumLite.class);
@@ -891,7 +886,7 @@ public record MessageCodegen(
                 classBuilder.addMethod(OneofMessages.getOneofCase(oneofCtx, generateGetCaseCode(message, i, oneofCtx.oneofName(), oneofCtx.enumName())));
             }
 
-            if (enhancedOneof()) {
+            if (isEnhancedOneof(message)) {
                 var switchCode = CodeBlock.builder();
                 switchCode.beginControlFlow("switch ($LCase_)", oneofCtx.oneofName());
                 for (var field : message.getFieldList()) {
@@ -942,12 +937,12 @@ public record MessageCodegen(
             var oneof = message.getOneofDecl(i);
             var oneofCtx = OneofCodegen.create(oneof, i, this);
 
-            if (enhancedOneof()) {
+            if (isEnhancedOneof(message)) {
                 // <OneofName> get<OneofName>()
                 interfaceBuilder.addMethod(OneofMessages.abstractGetOneof(oneofCtx));
             }
 
-            if (generateOneofCase()) {
+            if (isGenerateOneofCase(message)) {
                 // <OneofName>Case get<OneofName>Case()
                 interfaceBuilder.addMethod(OneofMessages.abstractGetOneofCase(oneofCtx));
             }

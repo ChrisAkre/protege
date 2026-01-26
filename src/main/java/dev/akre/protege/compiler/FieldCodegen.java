@@ -25,8 +25,9 @@ public record FieldCodegen(
         // Repeated specific
         TypeName genericType,
         // Context
-        MessageCodegen messageCodegen
-) {
+        MessageCodegen messageCodegen,
+        CodegenMetadata config
+) implements CodegenConfig {
 
     public static FieldCodegen create(DescriptorProtos.FieldDescriptorProto field, MessageCodegen messageCodegen) {
         var ctx = messageCodegen.ctx();
@@ -74,7 +75,8 @@ public record FieldCodegen(
                 keyType,
                 valueType,
                 genericType,
-                messageCodegen
+                messageCodegen,
+                messageCodegen.config()
         );
     }
 
@@ -96,7 +98,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.getMapOrDefault(this));
         methods.add(MessageMethods.getMapOrThrow(this));
 
-        if (messageCodegen.protoCodegen().generateDeprecated()) {
+        if (isGenerateDeprecated(field)) {
             methods.add(MessageMethods.getMapDeprecated(this, fieldType));
         }
         return methods;
@@ -168,7 +170,7 @@ public record FieldCodegen(
         methods.add(CodegenMethods.Builder.getMapOrDefault(this));
         methods.add(CodegenMethods.Builder.getMapOrThrow(this));
 
-        if (messageCodegen.protoCodegen().generateDeprecated()) {
+        if (isGenerateDeprecated(field)) {
             methods.add(CodegenMethods.Builder.getMapDeprecated(this, fieldType));
             methods.add(CodegenMethods.Builder.getMutableMapDeprecated(this, fieldType));
         }
@@ -292,7 +294,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.abstractGetMapOrDefault(this));
         methods.add(MessageMethods.abstractGetMapOrThrow(this));
 
-        if (messageCodegen.protoCodegen().generateDeprecated()) {
+        if (isGenerateDeprecated(field)) {
             methods.add(MessageMethods.abstractGetMapDeprecated(this, fieldType));
         }
         return methods;

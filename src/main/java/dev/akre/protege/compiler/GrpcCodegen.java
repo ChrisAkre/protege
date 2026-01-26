@@ -13,15 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GrpcCodegen {
+public record GrpcCodegen(Filer filer, CodegenMetadata config) implements CodegenConfig {
 
-    private final Filer filer;
-
-    public GrpcCodegen(Filer filer) {
-        this.filer = filer;
-    }
-
-    public void generateFile(DescriptorProtos.FileDescriptorProto fileDescriptor) throws IOException {
+    public void generateFile() throws IOException {
+        var fileDescriptor = config.fileDescriptor();
         var packageName = ProtoUtils.getJavaPackage(fileDescriptor);
         var outerClassName = ProtoUtils.getJavaOuterClassName(fileDescriptor);
 

@@ -1,6 +1,7 @@
 package dev.akre.protege;
 
 import com.google.protobuf.DescriptorProtos;
+import dev.akre.protege.compiler.CodegenMetadata;
 import dev.akre.protege.compiler.GrpcCodegen;
 import dev.akre.protege.compiler.ProtoCodegen;
 import dev.akre.protege.testutil.TestUtils;
@@ -66,10 +67,14 @@ public class GrpcCodegenTest {
 
         TestUtils.MockFiler filer = new TestUtils.MockFiler();
         ProtoCodegen protoCodegen = new ProtoCodegen(filer);
-        GrpcCodegen grpcCodegen = new GrpcCodegen(filer);
 
         protoCodegen.generateFile(fileDescriptor);
-        grpcCodegen.generateFile(fileDescriptor);
+
+        CodegenMetadata config = CodegenMetadata.build(fileDescriptor)
+                .setGenerateDeprecated(protoCodegen.generateDeprecated())
+                .build();
+        GrpcCodegen grpcCodegen = new GrpcCodegen(filer, config);
+        grpcCodegen.generateFile();
 
         Map<String, String> sources = filer.getSources();
         assertThat(sources).containsKey("com.test.TestProto");
@@ -119,10 +124,14 @@ public class GrpcCodegenTest {
 
         TestUtils.MockFiler filer = new TestUtils.MockFiler();
         ProtoCodegen protoCodegen = new ProtoCodegen(filer);
-        GrpcCodegen grpcCodegen = new GrpcCodegen(filer);
 
         protoCodegen.generateFile(fileDescriptor);
-        grpcCodegen.generateFile(fileDescriptor);
+
+        CodegenMetadata config = CodegenMetadata.build(fileDescriptor)
+                .setGenerateDeprecated(protoCodegen.generateDeprecated())
+                .build();
+        GrpcCodegen grpcCodegen = new GrpcCodegen(filer, config);
+        grpcCodegen.generateFile();
 
         Map<String, String> sources = filer.getSources();
         List<JavaFileObject> javaFiles = new ArrayList<>();

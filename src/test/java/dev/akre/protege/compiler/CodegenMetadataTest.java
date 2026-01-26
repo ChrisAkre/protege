@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CodegenMetadataTest {
-    record TestConfig(CodegenMetadata config) implements CodegenMetadata.Config {}
+    record TestConfig(CodegenMetadata config) implements CodegenConfig {}
 
     @Test
     public void testIsGenerateDeprecatedDefaults() {

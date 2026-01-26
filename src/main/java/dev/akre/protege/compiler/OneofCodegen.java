@@ -17,8 +17,9 @@ public record OneofCodegen(
         int oneofIndex,
         String pascalName,
         String enumName,
-        MessageCodegen messageCodegen
-) {
+        MessageCodegen messageCodegen,
+        CodegenMetadata config
+) implements CodegenConfig {
     public static OneofCodegen create(
             DescriptorProtos.OneofDescriptorProto oneof,
             int oneofIndex,
@@ -26,7 +27,7 @@ public record OneofCodegen(
     ) {
         String pascalName = ProtoUtils.toPascalCase(oneof.getName());
         String enumName = pascalName + "Case";
-        return new OneofCodegen(oneof, oneofIndex, pascalName, enumName, messageCodegen);
+        return new OneofCodegen(oneof, oneofIndex, pascalName, enumName, messageCodegen, messageCodegen.config());
     }
 
     public String oneofName() {
@@ -41,11 +42,11 @@ public record OneofCodegen(
         return messageCodegen.messageClassName().nestedClass(pascalName);
     }
 
-    public static void populateOneofInterfaces(CodegenContext ctx, Map<String, List<ClassName>> oneofInterfacesByType) {
+    public static void populateOneofInterfaces(CodegenContext ctx, Map<String, List<ClassName>> oneofInterfacesByType, CodegenMetadata config) {
         oneofInterfacesByType.clear();
 
         for (var message : ctx.fileDescriptor().getMessageTypeList()) {
-            populateOneofInterfaces(message, ctx, Cons.nil(), oneofInterfacesByType);
+            populateOneofInterfaces(message, ctx, Cons.nil(), oneofInterfacesByType, config);
         }
     }
 
@@ -53,8 +54,9 @@ public record OneofCodegen(
             DescriptorProtos.DescriptorProto message,
             CodegenContext ctx,
             Cons<String> parentPath,
-            Map<String, List<ClassName>> oneofInterfacesByType) {
-        boolean enhancedOneof = CodegenUtils.getBooleanOption(message.getOptions().getUninterpretedOptionList(), JAVA_ENHANCED_ONEOF_OPTION, ctx.fileEnhancedOneof());
+            Map<String, List<ClassName>> oneofInterfacesByType,
+            CodegenMetadata config) {
+        boolean enhancedOneof = config.isEnhancedOneof(message);
 
         var currentPath = parentPath.cons(message.getName());
 
@@ -87,7 +89,7 @@ public record OneofCodegen(
         }
 
         for (var nested : message.getNestedTypeList()) {
-            populateOneofInterfaces(nested, ctx, currentPath, oneofInterfacesByType);
+            populateOneofInterfaces(nested, ctx, currentPath, oneofInterfacesByType, config);
         }
     }
 }

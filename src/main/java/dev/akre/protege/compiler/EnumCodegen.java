@@ -12,8 +12,9 @@ public record EnumCodegen(
         DescriptorProtos.EnumDescriptorProto enumType,
         Cons<String> scope,
         CodegenContext ctx,
-        ProtoCodegen protoCodegen
-) {
+        ProtoCodegen protoCodegen,
+        CodegenMetadata config
+) implements CodegenConfig {
     public String getEnumName() {
         return enumType.getName();
     }
