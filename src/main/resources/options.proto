@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+
+package dev.akre.protege;
+option java_outer_classname = "OptionsOuterClass";
+
+extend google.protobuf.MessageOptions {
+  string java_implements = 50001;
+  repeated string java_message_annotation = 50002;
+  repeated string java_class_annotation = 50004;
+}
+
+extend google.protobuf.FieldOptions {
+  repeated string java_annotation = 50003;
+  repeated string java_field_annotation = 50005;
+}
+
+message MyMessage {
+  option (java_implements) = "com.example.interfaces.MyMessage";
+
+  string id = 1 [
+    (java_annotation) = "@PrimaryKey"
+  ];
+
+  string name = 2 [
+    (java_annotation) = "@JsonAlias(\"userName\")"
+  ];
+}

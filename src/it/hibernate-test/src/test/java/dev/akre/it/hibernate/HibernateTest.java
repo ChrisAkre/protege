@@ -56,4 +56,37 @@ public class HibernateTest {
         assertThat(foundUser.getName()).isEqualTo("Alice");
         assertThat(foundUser.getId()).isEqualTo(generatedId);
     }
+
+    @Test
+    public void testUpdate() {
+        // Create a new User via builder
+        EntityProtos.User user = EntityProtos.User.newBuilder()
+                .setName("Bob")
+                .build();
+
+        // Persist
+        em.getTransaction().begin();
+        em.persist(user);
+        em.getTransaction().commit();
+        long id = user.getId();
+        em.clear();
+
+        // Update: Create a detached instance with same ID and new name
+        // Since we can't mutate the managed entity's fields directly (no public setters),
+        // we use a detached object and merge it.
+        EntityProtos.User detachedUpdate = EntityProtos.User.newBuilder()
+                .setId(id)
+                .setName("Bob Updated")
+                .build();
+
+        em.getTransaction().begin();
+        EntityProtos.User mergedUser = em.merge(detachedUpdate);
+        em.getTransaction().commit();
+
+        em.clear();
+
+        // Verify update
+        EntityProtos.User foundUser = em.find(EntityProtos.User.class, id);
+        assertThat(foundUser.getName()).isEqualTo("Bob Updated");
+    }
 }
