@@ -7,24 +7,26 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CodegenMetadataTest {
+    record TestConfig(CodegenMetadata config) implements CodegenMetadata.Config {}
 
     @Test
     public void testIsGenerateDeprecatedDefaults() {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
-                .setGenerateDeprecated(true)
-                .build();
-        
-        assertThat(metadata.isGenerateDeprecated(fileDescriptor)).isTrue();
 
-        metadata = new CodegenMetadata.Builder(fileDescriptor)
+        TestConfig cfg = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
+                .setGenerateDeprecated(true)
+                .build());
+
+
+        assertThat(cfg.isGenerateDeprecated(fileDescriptor)).isTrue();
+
+        cfg = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setGenerateDeprecated(false)
-                .build();
+                .build());
         
-        assertThat(metadata.isGenerateDeprecated(fileDescriptor)).isFalse();
+        assertThat(cfg.isGenerateDeprecated(fileDescriptor)).isFalse();
     }
 
     @Test
@@ -32,11 +34,11 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setGenerateDeprecated(false)
                 .overrideGenerateDeprecated(true)
-                .build();
+                .build());
         
         assertThat(metadata.isGenerateDeprecated(fileDescriptor)).isTrue();
     }
@@ -49,10 +51,10 @@ public class CodegenMetadataTest {
                 option (dev.akre.protege.java_generate_deprecated) = "true";
                 """;
         DescriptorProtos.FileDescriptorProto fileDescriptor = ProtoUtils.parseProto(protoContent, "test.proto");
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setGenerateDeprecated(false)
-                .build();
+                .build());
         
         assertThat(metadata.isGenerateDeprecated(fileDescriptor)).isTrue();
     }
@@ -71,10 +73,10 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = ProtoUtils.parseProto(protoContent, "test.proto");
         DescriptorProtos.DescriptorProto myMessage = fileDescriptor.getMessageType(0);
         DescriptorProtos.DescriptorProto otherMessage = fileDescriptor.getMessageType(1);
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setGenerateDeprecated(false)
-                .build();
+                .build());
         
         assertThat(metadata.isGenerateDeprecated(myMessage)).isTrue();
         assertThat(metadata.isGenerateDeprecated(otherMessage)).isFalse();
@@ -85,10 +87,10 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setPackage("com.example")
-                .build();
+                .build());
         
         assertThat(metadata.getPackage(fileDescriptor)).isEqualTo("com.example");
     }
@@ -98,11 +100,11 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setPackage("com.example")
                 .overridePackage("com.override")
-                .build();
+                .build());
         
         assertThat(metadata.getPackage(fileDescriptor)).isEqualTo("com.override");
     }
@@ -113,9 +115,8 @@ public class CodegenMetadataTest {
                 .setName("test.proto")
                 .setPackage("com.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
-                .build();
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor).build());
         
         assertThat(metadata.getPackage(fileDescriptor)).isEqualTo("com.proto");
     }
@@ -128,9 +129,9 @@ public class CodegenMetadataTest {
                 .addMessageType(DescriptorProtos.DescriptorProto.newBuilder().setName("MyMessage").build())
                 .build();
         DescriptorProtos.DescriptorProto myMessage = fileDescriptor.getMessageType(0);
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
-                .build();
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
+                .build());
         
         assertThat(metadata.getPackage(myMessage)).isEqualTo("com.proto");
     }
@@ -140,10 +141,10 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setJavaPackage("com.example.java")
-                .build();
+                .build());
         
         assertThat(metadata.getJavaPackage(fileDescriptor)).isEqualTo("com.example.java");
     }
@@ -153,11 +154,11 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setJavaPackage("com.example.java")
                 .overrideJavaPackage("com.override.java")
-                .build();
+                .build());
         
         assertThat(metadata.getJavaPackage(fileDescriptor)).isEqualTo("com.override.java");
     }
@@ -168,9 +169,9 @@ public class CodegenMetadataTest {
                 .setName("test.proto")
                 .setOptions(DescriptorProtos.FileOptions.newBuilder().setJavaPackage("com.proto.java").build())
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
-                .build();
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
+                .build());
         
         assertThat(metadata.getJavaPackage(fileDescriptor)).isEqualTo("com.proto.java");
     }
@@ -180,11 +181,11 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .addFieldAnnotation("@Deprecated")
                 .addFieldAnnotation("@SuppressWarnings(\"unchecked\")")
-                .build();
+                .build());
         
         assertThat(metadata.getFieldAnnotations(fileDescriptor)).containsExactly("@Deprecated", "@SuppressWarnings(\"unchecked\")");
     }
@@ -194,10 +195,10 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .setFieldAnnotations(java.util.List.of("@A", "@B"))
-                .build();
+                .build());
         
         assertThat(metadata.getFieldAnnotations(fileDescriptor)).containsExactly("@A", "@B");
     }
@@ -207,11 +208,11 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .addFieldAnnotation("@Default")
                 .addOverrideFieldAnnotation("@Override")
-                .build();
+                .build());
         
         assertThat(metadata.getFieldAnnotations(fileDescriptor)).containsExactly("@Override");
     }
@@ -221,11 +222,11 @@ public class CodegenMetadataTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = DescriptorProtos.FileDescriptorProto.newBuilder()
                 .setName("test.proto")
                 .build();
-        
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
+
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
                 .addFieldAnnotation("@Deprecated")
                 .setOverrideFieldAnnotations(java.util.List.of("@SomeAnnotation"))
-                .build();
+                .build());
         
         assertThat(metadata.getFieldAnnotations(fileDescriptor)).containsExactly("@SomeAnnotation");
     }
@@ -263,8 +264,8 @@ public class CodegenMetadataTest {
                         .build())
                 .build();
 
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor)
-                .build();
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor)
+                .build());
         
         assertThat(metadata.getFieldAnnotations(fileDescriptor)).containsExactly("@Deprecated", "@SuppressWarnings(\"unchecked\")");
     }
@@ -280,12 +281,13 @@ public class CodegenMetadataTest {
                 .addMessageType(DescriptorProtos.DescriptorProto.newBuilder().setName("Other").build())
                 .build();
 
-        CodegenMetadata metadata = new CodegenMetadata.Builder(fileDescriptor).build();
+        TestConfig metadata = new TestConfig(new CodegenMetadata.Builder(fileDescriptor).build());
 
-        assertThat(metadata.messageDescriptorMap()).hasSize(3);
-        assertThat(metadata.messageDescriptorMap()).containsKey("Parent");
-        assertThat(metadata.messageDescriptorMap()).containsKey("Parent.Child");
-        assertThat(metadata.messageDescriptorMap()).containsKey("Other");
-        assertThat(metadata.messageDescriptorMap().get("Parent.Child").getName()).isEqualTo("Child");
+        assertThat(metadata.config().descriptorMap()).hasSize(4);
+        assertThat(metadata.config().descriptorMap()).containsKey(".");
+        assertThat(metadata.config().descriptorMap()).containsKey("Parent");
+        assertThat(metadata.config().descriptorMap()).containsKey("Parent.Child");
+        assertThat(metadata.config().descriptorMap()).containsKey("Other");
+        assertThat(metadata.getMessageDescriptor("Parent.Child").getName()).isEqualTo("Child");
     }
 }

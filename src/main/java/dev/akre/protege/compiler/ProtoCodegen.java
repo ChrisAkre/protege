@@ -87,7 +87,8 @@ public class ProtoCodegen {
 
     public JavaFile generateFile(DescriptorProtos.FileDescriptorProto fileDescriptor) throws IOException {
         var ctx = CodegenContext.create(fileDescriptor, messageParentClass, generateDeprecated);
-        var outerClass = new OuterClassCodegen(ctx, this).generate();
+        CodegenMetadata config = CodegenMetadata.build(fileDescriptor).build();
+        var outerClass = new OuterClassCodegen(ctx, this, config).generate();
 
         var javaFile = JavaFile.builder(ctx.packageName(), outerClass).build();
         javaFile.writeTo(filer);

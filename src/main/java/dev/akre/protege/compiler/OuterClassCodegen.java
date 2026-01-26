@@ -11,7 +11,7 @@ import dev.akre.util.Cons;
 
 import javax.lang.model.element.Modifier;
 
-public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen) {
+public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen, CodegenMetadata config) implements CodegenMetadata.Config {
     public TypeSpec generate() {
         protoCodegen.populateOneofInterfaces(ctx);
 
