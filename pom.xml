@@ -227,9 +227,6 @@
                     <filterProperties>
                         <project.version>${project.version}</project.version>
                     </filterProperties>
-                    <pomExcludes>
-                        <pomExclude>jackson-test/pom.xml</pomExclude>
-                    </pomExcludes>
                     <goals>
                         <goal>clean</goal>
                         <goal>verify</goal>

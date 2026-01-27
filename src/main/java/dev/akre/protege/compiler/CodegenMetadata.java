@@ -21,7 +21,14 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     public static final Option JAVA_GENERATE_DEPRECATED = Option.customBoolean("dev.akre.protege.java_generate_deprecated");
     public static final Option PACKAGE = Option.fileOption("package", DescriptorProtos.FileDescriptorProto::getPackage);
     public static final Option JAVA_PACKAGE = Option.fileOption("java_package", f -> f.getOptions().getJavaPackage());
-    public static final Option FIELD_ANNOTATIONS = Option.customStringList(FIELD_ANNOTATION.key());
+    public static final Option FIELD_ANNOTATIONS = new Option(FIELD_ANNOTATION.key(), Type.STRING_LIST, scope -> {
+        var list1 = getStringListDescriptorOption(ProtoUtils.nameList(FIELD_ANNOTATION.key()), scope).orElse(List.of());
+        var list2 = getStringListDescriptorOption(ProtoUtils.nameList("dev.akre.protege.java_annotation"), scope).orElse(List.of());
+        if (list1.isEmpty() && list2.isEmpty()) return Optional.empty();
+        return Optional.of(ProtoUtils.listConcat(list1, list2.toArray(String[]::new)));
+    });
+    public static final Option MESSAGE_ANNOTATIONS = Option.customStringList(MESSAGE_ANNOTATION.key());
+    public static final Option BUILDER_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_builder_annotation");
     public static final Option ENHANCED_ONEOF = Option.customBoolean("dev.akre.protege.java_enhanced_oneof");
     public static final Option ONEOF_CASE = Option.customBoolean("dev.akre.protege.java_oneof_case");
     public static final Option JAVA_IMPLEMENTS = Option.customString("dev.akre.protege.java_implements");
@@ -90,10 +97,18 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
                 .or(() -> key.get(defaults))
                 .orElse(List.of());
 
-        if (key == FIELD_ANNOTATIONS && getBoolean(JACKSON_ANNOTATIONS, descriptor)) {
-            List<String> newList = new ArrayList<>(list);
-            newList.add("@com.fasterxml.jackson.annotation.JsonValue");
-            return newList;
+        if (getBoolean(JACKSON_ANNOTATIONS, descriptor)) {
+            if (key == FIELD_ANNOTATIONS) {
+                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.annotation.JsonValue");
+            } else if (key == MESSAGE_ANNOTATIONS) {
+                if (descriptor instanceof DescriptorProtos.DescriptorProto msg) {
+                    return ProtoUtils.listConcat(list,
+                            "@com.fasterxml.jackson.databind.annotation.JsonDeserialize(builder = " + msg.getName() + ".Builder.class)",
+                            "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)");
+                }
+            } else if (key == BUILDER_ANNOTATIONS) {
+                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder(withPrefix = \"set\")");
+            }
         }
         return list;
     }

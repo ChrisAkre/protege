@@ -71,15 +71,8 @@ public record MessageCodegen(
                 .superclass(getMessageSuperclass())
                 .addSuperinterface(interfaceClassName());
 
-        classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()));
-
-        if (config.getBoolean(CodegenMetadata.JACKSON_ANNOTATIONS, descriptor)) {
-            classBuilder.addAnnotation(AnnotationSpec.builder(ClassName.bestGuess("com.fasterxml.jackson.databind.annotation.JsonDeserialize"))
-                    .addMember("builder", "$L.class", builderClassName())
-                    .build());
-            classBuilder.addAnnotation(AnnotationSpec.builder(ClassName.bestGuess("com.fasterxml.jackson.annotation.JsonIgnoreProperties"))
-                    .addMember("ignoreUnknown", "true")
-                    .build());
+        for (String annotation : config.getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor)) {
+            classBuilder.addAnnotation(CodegenUtils.parseAnnotation(annotation));
         }
 
         for (var nestedMessage : descriptor.getNestedTypeList()) {
@@ -639,10 +632,8 @@ public record MessageCodegen(
                 .superclass(ParameterizedTypeName.get(getMessageSuperclass().nestedClass("Builder"), builderClassName()))
                 .addSuperinterface(interfaceClassName);
 
-        if (config.getBoolean(CodegenMetadata.JACKSON_ANNOTATIONS, descriptor)) {
-            builderClassBuilder.addAnnotation(AnnotationSpec.builder(ClassName.bestGuess("com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder"))
-                    .addMember("withPrefix", "$S", "set")
-                    .build());
+        for (String annotation : config.getList(CodegenMetadata.BUILDER_ANNOTATIONS, descriptor)) {
+            builderClassBuilder.addAnnotation(CodegenUtils.parseAnnotation(annotation));
         }
 
         // Add fields to builder
