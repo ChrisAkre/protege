@@ -72,6 +72,7 @@ public record MessageCodegen(
                 .addSuperinterface(interfaceClassName());
 
         classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()));
+        classBuilder.addAnnotations(CodegenUtils.getClassAnnotations(descriptor.getOptions()));
 
         for (var nestedMessage : descriptor.getNestedTypeList()) {
             var nestedMsgCodegen = new MessageCodegen(nestedMessage, ctx, allNames(), protoCodegen, config);
@@ -387,8 +388,7 @@ public record MessageCodegen(
             }
 
             var fieldSpec = FieldSpec.builder(privateFieldType, fieldCodegen.internalName(), Modifier.PRIVATE)
-                    .addAnnotations(fieldCodegen.fieldAnnotations().stream()
-                            .filter(CodegenUtils::isPersistenceAnnotation).toList())
+                    .addAnnotations(fieldCodegen.fieldAnnotations())
                     .build();
             // private <FieldType> <fieldName>_
             classBuilder.addField(fieldSpec);
@@ -910,8 +910,7 @@ public record MessageCodegen(
 
     TypeSpec generateMessageInterface() {
         var interfaceBuilder = TypeSpec.interfaceBuilder(interfaceClassName())
-                .addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()).stream()
-                        .filter(a -> !CodegenUtils.isPersistenceAnnotation(a)).toList())
+                .addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()))
                 .addSuperinterface(ProtoCodegen.OR_BUILDER_INTERFACE)
                 .addModifiers(Modifier.PUBLIC);
 

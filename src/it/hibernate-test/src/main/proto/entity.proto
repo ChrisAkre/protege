@@ -8,9 +8,9 @@ option java_package = "dev.akre.it.hibernate";
 option java_outer_classname = "EntityProtos";
 
 message User {
-  option (dev.akre.protege.java_message_annotation) = "@jakarta.persistence.Entity";
-  option (dev.akre.protege.java_message_annotation) = "@jakarta.persistence.Access(jakarta.persistence.AccessType.FIELD)";
-  option (dev.akre.protege.java_message_annotation) = "@jakarta.persistence.Table(name = \"users\")";
+  option (dev.akre.protege.java_class_annotation) = "@jakarta.persistence.Entity";
+  option (dev.akre.protege.java_class_annotation) = "@jakarta.persistence.Access(jakarta.persistence.AccessType.FIELD)";
+  option (dev.akre.protege.java_class_annotation) = "@jakarta.persistence.Table(name = \"users\")";
 
   int64 id = 1 [
     (dev.akre.protege.java_field_annotation) = "@jakarta.persistence.Id",

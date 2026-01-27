@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class CodegenUtils {
     private static final String FIELD_ANNOTATION = "dev.akre.protege.java_field_annotation";
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
+    private static final String CLASS_ANNOTATION = "dev.akre.protege.java_class_annotation";
 
     private CodegenUtils() {
         // Utility class
@@ -25,6 +26,15 @@ public class CodegenUtils {
                 .filter(o -> o.getNameList().stream()
                         .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
                         .collect(Collectors.joining(".")).equals(FIELD_ANNOTATION))
+                .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
+                .collect(Collectors.toList());
+    }
+
+    static List<AnnotationSpec> getClassAnnotations(DescriptorProtos.MessageOptions options) {
+        return options.getUninterpretedOptionList().stream()
+                .filter(o -> o.getNameList().stream()
+                        .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
+                        .collect(Collectors.joining(".")).equals(CLASS_ANNOTATION))
                 .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
                 .collect(Collectors.toList());
     }
@@ -247,16 +257,5 @@ public class CodegenUtils {
             }
         }
         return cb.build();
-    }
-
-    static boolean isPersistenceAnnotation(AnnotationSpec a) {
-        String name = a.toString();
-        // Remove leading @
-        if (name.startsWith("@")) {
-            name = name.substring(1);
-        }
-        return name.startsWith("jakarta.persistence.")
-                || name.startsWith("javax.persistence.")
-                || name.startsWith("org.hibernate.annotations.");
     }
 }
