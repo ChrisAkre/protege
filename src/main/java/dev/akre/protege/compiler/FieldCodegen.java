@@ -4,13 +4,11 @@ import com.google.protobuf.DescriptorProtos;
 import com.palantir.javapoet.*;
 import dev.akre.protege.ProtoUtils;
 
-import javax.lang.model.element.Modifier;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 
 public record FieldCodegen(
-        DescriptorProtos.FieldDescriptorProto field,
+        DescriptorProtos.FieldDescriptorProto descriptor,
         TypeName fieldType,
         String fieldName,
         String pascalName,
@@ -25,8 +23,9 @@ public record FieldCodegen(
         // Repeated specific
         TypeName genericType,
         // Context
-        MessageCodegen messageCodegen
-) {
+        MessageCodegen messageCodegen,
+        CodegenMetadata config
+) implements CodegenConfig {
 
     public static FieldCodegen create(DescriptorProtos.FieldDescriptorProto field, MessageCodegen messageCodegen) {
         var ctx = messageCodegen.ctx();
@@ -74,7 +73,8 @@ public record FieldCodegen(
                 keyType,
                 valueType,
                 genericType,
-                messageCodegen
+                messageCodegen,
+                messageCodegen.config()
         );
     }
 
@@ -96,7 +96,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.getMapOrDefault(this));
         methods.add(MessageMethods.getMapOrThrow(this));
 
-        if (messageCodegen.protoCodegen().generateDeprecated()) {
+        if (isGenerateDeprecated(descriptor)) {
             methods.add(MessageMethods.getMapDeprecated(this, fieldType));
         }
         return methods;
@@ -168,7 +168,7 @@ public record FieldCodegen(
         methods.add(CodegenMethods.Builder.getMapOrDefault(this));
         methods.add(CodegenMethods.Builder.getMapOrThrow(this));
 
-        if (messageCodegen.protoCodegen().generateDeprecated()) {
+        if (isGenerateDeprecated(descriptor)) {
             methods.add(CodegenMethods.Builder.getMapDeprecated(this, fieldType));
             methods.add(CodegenMethods.Builder.getMutableMapDeprecated(this, fieldType));
         }
@@ -257,7 +257,7 @@ public record FieldCodegen(
         methods.add(CodegenMethods.Builder.setField(this, builderClassName, clearOneof));
 
         String defaultValue;
-        if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
+        if (descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
             defaultValue = "\"\"";
         } else {
             defaultValue = ProtoUtils.getDefaultReturnValue(fieldType.toString());
@@ -292,7 +292,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.abstractGetMapOrDefault(this));
         methods.add(MessageMethods.abstractGetMapOrThrow(this));
 
-        if (messageCodegen.protoCodegen().generateDeprecated()) {
+        if (isGenerateDeprecated(descriptor)) {
             methods.add(MessageMethods.abstractGetMapDeprecated(this, fieldType));
         }
         return methods;
@@ -346,54 +346,54 @@ public record FieldCodegen(
 
     // Helper methods
     public int fieldNumber() {
-        return field.getNumber();
+        return descriptor.getNumber();
     }
 
     public DescriptorProtos.FieldDescriptorProto.Type type() {
-        return field.getType();
+        return descriptor.getType();
     }
 
     public boolean hasOneofIndex() {
-        return field.hasOneofIndex();
+        return descriptor.hasOneofIndex();
     }
 
     public int oneofIndex() {
-        return field.getOneofIndex();
+        return descriptor.getOneofIndex();
     }
 
     public boolean isString() {
         if (isRepeated && !isMap) {
-             return field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING;
+             return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING;
         }
         return type() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING;
     }
 
     public boolean isMessage() {
         if (isRepeated && !isMap) {
-             return field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE;
+             return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE;
         }
         return type() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE;
     }
 
     public boolean isEnum() {
         if (isRepeated && !isMap) {
-             return field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM;
+             return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM;
         }
         return type() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM;
     }
 
     private CodeBlock generateHasFieldCode() {
-        if (field.hasOneofIndex()) {
-            return CodeBlock.of("return $LCase_ == $L;\n", messageCodegen.message().getOneofDecl(field.getOneofIndex()).getName(), field.getNumber());
+        if (descriptor.hasOneofIndex()) {
+            return CodeBlock.of("return $LCase_ == $L;\n", messageCodegen.descriptor().getOneofDecl(descriptor.getOneofIndex()).getName(), descriptor.getNumber());
         }
-        return CodeBlock.of("return $L_ != null;\n", field.getName());
+        return CodeBlock.of("return $L_ != null;\n", descriptor.getName());
     }
 
     public CodeBlock generateClearOneofCode() {
-         if (!field.hasOneofIndex()) {
+         if (!descriptor.hasOneofIndex()) {
              return CodeBlock.of("");
          }
-         return CodegenUtils.generateClearOneofCode(messageCodegen.message(), field.getOneofIndex());
+         return CodegenUtils.generateClearOneofCode(messageCodegen.descriptor(), descriptor.getOneofIndex());
     }
 
     private DescriptorProtos.FieldDescriptorProto.Type valueFieldType() {

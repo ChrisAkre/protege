@@ -4,6 +4,7 @@ import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import dev.akre.protege.GenProto;
 import dev.akre.protege.ProtegeVersion;
+import dev.akre.protege.compiler.CodegenMetadata;
 import dev.akre.protege.compiler.ProtoCodegen;
 import dev.akre.protege.ProtoUtils;
 import io.github.classgraph.ClassGraph;
@@ -172,10 +173,13 @@ public class TestProtos {
             try {
                 TestUtils.MockFiler filer = new TestUtils.MockFiler();
                 ProtoCodegen protoCodegen = new ProtoCodegen(filer);
-                GrpcCodegen grpcCodegen = new GrpcCodegen(filer);
 
                 protoCodegen.generateFile(parsedProto);
-                grpcCodegen.generateFile(parsedProto);
+
+                CodegenMetadata config = CodegenMetadata.build(parsedProto)
+                        .build();
+                GrpcCodegen grpcCodegen = new GrpcCodegen(filer, config);
+                grpcCodegen.generateFile();
 
                 List<JavaFileObject> sourceFiles = filer.getSources().entrySet().stream()
                         .map(e -> JavaFileObjects.forSourceString(e.getKey(), e.getValue()))

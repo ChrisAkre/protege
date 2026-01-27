@@ -9,13 +9,14 @@ import dev.akre.util.Cons;
 import javax.lang.model.element.Modifier;
 
 public record EnumCodegen(
-        DescriptorProtos.EnumDescriptorProto enumType,
+        DescriptorProtos.EnumDescriptorProto descriptor,
         Cons<String> scope,
         CodegenContext ctx,
-        ProtoCodegen protoCodegen
-) {
+        ProtoCodegen protoCodegen,
+        CodegenMetadata config
+) implements CodegenConfig {
     public String getEnumName() {
-        return enumType.getName();
+        return descriptor.getName();
     }
 
     public ClassName outerClassName() {
@@ -32,7 +33,7 @@ public record EnumCodegen(
                 .addModifiers(Modifier.PUBLIC)
                 .addSuperinterface(com.google.protobuf.ProtocolMessageEnum.class);
 
-        for (var value : enumType.getValueList()) {
+        for (var value : descriptor.getValueList()) {
             enumBuilder.addEnumConstant(value.getName(), TypeSpec.anonymousClassBuilder("$L", value.getNumber()).build());
         }
 
