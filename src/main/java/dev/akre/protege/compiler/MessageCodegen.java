@@ -386,7 +386,10 @@ public record MessageCodegen(
                 privateFieldType = ParameterizedTypeName.get(ClassName.get("com.google.protobuf", "MapField"), keyType.box(), valueType.box());
             }
 
-            var fieldSpec = FieldSpec.builder(privateFieldType, fieldCodegen.internalName(), Modifier.PRIVATE).build();
+            var fieldSpec = FieldSpec.builder(privateFieldType, fieldCodegen.internalName(), Modifier.PRIVATE)
+                    .addAnnotations(fieldCodegen.fieldAnnotations().stream()
+                            .filter(CodegenUtils::isPersistenceAnnotation).toList())
+                    .build();
             // private <FieldType> <fieldName>_
             classBuilder.addField(fieldSpec);
 
@@ -907,7 +910,8 @@ public record MessageCodegen(
 
     TypeSpec generateMessageInterface() {
         var interfaceBuilder = TypeSpec.interfaceBuilder(interfaceClassName())
-                .addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()))
+                .addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()).stream()
+                        .filter(a -> !CodegenUtils.isPersistenceAnnotation(a)).toList())
                 .addSuperinterface(ProtoCodegen.OR_BUILDER_INTERFACE)
                 .addModifiers(Modifier.PUBLIC);
 

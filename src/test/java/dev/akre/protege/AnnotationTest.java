@@ -27,20 +27,20 @@ public class AnnotationTest {
                   option (dev.akre.protege.java_message_annotation) = '@org.junit.jupiter.api.Tag("test")';
                 
                   int64 id = 1 [
-                    (dev.akre.protege.java_annotation) = '@java.lang.Deprecated(since = "1.0")',
-                    (dev.akre.protege.java_annotation) = '@java.beans.BeanProperty(description = "The user id")'
+                    (dev.akre.protege.java_field_annotation) = '@java.lang.Deprecated(since = "1.0")',
+                    (dev.akre.protege.java_field_annotation) = '@java.beans.BeanProperty(description = "The user id")'
                   ];
                 
                   string email = 2 [
-                    (dev.akre.protege.java_annotation) = '@java.lang.Deprecated(forRemoval = true)'
+                    (dev.akre.protege.java_field_annotation) = '@java.lang.Deprecated(forRemoval = true)'
                   ];
 
                   repeated string tags = 3 [
-                    (dev.akre.protege.java_annotation) = '@java.lang.Deprecated'
+                    (dev.akre.protege.java_field_annotation) = '@java.lang.Deprecated'
                   ];
 
                   map<string, string> attributes = 4 [
-                    (dev.akre.protege.java_annotation) = '@java.lang.Deprecated'
+                    (dev.akre.protege.java_field_annotation) = '@java.lang.Deprecated'
                   ];
                 }
                 """;

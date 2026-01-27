@@ -6,11 +6,9 @@ import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled("Skipped because Protege features required for Hibernate (JPA annotations) are reverted")
 public class HibernateTest {
 
     private EntityManagerFactory emf;

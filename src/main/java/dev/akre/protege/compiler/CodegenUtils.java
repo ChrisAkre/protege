@@ -13,14 +13,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CodegenUtils {
-    private static final String FIELD_ANNOTATION = "dev.akre.protege.java_annotation";
+    private static final String FIELD_ANNOTATION = "dev.akre.protege.java_field_annotation";
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
 
     private CodegenUtils() {
         // Utility class
     }
 
-    static List<AnnotationSpec> getGetterAnnotations(DescriptorProtos.FieldOptions options) {
+    static List<AnnotationSpec> getFieldAnnotations(DescriptorProtos.FieldOptions options) {
         return options.getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream()
                         .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
@@ -247,5 +247,16 @@ public class CodegenUtils {
             }
         }
         return cb.build();
+    }
+
+    static boolean isPersistenceAnnotation(AnnotationSpec a) {
+        String name = a.toString();
+        // Remove leading @
+        if (name.startsWith("@")) {
+            name = name.substring(1);
+        }
+        return name.startsWith("jakarta.persistence.")
+                || name.startsWith("javax.persistence.")
+                || name.startsWith("org.hibernate.annotations.");
     }
 }

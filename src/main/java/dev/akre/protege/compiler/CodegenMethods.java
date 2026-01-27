@@ -225,7 +225,7 @@ public class CodegenMethods {
             var builder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
+                    .addAnnotations(ctx.fieldAnnotations().stream().filter(a -> !CodegenUtils.isPersistenceAnnotation(a)).toList())
                     .returns(ctx.fieldType());
 
             if (ctx.isString()) {
@@ -399,7 +399,7 @@ public class CodegenMethods {
         static MethodSpec getMapField(FieldCodegen ctx, TypeName fieldType) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
+                    .addAnnotations(ctx.fieldAnnotations().stream().filter(a -> !CodegenUtils.isPersistenceAnnotation(a)).toList())
                     .returns(fieldType)
                     .addStatement("return $L.getMap()", ctx.internalName())
                     .build();
@@ -516,7 +516,7 @@ public class CodegenMethods {
         static MethodSpec getRepeatedListString(FieldCodegen ctx) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
+                    .addAnnotations(ctx.fieldAnnotations().stream().filter(a -> !CodegenUtils.isPersistenceAnnotation(a)).toList())
                     .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
                     .addStatement("return $L.getUnmodifiableView()", ctx.internalName())
                     .build();
@@ -548,7 +548,7 @@ public class CodegenMethods {
         static MethodSpec getRepeatedList(FieldCodegen ctx, TypeName listType) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.getterAnnotations())
+                    .addAnnotations(ctx.fieldAnnotations().stream().filter(a -> !CodegenUtils.isPersistenceAnnotation(a)).toList())
                     .returns(listType)
                     .addStatement("return $T.unmodifiableList($L)", java.util.Collections.class, ctx.internalName())
                     .build();
