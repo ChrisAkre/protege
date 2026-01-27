@@ -33,13 +33,6 @@ public record FieldCodegen(
         CodegenMetadata config
 ) implements CodegenConfig {
 
-    /**
-     * Creates a new FieldCodegen instance.
-     *
-     * @param field          The field descriptor.
-     * @param messageCodegen The parent message context.
-     * @return A new FieldCodegen.
-     */
     public static FieldCodegen create(DescriptorProtos.FieldDescriptorProto field, MessageCodegen messageCodegen) {
         var ctx = messageCodegen.ctx();
         var fieldType = ctx.getFieldType(field, messageCodegen.currentScope());
@@ -373,48 +366,22 @@ public record FieldCodegen(
     }
 
     // Helper methods
-
-    /**
-     * Gets the field number.
-     *
-     * @return The field number.
-     */
     public int fieldNumber() {
         return descriptor.getNumber();
     }
 
-    /**
-     * Gets the field type.
-     *
-     * @return The field type.
-     */
     public DescriptorProtos.FieldDescriptorProto.Type type() {
         return descriptor.getType();
     }
 
-    /**
-     * Checks if the field is part of a oneof.
-     *
-     * @return true if part of a oneof, false otherwise.
-     */
     public boolean hasOneofIndex() {
         return descriptor.hasOneofIndex();
     }
 
-    /**
-     * Gets the index of the oneof this field belongs to.
-     *
-     * @return The oneof index.
-     */
     public int oneofIndex() {
         return descriptor.getOneofIndex();
     }
 
-    /**
-     * Checks if the field is a string.
-     *
-     * @return true if string, false otherwise.
-     */
     public boolean isString() {
         if (isRepeated && !isMap) {
              return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING;
@@ -422,11 +389,6 @@ public record FieldCodegen(
         return type() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING;
     }
 
-    /**
-     * Checks if the field is a message.
-     *
-     * @return true if message, false otherwise.
-     */
     public boolean isMessage() {
         if (isRepeated && !isMap) {
              return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE;
@@ -434,11 +396,6 @@ public record FieldCodegen(
         return type() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE;
     }
 
-    /**
-     * Checks if the field is an enum.
-     *
-     * @return true if enum, false otherwise.
-     */
     public boolean isEnum() {
         if (isRepeated && !isMap) {
              return descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM;

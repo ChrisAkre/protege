@@ -103,11 +103,8 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
     public enum Type {
-        /** Boolean type option. */
         BOOLEAN(Boolean.class),
-        /** String type option. */
         STRING(String.class),
-        /** List of Strings type option. */
         STRING_LIST(List.class);
 
         private final Predicate<Object> check;
@@ -123,56 +120,25 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
 
 
     public record Option(String key, Type type, Function<Cons<Object>, Optional<?>> lookup) {
-        /**
-         * Creates a custom boolean option.
-         *
-         * @param key The option key.
-         * @return The option.
-         */
         public static Option customBoolean(String key) {
             var p = ProtoUtils.nameList(key);
             return new Option(key, Type.BOOLEAN, scope -> getBooleanDescriptorOption(p, scope));
         }
 
-        /**
-         * Creates a custom string option.
-         *
-         * @param key The option key.
-         * @return The option.
-         */
         public static Option customString(String key) {
             var p = ProtoUtils.nameList(key);
             return new Option(key, Type.STRING, scope -> getDescriptorStringOption(p, scope));
         }
 
-        /**
-         * Creates a custom string list option.
-         *
-         * @param key The option key.
-         * @return The option.
-         */
         public static Option customStringList(String key) {
             var p = ProtoUtils.nameList(key);
             return new Option(key, Type.STRING_LIST, scope -> getStringListDescriptorOption(p, scope));
         }
 
-        /**
-         * Creates a file option (derived from FileDescriptorProto).
-         *
-         * @param key The option key.
-         * @param f   The function to extract value from FileDescriptorProto.
-         * @return The option.
-         */
         public static Option fileOption(String key, Function<DescriptorProtos.FileDescriptorProto, String> f) {
             return new Option(key, Type.STRING, scope -> getFileDescriptorStringOption(scope, f));
         }
 
-        /**
-         * Sets the value of this option in the given map.
-         *
-         * @param values The map to set value in.
-         * @param value  The value to set.
-         */
         public void setValue(HashMap<String, Object> values, Object value) {
             if (!type.isInstance(value)) {
                 throw new IllegalStateException("bad option type for %s: %s".formatted(key, value));
@@ -180,25 +146,11 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             values.put(key, value);
         }
 
-        /**
-         * Looks up the value of this option in the scope chain.
-         *
-         * @param scope The scope chain.
-         * @param <T>   The return type.
-         * @return The optional value.
-         */
         @SuppressWarnings("unchecked")
         public <T> Optional<T> lookup(Cons<Object> scope) {
             return (Optional<T>) lookup.apply(scope);
         }
 
-        /**
-         * Gets the value of this option from the map.
-         *
-         * @param values The map.
-         * @param <T>    The return type.
-         * @return The optional value.
-         */
         @SuppressWarnings("unchecked")
         public <T> Optional<T> get(Map<String, Object> values) {
             return Optional.ofNullable((T) values.get(key));
@@ -253,67 +205,31 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             return hierarchy;
         }
 
-        /**
-         * Sets the default value for generating deprecated annotations.
-         *
-         * @param value true to generate, false otherwise.
-         * @return This builder.
-         */
         public Builder setGenerateDeprecated(boolean value) {
             JAVA_GENERATE_DEPRECATED.setValue(defaults, value);
             return this;
         }
 
-        /**
-         * Overrides the value for generating deprecated annotations.
-         *
-         * @param value true to generate, false otherwise.
-         * @return This builder.
-         */
         public Builder overrideGenerateDeprecated(boolean value) {
             JAVA_GENERATE_DEPRECATED.setValue(overrides, value);
             return this;
         }
 
-        /**
-         * Sets the default protobuf package.
-         *
-         * @param value The package name.
-         * @return This builder.
-         */
         public Builder setPackage(String value) {
             PACKAGE.setValue(defaults, value);
             return this;
         }
 
-        /**
-         * Overrides the protobuf package.
-         *
-         * @param value The package name.
-         * @return This builder.
-         */
         public Builder overridePackage(String value) {
             PACKAGE.setValue(overrides, value);
             return this;
         }
 
-        /**
-         * Sets the default Java package.
-         *
-         * @param value The Java package name.
-         * @return This builder.
-         */
         public Builder setJavaPackage(String value) {
             JAVA_PACKAGE.setValue(defaults, value);
             return this;
         }
 
-        /**
-         * Overrides the Java package.
-         *
-         * @param value The Java package name.
-         * @return This builder.
-         */
         public Builder overrideJavaPackage(String value) {
             JAVA_PACKAGE.setValue(overrides, value);
             return this;
@@ -325,12 +241,6 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             return this;
         }
 
-        /**
-         * Sets the default field annotations.
-         *
-         * @param values The list of annotations.
-         * @return This builder.
-         */
         public Builder setFieldAnnotations(List<String> values) {
             FIELD_ANNOTATIONS.setValue(defaults, new ArrayList<>(values));
             return this;
@@ -342,12 +252,6 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             return this;
         }
 
-        /**
-         * Overrides the field annotations.
-         *
-         * @param values The list of annotations.
-         * @return This builder.
-         */
         public Builder setOverrideFieldAnnotations(List<String> values) {
             FIELD_ANNOTATIONS.setValue(overrides, new ArrayList<>(values));
             return this;

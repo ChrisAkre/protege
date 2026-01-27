@@ -25,29 +25,14 @@ public record EnumCodegen(
         ProtoCodegen protoCodegen,
         CodegenMetadata config
 ) implements CodegenConfig {
-    /**
-     * Gets the simple name of the enum.
-     *
-     * @return The enum name.
-     */
     public String getEnumName() {
         return descriptor.getName();
     }
 
-    /**
-     * Gets the outer class name if one exists.
-     *
-     * @return The outer class name.
-     */
     public ClassName outerClassName() {
         return ClassName.get(ctx.packageName(), ctx.outerName());
     }
 
-    /**
-     * Gets the names of parent messages.
-     *
-     * @return An array of parent names.
-     */
     public String[] parentNames() {
         return scope.stream().toArray(String[]::new);
     }

@@ -33,6 +33,8 @@ public class InterfaceDescriptorFactory {
 
     /**
      * Creates a new InterfaceDescriptorFactory.
+     * <p>
+     * Initializes the factory with empty caches for messages and enums.
      */
     public InterfaceDescriptorFactory() {
 
