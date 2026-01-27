@@ -91,12 +91,4 @@ public class ProtoCodegen {
         return javaFile;
     }
 
-    public Optional<String> getJavaImplements(DescriptorProtos.DescriptorProto message) {
-        return message.getOptions().getUninterpretedOptionList().stream()
-                .filter(o -> o.getNameList().stream().anyMatch(n -> n.getNamePart().endsWith("java_implements")))
-                .map(DescriptorProtos.UninterpretedOption::getStringValue)
-                .map(com.google.protobuf.ByteString::toStringUtf8)
-                .findFirst();
-    }
-
 }
