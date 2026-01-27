@@ -24,15 +24,35 @@ import java.util.stream.Collectors;
  * </ul>
  */
 public class CodegenUtils {
-    private static final String FIELD_ANNOTATION = "dev.akre.protege.java_annotation";
+    private static final String FIELD_ANNOTATION = "dev.akre.protege.java_field_annotation";
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
+    private static final String CLASS_ANNOTATION = "dev.akre.protege.java_class_annotation";
 
     private CodegenUtils() {
         // Utility class
     }
 
-    static List<AnnotationSpec> getGetterAnnotations(DescriptorProtos.FieldOptions options) {
-        return options.getUninterpretedOptionList().stream().filter(o -> o.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining(".")).equals(FIELD_ANNOTATION)).map(o -> parseAnnotation(o.getStringValue().toStringUtf8())).collect(Collectors.toList());
+    static List<AnnotationSpec> getFieldAnnotations(DescriptorProtos.FieldOptions options) {
+        return options.getUninterpretedOptionList().stream()
+                .filter(o -> o.getNameList().stream()
+                        .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
+                        .collect(Collectors.joining(".")).equals(FIELD_ANNOTATION))
+                .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
+                .collect(Collectors.toList());
+    }
+
+//    static List<AnnotationSpec> getGetterAnnotations(DescriptorProtos.FieldOptions options) {
+//        return options.getUninterpretedOptionList().stream().filter(o -> o.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining(".")).equals(FIELD_ANNOTATION)).map(o -> parseAnnotation(o.getStringValue().toStringUtf8())).collect(Collectors.toList());
+//    }
+
+
+    static List<AnnotationSpec> getClassAnnotations(DescriptorProtos.MessageOptions options) {
+        return options.getUninterpretedOptionList().stream()
+                .filter(o -> o.getNameList().stream()
+                        .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
+                        .collect(Collectors.joining(".")).equals(CLASS_ANNOTATION))
+                .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
+                .collect(Collectors.toList());
     }
 
     static List<AnnotationSpec> getMessageAnnotations(DescriptorProtos.MessageOptions options) {

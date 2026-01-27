@@ -148,7 +148,7 @@ public class MessageMethods {
         var getterBuilder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(ctx.getterAnnotations())
+                .addAnnotations(ctx.fieldAnnotations())
                 .returns(ctx.fieldType());
 
         if (ctx.isString()) {
@@ -217,7 +217,7 @@ public class MessageMethods {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(ctx.getterAnnotations())
+                .addAnnotations(ctx.fieldAnnotations())
                 .returns(fieldType)
                 .addStatement("return $L.getMap()", ctx.internalName())
                 .build();
@@ -272,7 +272,7 @@ public class MessageMethods {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(ctx.getterAnnotations())
+                .addAnnotations(ctx.fieldAnnotations())
                 .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
                 .addStatement("return new $T($L)", com.google.protobuf.UnmodifiableLazyStringList.class, ctx.internalName())
                 .build();
@@ -282,7 +282,7 @@ public class MessageMethods {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(ctx.getterAnnotations())
+                .addAnnotations(ctx.fieldAnnotations())
                 .returns(fieldType)
                 .addStatement("return $L", ctx.internalName())
                 .build();
@@ -529,7 +529,7 @@ public class MessageMethods {
     static MethodSpec abstractGetField(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .addAnnotations(ctx.getterAnnotations())
+                .addAnnotations(ctx.fieldAnnotations())
                 .returns(ctx.fieldType())
                 .build();
     }
@@ -567,7 +567,7 @@ public class MessageMethods {
     static MethodSpec abstractGetMapField(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .addAnnotations(ctx.getterAnnotations())
+                .addAnnotations(ctx.fieldAnnotations())
                 .returns(ParameterizedTypeName.get(ClassName.get(Map.class), ctx.keyType().box(), ctx.valueType().box()))
                 .build();
     }
@@ -608,7 +608,7 @@ public class MessageMethods {
     static MethodSpec abstractGetRepeatedList(FieldCodegen ctx, TypeName listType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .addAnnotations(ctx.getterAnnotations())
+                .addAnnotations(ctx.fieldAnnotations())
                 .returns(listType)
                 .build();
     }
