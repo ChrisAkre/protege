@@ -13,6 +13,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Generates Java code for a Protobuf message handling:
+ * <ul>
+ *   <li>Message class definition (POJO/GeneratedMessageV3)</li>
+ *   <li>Builder class generation</li>
+ *   <li>Interface definition (*OrBuilder)</li>
+ *   <li>Nested types (messages and enums)</li>
+ *   <li>Serialization/Deserialization logic</li>
+ * </ul>
+ */
 public record MessageCodegen(
         DescriptorProtos.DescriptorProto descriptor,
         Cons<String> scope,
@@ -39,7 +49,6 @@ public record MessageCodegen(
             case Cons<String> c -> className(c.tail()).nestedClass(c.head());
         };
     }
-
 
     ClassName interfaceClassName() {
         return className(scope.cons(interfaceName()));

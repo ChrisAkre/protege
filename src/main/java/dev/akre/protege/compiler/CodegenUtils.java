@@ -12,6 +12,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utility methods for generating Java code from Protobuf descriptors.
+ * <p>
+ * This class handles:
+ * <ul>
+ *   <li>Annotation parsing and extraction</li>
+ *   <li>Type registry management</li>
+ *   <li>Field type resolution</li>
+ *   <li>Code block generation for write conditions</li>
+ * </ul>
+ */
 public class CodegenUtils {
     private static final String FIELD_ANNOTATION = "dev.akre.protege.java_field_annotation";
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
@@ -40,12 +51,7 @@ public class CodegenUtils {
     }
 
     static List<AnnotationSpec> getMessageAnnotations(DescriptorProtos.MessageOptions options) {
-        return options.getUninterpretedOptionList().stream()
-                .filter(o -> o.getNameList().stream()
-                        .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
-                        .collect(Collectors.joining(".")).equals(MESSAGE_ANNOTATION))
-                .map(o -> parseAnnotation(o.getStringValue().toStringUtf8()))
-                .collect(Collectors.toList());
+        return options.getUninterpretedOptionList().stream().filter(o -> o.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining(".")).equals(MESSAGE_ANNOTATION)).map(o -> parseAnnotation(o.getStringValue().toStringUtf8())).collect(Collectors.toList());
     }
 
     static AnnotationSpec parseAnnotation(String annotationStr) {
@@ -177,9 +183,7 @@ public class CodegenUtils {
 
     static boolean getBooleanOption(List<DescriptorProtos.UninterpretedOption> options, String name, boolean defaultValue) {
         for (var option : options) {
-            String optionName = option.getNameList().stream()
-                    .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
-                    .collect(Collectors.joining("."));
+            String optionName = option.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining("."));
             if (optionName.equals(name)) {
                 if (option.hasIdentifierValue()) {
                     return Boolean.parseBoolean(option.getIdentifierValue());
@@ -195,10 +199,12 @@ public class CodegenUtils {
         }
         return switch (type) {
             case TYPE_STRING -> CodeBlock.of("!$T.isStringEmpty((java.lang.Object)$L)", ProtoUtils.class, fieldName);
-            case TYPE_INT32, TYPE_UINT32, TYPE_SINT32, TYPE_FIXED32, TYPE_SFIXED32 -> CodeBlock.of("$L != 0", fieldName);
+            case TYPE_INT32, TYPE_UINT32, TYPE_SINT32, TYPE_FIXED32, TYPE_SFIXED32 ->
+                    CodeBlock.of("$L != 0", fieldName);
             case TYPE_ENUM -> CodeBlock.of("$L.getNumber() != 0", fieldName);
             case TYPE_MESSAGE -> CodeBlock.of("$L != null", fieldName);
-            case TYPE_INT64, TYPE_UINT64, TYPE_SINT64, TYPE_FIXED64, TYPE_SFIXED64 -> CodeBlock.of("$L != 0L", fieldName);
+            case TYPE_INT64, TYPE_UINT64, TYPE_SINT64, TYPE_FIXED64, TYPE_SFIXED64 ->
+                    CodeBlock.of("$L != 0L", fieldName);
             case TYPE_FLOAT -> CodeBlock.of("java.lang.Float.floatToRawIntBits($L) != 0", fieldName);
             case TYPE_DOUBLE -> CodeBlock.of("java.lang.Double.doubleToRawLongBits($L) != 0", fieldName);
             case TYPE_BOOL -> CodeBlock.of("$L", fieldName);
@@ -207,6 +213,16 @@ public class CodegenUtils {
         };
     }
 
+    /**
+     * Converts a message type name to its corresponding *OrBuilder interface type.
+     * <p>
+     * Used when generating method signatures that accept both the concrete message class
+     * and its builder (via the interface).
+     *
+     * @param typeName The concrete message type (e.g., {@code MyMessage})
+     * @return The *OrBuilder type (e.g., {@code MyMessageOrBuilder}), or the original type if not a ClassName.
+     */
+    // TODO reimplement this but using ClassName.peerClass ?
     public static TypeName getOrBuilderType(TypeName typeName) {
         if (typeName instanceof ClassName) {
             ClassName cn = (ClassName) typeName;
@@ -215,16 +231,20 @@ public class CodegenUtils {
             if (simpleNames.size() == 1) {
                 return ClassName.get(cn.packageName(), last + "OrBuilder");
             } else {
-                return ClassName.get(cn.packageName(), simpleNames.getFirst(),
-                        java.util.stream.Stream.concat(
-                                simpleNames.subList(1, simpleNames.size() - 1).stream(),
-                                java.util.stream.Stream.of(last + "OrBuilder")
-                        ).toArray(String[]::new));
+                return ClassName.get(cn.packageName(), simpleNames.getFirst(), java.util.stream.Stream.concat(simpleNames.subList(1, simpleNames.size() - 1).stream(), java.util.stream.Stream.of(last + "OrBuilder")).toArray(String[]::new));
             }
         }
         return typeName;
     }
 
+    /**
+     * Relativizes a Protobuf type name by trimming a matching package name from the start. If the package name is not
+     * a prefix, the name is unchanged.
+     *
+     * @param typeName     The fully qualified type name (e.g., {@code .my.pkg.Message})
+     * @param protoPackage The package to strip (e.g., {@code my.pkg})
+     * @return The relative type name (e.g., {@code Message})
+     */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
             if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
@@ -236,6 +256,13 @@ public class CodegenUtils {
         return typeName;
     }
 
+    /**
+     * Generates code to clear fields associated with a specific oneof group.
+     *
+     * @param message    The message containing the oneof.
+     * @param oneofIndex The index of the oneof group to clear.
+     * @return A CodeBlock that resets the oneof case and clears its fields.
+     */
     public static CodeBlock generateClearOneofCode(DescriptorProtos.DescriptorProto message, int oneofIndex) {
         var cb = CodeBlock.builder();
         cb.addStatement("$LCase_ = 0", message.getOneofDecl(oneofIndex).getName());

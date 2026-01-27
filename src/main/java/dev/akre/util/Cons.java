@@ -6,17 +6,27 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Immutable Linked List
+ * An immutable, singly-linked list implementation (Lisp-style cons cells).
+ * <p>
+ * This structure is optimized for stack-based traversal where efficient
+ * head insertion and tail sharing are required. It is <strong>not</strong>
+ * suitable for random access operations.
+ * <p>
+ * Iteration order via {@link #iterator()} and {@link #stream()} is from
+ * Tail to Head (Oldest to Newest), effectively reversing the stack.
+ * Use {@link #descendingIterator()} or {@link #descendingStream()} for
+ * Head to Tail (Newest to Oldest) traversal in classic Lisp style.
  *
- * @link <a href="https://en.wikipedia.org/wiki/Greenspun%27s_tenth_rule">Greenspun's tenth rule</a>
+ * @param <T> element type
+ * @see <a href="https://en.wikipedia.org/wiki/Greenspun%27s_tenth_rule">Greenspun's tenth rule</a>
  */
 public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     public static final Cons<?> NIL = new Cons<>(null, null);
 
     public Cons {
-        if (tail == null && NIL != null) {
-            throw new IllegalArgumentException("must be a non-empty cons or NIL");
+        if ((head == null || tail == null) && NIL != null) {
+            throw new IllegalArgumentException("must provide a non-null value");
         }
     }
 
@@ -25,27 +35,38 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
         return (Cons<T>) NIL;
     }
 
+    @Override
     public boolean isEmpty() {
         return this == NIL;
     }
 
+    /**
+     * Prepends an element to this list, creating a new head.
+     */
     public Cons<T> cons(T t) {
         return new Cons<>(t, this);
     }
 
     @SafeVarargs
     public static <T> Cons<T> of(T... elements) {
-        Cons<T> acc = nil();
-        for (int i = elements.length - 1; i >= 0; i--) {
-            acc = new Cons<>(elements[i], acc);
-        }
-        return acc;
+        return copyOf(Arrays.asList(elements));
     }
 
-    public static <T> Cons<T> copyOf(List<T> values) {
+    /**
+     * Creates a copy of a collection as a cons list. The iteration order of the resulting list
+     * will match the iteration order of the original collection.
+     * <p>
+     * Note that a reversed cons list will be iterated using {@link #descendingIterator()}
+     * and thus will be copied using the classic "reverse a linked list" implementation.
+     */
+    public static <T> Cons<T> copyOf(Iterable<T> values) {
+        if (values instanceof Cons<T> c) {
+            // already unmodifiable
+            return c;
+        }
         Cons<T> acc = nil();
-        for (int i = values.size() - 1; i >= 0; i--) {
-            acc = new Cons<>(values.get(i), acc);
+        for (T t : values) {
+            acc = acc.cons(t);
         }
         return acc;
     }
@@ -76,6 +97,7 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
         return stream().iterator();
     }
 
+    @Override
     public Iterator<T> descendingIterator() {
         return new Iterator<>() {
             private Cons<T> current = Cons.this;
@@ -93,6 +115,9 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
         };
     }
 
+    /**
+     * Returns a stream of elements in descending order (Head to Tail).
+     */
     public Stream<T> descendingStream() {
         return StreamSupport.stream(descendingSpliterator(), false);
     }
@@ -107,9 +132,12 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     @Override
     public String toString() {
-        return stream().map(T::toString).collect(Collectors.joining(", ", "[", "]"));
+        return stream().map(String::valueOf).collect(Collectors.joining(", ", "[", "]"));
     }
 
+    /**
+     * Returns a reversed read-only view of the collection. To be able to append elements to this collection, use Cons.copyOf.
+     */
     @Override
     public UnmodifiableCons<T> reversed() {
         return new UnmodifiableCons<>() {

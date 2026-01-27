@@ -7,6 +7,12 @@ import dev.akre.protege.ProtoUtils;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Generates Java code for a single Protobuf field.
+ * <p>
+ * This class abstracts the complexity of different field types (singular, repeated, map, oneof)
+ * and generates the appropriate getter, setter (builder), and cleaner methods.
+ */
 public record FieldCodegen(
         DescriptorProtos.FieldDescriptorProto descriptor,
         TypeName fieldType,
@@ -78,6 +84,11 @@ public record FieldCodegen(
         );
     }
 
+    /**
+     * Generates getter methods for this field.
+     *
+     * @return A list of getter MethodSpecs.
+     */
     public List<MethodSpec> getterMethods() {
         if (isMap) {
             return mapGetterMethods();
@@ -148,6 +159,11 @@ public record FieldCodegen(
         return methods;
     }
 
+    /**
+     * Generates builder methods (setters, adders, clearers) for this field.
+     *
+     * @return A list of builder MethodSpecs.
+     */
     public List<MethodSpec> builderMethods() {
         if (isMap) {
             return mapBuilderMethods();
@@ -274,6 +290,11 @@ public record FieldCodegen(
         return methods;
     }
 
+    /**
+     * Generates abstract getter methods for the interface.
+     *
+     * @return A list of abstract MethodSpecs.
+     */
     public List<MethodSpec> abstractMethods() {
         if (isMap) {
             return mapAbstractMethods();
@@ -389,6 +410,11 @@ public record FieldCodegen(
         return CodeBlock.of("return $L_ != null;\n", descriptor.getName());
     }
 
+    /**
+     * Generates code to clear the oneof field if it is set.
+     *
+     * @return The CodeBlock to clear the oneof.
+     */
     public CodeBlock generateClearOneofCode() {
          if (!descriptor.hasOneofIndex()) {
              return CodeBlock.of("");

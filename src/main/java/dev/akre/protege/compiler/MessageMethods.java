@@ -11,7 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utility methods for generating methods in message and builder classes.
+ * <p>
+ * This class isolates the complexity of generating standard Protobuf methods
+ * (getters, setters, serialization, etc.) from the higher level logic.
+ */
 public class MessageMethods {
+
+    private MessageMethods() {}
 
     public static MethodSpec getDescriptor() {
         return MethodSpec.methodBuilder("getDescriptor")
@@ -126,6 +134,7 @@ public class MessageMethods {
     }
 
     // Field getters
+
     public static MethodSpec hasField(FieldCodegen ctx, CodeBlock hasCode) {
         return MethodSpec.methodBuilder("has" + ctx.pascalName())
                 .addAnnotation(Override.class)
@@ -193,6 +202,7 @@ public class MessageMethods {
     }
 
     // Map field getters
+
     public static MethodSpec containsMapKey(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("contains" + ctx.pascalName())
                 .addAnnotation(Override.class)
@@ -257,6 +267,7 @@ public class MessageMethods {
     }
 
     // Repeated field getters
+
     public static MethodSpec getRepeatedListString(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
@@ -345,6 +356,7 @@ public class MessageMethods {
     }
 
     // Parse methods
+
     public static MethodSpec parseFrom(ClassName messageClassName, TypeName paramType, String paramName, boolean hasRegistry) {
         var builder = MethodSpec.methodBuilder("parseFrom")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
