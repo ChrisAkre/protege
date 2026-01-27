@@ -5,7 +5,11 @@ import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
 
-interface UnmodifiableCons<T> extends Collection<T> {
+/**
+ * A read-only collection interface for {@link Cons}, primarily used as a return type for Cons.reversed()
+ */
+public interface UnmodifiableCons<T> extends Collection<T> {
+
     UnmodifiableCons<T> reversed();
 
     Iterator<T> descendingIterator();

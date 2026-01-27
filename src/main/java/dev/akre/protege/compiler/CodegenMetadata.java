@@ -13,6 +13,14 @@ import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
 
+/**
+ * Configuration metadata for the code generation process.  This configuration allows setting default values and override
+ * values through the builder, and then uses the provided FileDescriptor to resolve configuration options for each
+ * Message, Field, Enum, and Service descriptor.
+ * <p>
+ *  Additionally, this class builds a structure mirroring all the descriptors in the file to help the code generators
+ *  determine structure and type information.
+ */
 public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
                               Map<String, Object> defaults, Map<String, Object> overrides,
                               Map<String, Object> descriptorMap) {
@@ -95,12 +103,18 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         return Optional.ofNullable((Boolean) overrides.get(key));
     }
 
-    public enum Type {
-        BOOLEAN(Boolean.class), STRING(String.class), STRING_LIST(List.class);
+    /**
+     * Represents the data type of a configuration option, used to validate values and ensure type safety
+     * when retrieving options.
+     */
+    public enum ValueType {
+        BOOLEAN(Boolean.class),
+        STRING(String.class),
+        STRING_LIST(List.class);
 
         private final Predicate<Object> check;
 
-        Type(Class<?> cls) {
+        ValueType(Class<?> cls) {
             this.check = cls::isInstance;
         }
 
@@ -110,24 +124,28 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
 
-    public record Option(String key, Type type, Function<Cons<Object>, Optional<?>> lookup) {
+    /**
+     * Defines a configuration option with a unique key, a specific {@link ValueType}, and a lookup function
+     * to resolve its value from a descriptor hierarchy.
+     */
+    public record Option(String key, ValueType type, Function<Cons<Object>, Optional<?>> lookup) {
         public static Option customBoolean(String key) {
             var p = ProtoUtils.nameList(key);
-            return new Option(key, Type.BOOLEAN, scope -> getBooleanDescriptorOption(p, scope));
+            return new Option(key, ValueType.BOOLEAN, scope -> getBooleanDescriptorOption(p, scope));
         }
 
         public static Option customString(String key) {
             var p = ProtoUtils.nameList(key);
-            return new Option(key, Type.STRING, scope -> getDescriptorStringOption(p, scope));
+            return new Option(key, ValueType.STRING, scope -> getDescriptorStringOption(p, scope));
         }
 
         public static Option customStringList(String key) {
             var p = ProtoUtils.nameList(key);
-            return new Option(key, Type.STRING_LIST, scope -> getStringListDescriptorOption(p, scope));
+            return new Option(key, ValueType.STRING_LIST, scope -> getStringListDescriptorOption(p, scope));
         }
 
         public static Option fileOption(String key, Function<DescriptorProtos.FileDescriptorProto, String> f) {
-            return new Option(key, Type.STRING, scope -> getFileDescriptorStringOption(scope, f));
+            return new Option(key, ValueType.STRING, scope -> getFileDescriptorStringOption(scope, f));
         }
 
         public void setValue(HashMap<String, Object> values, Object value) {
@@ -148,6 +166,10 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         }
     }
 
+    /**
+     * A builder for creating and configuring {@link CodegenMetadata} instances. It allows setting
+     * default values and specific overrides that interact with values set in the .proto file.
+     */
     public static class Builder {
         private final DescriptorProtos.FileDescriptorProto fileDescriptor;
         private final HashMap<String, Object> defaults = new HashMap<>();
