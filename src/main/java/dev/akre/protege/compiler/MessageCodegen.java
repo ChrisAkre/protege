@@ -81,7 +81,6 @@ public record MessageCodegen(
                 .addSuperinterface(interfaceClassName());
 
         classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(message.getOptions()));
-        classBuilder.addAnnotations(CodegenUtils.getClassAnnotations(message.getOptions()));
 
         for (var nestedMessage : message.getNestedTypeList()) {
             var nestedMsgCodegen = new MessageCodegen(nestedMessage, ctx, allNames(), protoCodegen);
@@ -396,9 +395,7 @@ public record MessageCodegen(
                 privateFieldType = ParameterizedTypeName.get(ClassName.get("com.google.protobuf", "MapField"), keyType.box(), valueType.box());
             }
 
-            var fieldSpec = FieldSpec.builder(privateFieldType, fieldCodegen.internalName(), Modifier.PRIVATE)
-                    .addAnnotations(fieldCodegen.fieldAnnotations())
-                    .build();
+            var fieldSpec = FieldSpec.builder(privateFieldType, fieldCodegen.internalName(), Modifier.PRIVATE).build();
             // private <FieldType> <fieldName>_
             classBuilder.addField(fieldSpec);
 

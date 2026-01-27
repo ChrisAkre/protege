@@ -72,21 +72,6 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
-    public record Extension(String extendee, List<FieldDescriptorProto.Builder> fields) {
-        public void addTo(FileDescriptorProto.Builder fileBuilder) {
-            fields.forEach(f -> {
-                f.setExtendee(extendee);
-                fileBuilder.addExtension(f);
-            });
-        }
-        public void addTo(DescriptorProto.Builder messageBuilder) {
-            fields.forEach(f -> {
-                f.setExtendee(extendee);
-                messageBuilder.addExtension(f);
-            });
-        }
-    }
-
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
 //        if (isEmptyFile()) {
@@ -114,7 +99,6 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                 case EnumDescriptorProto.Builder e -> fileBuilder.addEnumType(e);
                 case ServiceDescriptorProto.Builder s -> fileBuilder.addService(s);
                 case UninterpretedOption.Builder o -> fileOptions.addUninterpretedOption(o);
-                case Extension e -> e.addTo(fileBuilder);
                 case null -> {} // EOF
                 default -> throw new IllegalStateException("unexpected: " + c);
             }
@@ -210,8 +194,6 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                 }
                 case ProtobufParser.ReservedContext r ->
                         visitReserved(r, messageBuilder);
-                case ProtobufParser.ExtendContext e ->
-                        visitExtend(e).addTo(messageBuilder);
                 default -> {}
             }
         });
@@ -220,20 +202,6 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
         scope = scope.tail();
         return messageBuilder;
-    }
-
-    @Override
-    public Extension visitExtend(ProtobufParser.ExtendContext ctx) {
-        String name = ctx.messageType().getText();
-        String extendee = root.resolve(name, scope)
-                .map(MemberNode::fullName)
-                .orElseGet(() -> name.startsWith(".") ? name : "." + name);
-
-        List<FieldDescriptorProto.Builder> fields = ctx.field().stream()
-                .map(this::visitField)
-                .toList();
-
-        return new Extension(extendee, fields);
     }
 
     @Override
