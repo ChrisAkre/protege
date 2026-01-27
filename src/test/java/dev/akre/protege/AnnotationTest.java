@@ -5,6 +5,7 @@ import dev.akre.protege.testutil.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -27,20 +28,20 @@ public class AnnotationTest {
                   option (dev.akre.protege.java_message_annotation) = '@org.junit.jupiter.api.Tag("test")';
                 
                   int64 id = 1 [
-                    (dev.akre.protege.java_annotation) = '@java.lang.Deprecated(since = "1.0")',
-                    (dev.akre.protege.java_annotation) = '@java.beans.BeanProperty(description = "The user id")'
+                    (dev.akre.protege.java_field_annotation) = '@java.lang.Deprecated(since = "1.0")',
+                    (dev.akre.protege.java_field_annotation) = '@java.beans.BeanProperty(description = "The user id")'
                   ];
                 
                   string email = 2 [
-                    (dev.akre.protege.java_annotation) = '@java.lang.Deprecated(forRemoval = true)'
+                    (dev.akre.protege.java_field_annotation) = '@java.lang.Deprecated(forRemoval = true)'
                   ];
 
                   repeated string tags = 3 [
-                    (dev.akre.protege.java_annotation) = '@java.lang.Deprecated'
+                    (dev.akre.protege.java_field_annotation) = '@java.lang.Deprecated'
                   ];
 
                   map<string, string> attributes = 4 [
-                    (dev.akre.protege.java_annotation) = '@java.lang.Deprecated'
+                    (dev.akre.protege.java_field_annotation) = '@java.lang.Deprecated'
                   ];
                 }
                 """;
@@ -119,6 +120,12 @@ public class AnnotationTest {
         assertThat(userBuilder.getMethod("getTags", int.class).isAnnotationPresent(Deprecated.class)).isFalse();
         assertThat(userBuilder.getMethod("getTagsCount").isAnnotationPresent(Deprecated.class)).isFalse();
         assertThat(userBuilder.getMethod("getAttributesOrDefault", String.class, String.class).isAnnotationPresent(Deprecated.class)).isFalse();
+
+        // Ensure private fields are NOT annotated
+        assertThat(userClass.getDeclaredField("id_").getAnnotations()).isEmpty();
+        assertThat(userClass.getDeclaredField("email_").getAnnotations()).isEmpty();
+        assertThat(userBuilder.getDeclaredField("id_").getAnnotations()).isEmpty();
+        assertThat(userBuilder.getDeclaredField("email_").getAnnotations()).isEmpty();
     }
 
     private void checkFieldAnnotation(Class<?> clazz, String methodName, Class<? extends Annotation> annotationClass) throws NoSuchMethodException {

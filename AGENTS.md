@@ -74,7 +74,15 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 ### 4. Build and Verification
 
 * **Integration Testing**: Unit tests are insufficient for codegen changes. You must run `mvn verify` to trigger the
-  `maven-invoker-plugin` tests in `src/it`.
+  `maven-invoker-plugin` tests in `src/it`.  Individual integration tests can be executed using 
+  `mvn verify -DskipTests -Dinvoker.test=<test folder name>`.  To exclude a broken integration test from running in CI,
+  add it to an pomExcludes element in the configuration of the invoker plugin. See the following example
+```xml
+    <pomExcludes>
+        <pomExclude>hibernate-test/*</pomExclude>
+    </pomExcludes>
+```
+
 * **Template Injection**: Do not hardcode versions. The build uses `ProtegeVersion.java` as a template for version
   injection.
 
