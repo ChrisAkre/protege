@@ -27,6 +27,7 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     public static final Option JAVA_IMPLEMENTS = Option.customString("dev.akre.protege.java_implements");
     public static final Option JAVA_MESSAGE_SUPERCLASS = Option.customString("dev.akre.protege.message_superclass");
     public static final Option OUTER_NAME = Option.fileOption("outer_name", ProtoUtils::getJavaOuterClassName);
+    public static final Option JACKSON_ANNOTATIONS = Option.customBoolean("dev.akre.protege.java_jackson_annotations");
 
 
     public static CodegenMetadata.Builder build(DescriptorProtos.FileDescriptorProto fileDescriptor) {
@@ -84,7 +85,17 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
     List<String> getList(Option key, Object descriptor) {
-        return key.<List<String>>get(overrides).or(() -> key.lookup(hierarchy().get(descriptor))).or(() -> key.get(defaults)).orElse(List.of());
+        List<String> list = key.<List<String>>get(overrides)
+                .or(() -> Optional.ofNullable(hierarchy().get(descriptor)).flatMap(key::lookup))
+                .or(() -> key.get(defaults))
+                .orElse(List.of());
+
+        if (key == FIELD_ANNOTATIONS && getBoolean(JACKSON_ANNOTATIONS, descriptor)) {
+            List<String> newList = new ArrayList<>(list);
+            newList.add("@com.fasterxml.jackson.annotation.JsonValue");
+            return newList;
+        }
+        return list;
     }
 
     public Optional<Boolean> getBooleanDefault(String key) {
@@ -159,6 +170,7 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             ENHANCED_ONEOF.setValue(defaults, false);
             ONEOF_CASE.setValue(defaults, true);
             JAVA_MESSAGE_SUPERCLASS.setValue(defaults, GeneratedMessage.class.getName());
+            JACKSON_ANNOTATIONS.setValue(defaults, false);
         }
 
         static Map<String, Object> buildDescriptorMap(DescriptorProtos.FileDescriptorProto fileDescriptor) {
