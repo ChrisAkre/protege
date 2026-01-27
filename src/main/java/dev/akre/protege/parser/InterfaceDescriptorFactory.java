@@ -16,6 +16,13 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Generates Protobuf descriptors from annotated Java interfaces.
+ * <p>
+ * This class uses reflection to scan Java classes (typically interfaces) annotated with
+ * {@link dev.akre.protege.GenProto} and {@link dev.akre.protege.Field} to build
+ * corresponding {@link FileDescriptorProto} objects.
+ */
 public class InterfaceDescriptorFactory {
 
     private final Map<Type, DescriptorProtos.DescriptorProto> messages = new LinkedHashMap<>();
@@ -29,6 +36,13 @@ public class InterfaceDescriptorFactory {
     }
 
 
+    /**
+     * Updates an existing FileDescriptorProto with definitions from a Java class.
+     *
+     * @param descriptor The base descriptor to update.
+     * @param cls        The Java class to inspect.
+     * @return The updated FileDescriptorProto.
+     */
     public FileDescriptorProto update(FileDescriptorProto descriptor, Class<?> cls) {
         FileDescriptorProto.Builder builder = descriptor.toBuilder();
 
@@ -72,9 +86,9 @@ public class InterfaceDescriptorFactory {
         return create(cls, name);
     }
 
-    public FileDescriptorProto create(Class<?> cls, String name) {
+    public FileDescriptorProto create(Class<?> cls, String protoFileName) {
         FileDescriptorProto.Builder fileDescriptorProtoBuilder = FileDescriptorProto.newBuilder();
-        fileDescriptorProtoBuilder.setName(name + ".proto");
+        fileDescriptorProtoBuilder.setName(protoFileName + ".proto");
 
         GenProto genProto = cls.getAnnotation(GenProto.class);
         String pkg = (genProto != null && !genProto.pkg().isEmpty()) ? genProto.pkg() : cls.getPackageName();
@@ -193,9 +207,7 @@ public class InterfaceDescriptorFactory {
                 Field fieldAnn = method.getAnnotation(Field.class);
                 if (fieldAnn != null) {
                     fieldBuilder.setNumber(fieldAnn.value());
-                    if (fieldAnn.type() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32) {
-                        fieldBuilder.setType(fieldAnn.type());
-                    }
+                    fieldAnn.type().ifPresent(fieldBuilder::setType);
                     if (!fieldAnn.oneof().isEmpty()) {
                         String oneofName = fieldAnn.oneof();
                         int index = oneofIndices.computeIfAbsent(oneofName, k -> {
@@ -263,5 +275,3 @@ public class InterfaceDescriptorFactory {
         return result;
     }
 }
-
-    

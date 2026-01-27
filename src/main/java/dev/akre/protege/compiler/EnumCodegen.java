@@ -8,6 +8,14 @@ import dev.akre.util.Cons;
 
 import javax.lang.model.element.Modifier;
 
+/**
+ * Generates Java code for Protobuf enums including:
+ * <ul>
+ *   <li>Enum constants</li>
+ *   <li>Value storage and retrieval</li>
+ *   <li>Integration with ProtocolMessageEnum</li>
+ * </ul>
+ */
 public record EnumCodegen(
         DescriptorProtos.EnumDescriptorProto descriptor,
         Cons<String> scope,
@@ -27,6 +35,11 @@ public record EnumCodegen(
         return scope.stream().toArray(String[]::new);
     }
 
+    /**
+     * Generates code for an enum
+     *
+     * @return a fully populated TypeSpec containing the entire enum class
+     */
     public TypeSpec generate() {
         var enumName = getEnumName();
         var enumBuilder = TypeSpec.enumBuilder(enumName)

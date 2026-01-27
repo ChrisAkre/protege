@@ -1,5 +1,10 @@
 package dev.akre.protege.parser;
 
+/**
+ * Thrown when the Protobuf parser or generator encounters an invalid state or input.
+ * <p>
+ * This exception carries an optional filename to help locate the error source.
+ */
 public class InvalidProtoException extends RuntimeException {
     private String filename;
 

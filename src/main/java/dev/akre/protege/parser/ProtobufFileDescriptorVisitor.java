@@ -14,6 +14,9 @@ import java.util.stream.Stream;
 
 import static dev.akre.protege.ProtoUtils.toPascalCase;
 
+/**
+ * Visitor that creates a FileDescriptorProto.Builder from an ANTLR parse tree
+ */
 public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     private final MemberNode root;
@@ -36,12 +39,15 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     public interface FileOption {
         void set(FileOptions.Builder options);
+
         static FileOption javaPackage(String value) {
             return options -> options.setJavaPackage(value);
         }
+
         static FileOption javaOuterClass(String value) {
             return options -> options.setJavaOuterClassname(value);
         }
+
         static FileOption javaGenericServices(boolean value) {
             return options -> options.setJavaGenericServices(value);
         }
