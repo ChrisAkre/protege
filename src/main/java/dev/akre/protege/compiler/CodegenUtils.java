@@ -41,11 +41,6 @@ public class CodegenUtils {
                 .collect(Collectors.toList());
     }
 
-//    static List<AnnotationSpec> getGetterAnnotations(DescriptorProtos.FieldOptions options) {
-//        return options.getUninterpretedOptionList().stream().filter(o -> o.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining(".")).equals(FIELD_ANNOTATION)).map(o -> parseAnnotation(o.getStringValue().toStringUtf8())).collect(Collectors.toList());
-//    }
-
-
     static List<AnnotationSpec> getClassAnnotations(DescriptorProtos.MessageOptions options) {
         return options.getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream()

@@ -10,45 +10,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Static methods for generating code specifications
+ * Factory class for generating JavaPoet method specifications.
+ * <p>
+ * This class contains static utility methods that construct {@link MethodSpec} objects
+ * for various parts of the generated code (e.g., builders, field accessors, map handling).
+ * It delegates the actual logic of <i>what</i> to generate to these methods, keeping the
+ * main generator classes cleaner.
  */
 public class CodegenMethods {
 
     private CodegenMethods() {
         // Utility class
     }
-
-//    static class OuterClass {
-//        public static FieldSpec versionField() {
-//            return FieldSpec.builder(String.class, "PROTEGE_VERSION", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-//                    .initializer("$S", ProtegeVersion.VERSION_STRING)
-//                    .build();
-//        }
-//
-//        public static MethodSpec getDescriptor() {
-//            return MethodSpec.methodBuilder("getDescriptor")
-//                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-//                    .returns(Descriptors.FileDescriptor.class)
-//                    .addStatement("return fileDescriptor")
-//                    .build();
-//        }
-//
-//        public static FieldSpec fileDescriptorField(CodegenContext ctx) {
-//            var descriptorChunks =  ProtoUtils.splitAndEscapeBytes(ctx.fileDescriptor().toByteArray()).stream()
-//                    .map(s -> CodeBlock.of("\"$L\"", s))
-//                    .collect(CodeBlock.joining(",\n"));
-//
-//            var data = CodeBlock.builder().add("new String[] {\n").indent().add(descriptorChunks).unindent().add("\n}").build();
-//
-//            CodeBlock descriptorInitializer = CodeBlock.builder()
-//                    .addStatement("$T.internalBuildGeneratedFileFrom($L, new $T[0])",
-//                            Descriptors.FileDescriptor.class, data, Descriptors.FileDescriptor.class)
-//                    .build();
-//            return FieldSpec.builder(Descriptors.FileDescriptor.class, "fileDescriptor", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-//                    .initializer(descriptorInitializer)
-//                    .build();
-//        }
-//    }
 
     /**
      * Methods for generating Builder classes
