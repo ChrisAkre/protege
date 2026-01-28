@@ -10,6 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Context for generating code for a oneof group.
+ * <p>
+ * This record holds the metadata required to generate the sealed interfaces, case enums,
+ * and pattern matching logic used by the enhanced oneof implementation.
+ */
 public record OneofCodegen(
         DescriptorProtos.OneofDescriptorProto descriptor,
         int oneofIndex,
@@ -42,10 +48,6 @@ public record OneofCodegen(
 
     public static void populateOneofInterfaces(OuterClassCodegen context, CodegenContext ctx, Map<String, List<ClassName>> oneofInterfacesByType, CodegenMetadata config) {
         oneofInterfacesByType.clear();
-
-//        for (var message : ctx.fileDescriptor().getMessageTypeList()) {
-//            populateOneofInterfaces(context, message, ctx, Cons.nil(), oneofInterfacesByType);
-//        }
 
         ProtoUtils.descriptorChildren(context.descriptor(), DescriptorProtos.DescriptorProto.class)
                 .forEach(message -> populateOneofInterfaces(context, message, ctx, Cons.nil(), oneofInterfacesByType));

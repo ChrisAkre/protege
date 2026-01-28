@@ -15,3 +15,5 @@
 - [x] Add Javadocs to `dev.akre.protege` root package.
 - [x] Add Javadocs to `dev.akre.protege.compiler` package.
 - [x] Add Javadocs to `dev.akre.protege.parser` package.
+- [ ] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
+- [ ] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
