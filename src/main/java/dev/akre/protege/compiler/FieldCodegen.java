@@ -21,7 +21,6 @@ public record FieldCodegen(
         String internalName,
         boolean isMap,
         boolean isRepeated,
-        List<AnnotationSpec> fieldAnnotations,
         // Map specific
         DescriptorProtos.DescriptorProto entryDescriptor,
         TypeName keyType,
@@ -42,14 +41,6 @@ public record FieldCodegen(
         String internalName = fieldName + "_";
         boolean isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
         boolean isMap = ctx.isMapField(field);
-        List<AnnotationSpec> getterAnnotations = CodegenUtils.getFieldAnnotations(field.getOptions());
-//        List<AnnotationSpec> getterAnnotations = new ArrayList<>();
-//        List<String> configuredAnnotations = messageCodegen.config().getList(CodegenMetadata.FIELD_ANNOTATIONS, field);
-//        for (String annotation : configuredAnnotations) {
-//            getterAnnotations.add(CodegenUtils.parseAnnotation(annotation));
-//        }
-
-
 
         DescriptorProtos.DescriptorProto entryDescriptor = null;
         TypeName keyType = null;
@@ -81,7 +72,6 @@ public record FieldCodegen(
                 internalName,
                 isMap,
                 isRepeated,
-                getterAnnotations,
                 entryDescriptor,
                 keyType,
                 valueType,

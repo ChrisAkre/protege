@@ -1,6 +1,7 @@
 package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
+import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 
 import java.util.List;
@@ -22,8 +23,14 @@ public interface CodegenConfig {
         return config().getString(CodegenMetadata.JAVA_PACKAGE, descriptor()).orElseGet(this::getPackage);
     }
 
-    default List<String> getFieldAnnotations() {
-        return config().getList(CodegenMetadata.FIELD_ANNOTATIONS, descriptor());
+    default List<AnnotationSpec> getFieldAnnotations() {
+        return config().getList(CodegenMetadata.FIELD_ANNOTATION, descriptor()).stream()
+                .map(CodegenUtils::parseAnnotation).toList();
+    }
+
+    default List<AnnotationSpec> getClassAnnotations() {
+        return config().getList(CodegenMetadata.FIELD_ANNOTATION, descriptor()).stream()
+                .map(CodegenUtils::parseAnnotation).toList();
     }
 
     default DescriptorProtos.DescriptorProto getMessageDescriptor(String name) {

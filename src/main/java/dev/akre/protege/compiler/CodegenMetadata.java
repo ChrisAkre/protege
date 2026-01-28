@@ -24,17 +24,11 @@ import static java.util.function.Predicate.not;
 public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
                               Map<String, Object> defaults, Map<String, Object> overrides,
                               Map<String, Object> descriptorMap) {
-    public static final Option FIELD_ANNOTATION = Option.customString("dev.akre.protege.java_field_annotation");
-    public static final Option MESSAGE_ANNOTATION = Option.customString("dev.akre.protege.java_message_annotation");
+    public static final Option FIELD_ANNOTATION = Option.customStringList("dev.akre.protege.java_field_annotation");
+    public static final Option MESSAGE_ANNOTATION = Option.customStringList("dev.akre.protege.java_message_annotation");
     public static final Option JAVA_GENERATE_DEPRECATED = Option.customBoolean("dev.akre.protege.java_generate_deprecated");
     public static final Option PACKAGE = Option.fileOption("package", DescriptorProtos.FileDescriptorProto::getPackage);
     public static final Option JAVA_PACKAGE = Option.fileOption("java_package", f -> f.getOptions().getJavaPackage());
-    public static final Option FIELD_ANNOTATIONS = new Option(FIELD_ANNOTATION.key(), ValueType.STRING_LIST, scope -> {
-        var list1 = getStringListDescriptorOption(ProtoUtils.nameList(FIELD_ANNOTATION.key()), scope).orElse(List.of());
-        var list2 = getStringListDescriptorOption(ProtoUtils.nameList("dev.akre.protege.java_annotation"), scope).orElse(List.of());
-        if (list1.isEmpty() && list2.isEmpty()) return Optional.empty();
-        return Optional.of(ProtoUtils.listConcat(list1, list2.toArray(String[]::new)));
-    });
     public static final Option MESSAGE_ANNOTATIONS = Option.customStringList(MESSAGE_ANNOTATION.key());
     public static final Option BUILDER_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_builder_annotation");
     public static final Option ENHANCED_ONEOF = Option.customBoolean("dev.akre.protege.java_enhanced_oneof");
@@ -100,25 +94,28 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
     List<String> getList(Option key, Object descriptor) {
-        List<String> list = key.<List<String>>get(overrides)
-                .or(() -> Optional.ofNullable(hierarchy().get(descriptor)).flatMap(key::lookup))
-                .or(() -> key.get(defaults))
-                .orElse(List.of());
 
-        if (getBoolean(JACKSON_ANNOTATIONS, descriptor)) {
-            if (key == FIELD_ANNOTATIONS) {
-                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.annotation.JsonValue");
-            } else if (key == MESSAGE_ANNOTATIONS) {
-                if (descriptor instanceof DescriptorProtos.DescriptorProto msg) {
-                    return ProtoUtils.listConcat(list,
-                            "@com.fasterxml.jackson.databind.annotation.JsonDeserialize(builder = " + msg.getName() + ".Builder.class)",
-                            "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)");
-                }
-            } else if (key == BUILDER_ANNOTATIONS) {
-                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder(withPrefix = \"set\")");
-            }
+//        if (getBoolean(JACKSON_ANNOTATIONS, descriptor)) {
+//            if (key == FIELD_ANNOTATION) {
+//                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.annotation.JsonValue");
+//            } else if (key == MESSAGE_ANNOTATIONS) {
+//                if (descriptor instanceof DescriptorProtos.DescriptorProto msg) {
+//                    return ProtoUtils.listConcat(list,
+//                            "@com.fasterxml.jackson.databind.annotation.JsonDeserialize(builder = " + msg.getName() + ".Builder.class)",
+//                            "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)");
+//                }
+//            } else if (key == BUILDER_ANNOTATIONS) {
+//                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder(withPrefix = \"set\")");
+//            }
+//        }
+        try {
+            return key.<List<String>>get(overrides)
+                    .or(() -> Optional.ofNullable(this.hierarchy().get(descriptor)).flatMap(key::lookup))
+                    .or(() -> key.get(defaults))
+                    .orElse(List.of());
+        } catch (ClassCastException e) {
+            throw e;
         }
-        return list;
     }
 
     public Optional<Boolean> getBooleanDefault(String key) {
@@ -276,24 +273,24 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         }
 
         public Builder addFieldAnnotation(String value) {
-            @SuppressWarnings("unchecked") List<String> list = (List<String>) defaults.computeIfAbsent(FIELD_ANNOTATIONS.key(), k -> new ArrayList<>());
+            @SuppressWarnings("unchecked") List<String> list = (List<String>) defaults.computeIfAbsent(FIELD_ANNOTATION.key(), k -> new ArrayList<>());
             list.add(value);
             return this;
         }
 
         public Builder setFieldAnnotations(List<String> values) {
-            FIELD_ANNOTATIONS.setValue(defaults, new ArrayList<>(values));
+            FIELD_ANNOTATION.setValue(defaults, new ArrayList<>(values));
             return this;
         }
 
         public Builder addOverrideFieldAnnotation(String value) {
-            @SuppressWarnings("unchecked") List<String> list = (List<String>) overrides.computeIfAbsent(FIELD_ANNOTATIONS.key(), k -> new ArrayList<>());
+            @SuppressWarnings("unchecked") List<String> list = (List<String>) overrides.computeIfAbsent(FIELD_ANNOTATION.key(), k -> new ArrayList<>());
             list.add(value);
             return this;
         }
 
         public Builder setOverrideFieldAnnotations(List<String> values) {
-            FIELD_ANNOTATIONS.setValue(overrides, new ArrayList<>(values));
+            FIELD_ANNOTATION.setValue(overrides, new ArrayList<>(values));
             return this;
         }
 

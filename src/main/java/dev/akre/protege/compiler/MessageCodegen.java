@@ -80,11 +80,10 @@ public record MessageCodegen(
                 .superclass(getMessageSuperclass())
                 .addSuperinterface(interfaceClassName());
 
-        classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()));
         classBuilder.addAnnotations(CodegenUtils.getClassAnnotations(descriptor.getOptions()));
-//        for (String annotation : config.getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor)) {
-//            classBuilder.addAnnotation(CodegenUtils.parseAnnotation(annotation));
-//        }
+        for (String annotation : config.getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor)) {
+            classBuilder.addAnnotation(CodegenUtils.parseAnnotation(annotation));
+        }
 
 
         for (var nestedMessage : descriptor.getNestedTypeList()) {
