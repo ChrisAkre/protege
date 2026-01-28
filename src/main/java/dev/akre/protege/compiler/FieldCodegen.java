@@ -33,7 +33,7 @@ public record FieldCodegen(
 ) implements CodegenConfig {
 
     public static FieldCodegen create(DescriptorProtos.FieldDescriptorProto field, MessageCodegen messageCodegen) {
-        var ctx = messageCodegen.ctx();
+        var ctx = messageCodegen;
         var fieldType = ctx.getFieldType(field, messageCodegen.currentScope());
 
         String fieldName = field.getName();
@@ -54,7 +54,7 @@ public record FieldCodegen(
             keyType = ctx.getFieldType(keyField, messageCodegen.currentScope());
             valueType = ctx.getFieldType(valueField, messageCodegen.currentScope());
         } else if (isRepeated) {
-            genericType = ProtoCodegen.PROTO_TYPE_TO_TYPE_NAME.get(field.getType());
+            genericType = CodegenUtils.PROTO_TYPE_TO_TYPE_NAME.get(field.getType());
             if (field.hasTypeName()) {
                 genericType = ctx.resolveTypeName(field.getTypeName(), messageCodegen.currentScope());
             }

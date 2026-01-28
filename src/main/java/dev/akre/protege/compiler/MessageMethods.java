@@ -407,23 +407,23 @@ public class MessageMethods {
             var isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
             var methodName = ProtoUtils.getWriteMethodName(field.getType());
 
-            if (context.ctx().isMapField(field)) {
+            if (context.isMapField(field)) {
                 writeToBuilder.beginControlFlow("");
-                var innerType = context.ctx().resolveTypeName(field.getTypeName(), context.currentScope());
+                var innerType = context.resolveTypeName(field.getTypeName(), context.currentScope());
                 String entryTypeName = field.getTypeName();
                 if (entryTypeName.startsWith(".")) {
-                    var protoPackage = context.ctx().fileDescriptor().getPackage();
+                    var protoPackage = context.config().fileDescriptor().getPackage();
                     if (!protoPackage.isEmpty() && entryTypeName.startsWith("." + protoPackage + ".")) {
                         entryTypeName = entryTypeName.substring(protoPackage.length() + 2);
                     } else if (entryTypeName.startsWith(".")) {
                         entryTypeName = entryTypeName.substring(1);
                     }
                 }
-                var entryDescriptor = context.ctx().messageDescriptorRegistry().get(entryTypeName);
+                var entryDescriptor = context.config().messageDescriptorRegistry().get(entryTypeName);
                 var keyField = entryDescriptor.getField(0);
                 var valueField = entryDescriptor.getField(1);
-                var keyType = context.ctx().getFieldType(keyField, context.currentScope());
-                var valueType = context.ctx().getFieldType(valueField, context.currentScope());
+                var keyType = context.getFieldType(keyField, context.currentScope());
+                var valueType = context.getFieldType(valueField, context.currentScope());
 
                 writeToBuilder.addStatement("$T<$T, $T> sortedMap = new $T<>($L.getMap())",
                         Map.class, keyType.box(), valueType.box(), java.util.TreeMap.class, fieldName);
@@ -482,7 +482,7 @@ public class MessageMethods {
         for (var field : context.descriptor().getFieldList()) {
             var fieldName = field.getName();
             var pascalName = ProtoUtils.toPascalCase(fieldName);
-            if (context.ctx().isMapField(field)) {
+            if (context.isMapField(field)) {
                 mergeFromSpecificMethod.beginControlFlow("if (!other.get$LMap().isEmpty())", pascalName)
                         .addStatement("$L_.getMutableMap().putAll(other.get$LMap())", fieldName, pascalName)
                         .addStatement("onChanged()")
