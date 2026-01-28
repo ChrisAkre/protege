@@ -81,7 +81,7 @@ public record FieldCodegen(
                 internalName,
                 isMap,
                 isRepeated,
-                fieldAnnotations,
+                getterAnnotations,
                 entryDescriptor,
                 keyType,
                 valueType,

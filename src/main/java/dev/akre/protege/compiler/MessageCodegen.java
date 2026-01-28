@@ -71,7 +71,7 @@ public record MessageCodegen(
     }
 
     public String canonicalMessageName() {
-        return ctx().packageName() + "." + allNames().stream().collect(Collectors.joining("."));
+        return ctx().packageName() + "." + String.join(".", allNames());
     }
 
     public TypeSpec generateMessageClass() {

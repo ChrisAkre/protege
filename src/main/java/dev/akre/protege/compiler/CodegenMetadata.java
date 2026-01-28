@@ -29,7 +29,7 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     public static final Option JAVA_GENERATE_DEPRECATED = Option.customBoolean("dev.akre.protege.java_generate_deprecated");
     public static final Option PACKAGE = Option.fileOption("package", DescriptorProtos.FileDescriptorProto::getPackage);
     public static final Option JAVA_PACKAGE = Option.fileOption("java_package", f -> f.getOptions().getJavaPackage());
-    public static final Option FIELD_ANNOTATIONS = new Option(FIELD_ANNOTATION.key(), Type.STRING_LIST, scope -> {
+    public static final Option FIELD_ANNOTATIONS = new Option(FIELD_ANNOTATION.key(), ValueType.STRING_LIST, scope -> {
         var list1 = getStringListDescriptorOption(ProtoUtils.nameList(FIELD_ANNOTATION.key()), scope).orElse(List.of());
         var list2 = getStringListDescriptorOption(ProtoUtils.nameList("dev.akre.protege.java_annotation"), scope).orElse(List.of());
         if (list1.isEmpty() && list2.isEmpty()) return Optional.empty();
