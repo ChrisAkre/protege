@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.junit.jupiter.api.Test;
-
+import static dev.akre.it.Jackson.*;
 import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +34,7 @@ class JacksonTest {
     @Test
     void testFieldAnnotation() throws NoSuchMethodException {
         Method method = SingleFieldMessage.class.getMethod("getValue");
-        assertThat(method).hasAnnotation(JsonValue.class);
+        assertThat(method.isAnnotationPresent(JsonValue.class)).isTrue();
     }
 
     @Test
@@ -50,10 +50,10 @@ class JacksonTest {
     @Test
     void testMultiFieldMessageAnnotations() throws NoSuchMethodException {
         Method method1 = MultiFieldMessage.class.getMethod("getName");
-        assertThat(method1).hasAnnotation(JsonValue.class);
+        assertThat(method1.isAnnotationPresent(JsonValue.class)).isTrue();
 
         Method method2 = MultiFieldMessage.class.getMethod("getId");
-        assertThat(method2).hasAnnotation(JsonValue.class);
+        assertThat(method2.isAnnotationPresent(JsonValue.class)).isTrue();
 
         // Serialization should fail because multiple @JsonValue
         ObjectMapper mapper = new ObjectMapper();

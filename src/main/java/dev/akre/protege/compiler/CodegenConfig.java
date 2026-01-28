@@ -1,10 +1,15 @@
 package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
+import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.TypeName;
+import dev.akre.util.Cons;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface CodegenConfig {
     CodegenMetadata config();
@@ -22,8 +27,27 @@ public interface CodegenConfig {
         return config().getString(CodegenMetadata.JAVA_PACKAGE, descriptor()).orElseGet(this::getPackage);
     }
 
-    default List<String> getFieldAnnotations() {
-        return config().getList(CodegenMetadata.FIELD_ANNOTATIONS, descriptor());
+    default List<AnnotationSpec> getFieldAnnotations() {
+        return config().getList(CodegenMetadata.FIELD_ANNOTATIONS, descriptor()).stream()
+                .map(CodegenUtils::parseAnnotation).toList();
+    }
+
+    default List<AnnotationSpec> getClassAnnotations() {
+        return Stream.concat(config().getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor()).stream(),
+                config().getList(CodegenMetadata.CLASS_ANNOTATIONS, descriptor()).stream())
+                .map(CodegenUtils::parseAnnotation).toList();
+    }
+
+    default List<AnnotationSpec> getInterfaceAnnotations() {
+        return Stream.concat(config().getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor()).stream(),
+                        config().getList(CodegenMetadata.INTERFACE_ANNOTATIONS, descriptor()).stream())
+                .map(CodegenUtils::parseAnnotation).toList();
+    }
+
+    default List<AnnotationSpec> getBuilderAnnotations() {
+        return Stream.concat(config().getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor()).stream(),
+                        config().getList(CodegenMetadata.BUILDER_ANNOTATIONS, descriptor()).stream())
+                .map(CodegenUtils::parseAnnotation).toList();
     }
 
     default DescriptorProtos.DescriptorProto getMessageDescriptor(String name) {
@@ -48,5 +72,41 @@ public interface CodegenConfig {
 
     default String getOuterName() {
         return config().getString(CodegenMetadata.OUTER_NAME, descriptor()).orElse("");
+    }
+
+    default TypeName resolveTypeName(String protoTypeName, List<String> currentScope) {
+        return config().resolveTypeName(protoTypeName, currentScope);
+    }
+
+    default TypeName resolveTypeName(String protoTypeName, Cons<String> currentScope) {
+        return config().resolveTypeName(protoTypeName, currentScope);
+    }
+
+    default TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
+        return config().getFieldType(field, currentScope);
+    }
+
+//    default TypeName getFieldType() {
+//        return config().getFieldType(descriptor());
+//    }
+
+    default boolean isMapField(DescriptorProtos.FieldDescriptorProto field) {
+        return config().isMapField(field);
+    }
+
+    default DescriptorProtos.DescriptorProto getEntryDescriptor(DescriptorProtos.FieldDescriptorProto field) {
+        return config().getEntryDescriptor(field);
+    }
+
+    default String relativeToProtoPackage(String typeName) {
+        return config().relativeToProtoPackage(typeName);
+    }
+
+    default ClassName getFieldAccessorTableClass() {
+        return config().getFieldAccessorTableClass();
+    }
+
+    default Map<String, ClassName> typeRegistry() {
+        return config().typeRegistry();
     }
 }

@@ -1,10 +1,7 @@
 package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.*;
 import dev.akre.protege.ProtoUtils;
 
 import java.util.ArrayList;
@@ -27,6 +24,24 @@ public class CodegenUtils {
     private static final String FIELD_ANNOTATION = "dev.akre.protege.java_field_annotation";
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
     private static final String CLASS_ANNOTATION = "dev.akre.protege.java_class_annotation";
+
+    public static final Map<DescriptorProtos.FieldDescriptorProto.Type, TypeName> PROTO_TYPE_TO_TYPE_NAME = Map.ofEntries(
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING, ClassName.get(String.class)),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32, TypeName.INT),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT64, TypeName.LONG),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_FLOAT, TypeName.FLOAT),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_DOUBLE, TypeName.DOUBLE),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_BOOL, TypeName.BOOLEAN),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_BYTES, ClassName.get(com.google.protobuf.ByteString.class)),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_UINT32, TypeName.INT),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_UINT64, TypeName.LONG),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_SINT32, TypeName.INT),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_SINT64, TypeName.LONG),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_FIXED32, TypeName.INT),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_FIXED64, TypeName.LONG),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_SFIXED32, TypeName.INT),
+            Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_SFIXED64, TypeName.LONG)
+    );
 
     private CodegenUtils() {
         // Utility class
@@ -271,7 +286,7 @@ public class CodegenUtils {
                 } else {
                     // Primitive types. This is a bit hacky without full type mapping here,
                     // but we can use common defaults.
-                    cb.addStatement("$L = $L", fieldName, ProtoUtils.getDefaultReturnValue(ProtoCodegen.PROTO_TYPE_TO_TYPE_NAME.get(field.getType()).toString()));
+                    cb.addStatement("$L = $L", fieldName, ProtoUtils.getDefaultReturnValue(PROTO_TYPE_TO_TYPE_NAME.get(field.getType()).toString()));
                 }
             }
         }

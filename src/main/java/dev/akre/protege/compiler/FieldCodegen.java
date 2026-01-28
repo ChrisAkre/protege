@@ -21,7 +21,6 @@ public record FieldCodegen(
         String internalName,
         boolean isMap,
         boolean isRepeated,
-        List<AnnotationSpec> fieldAnnotations,
         // Map specific
         DescriptorProtos.DescriptorProto entryDescriptor,
         TypeName keyType,
@@ -34,7 +33,7 @@ public record FieldCodegen(
 ) implements CodegenConfig {
 
     public static FieldCodegen create(DescriptorProtos.FieldDescriptorProto field, MessageCodegen messageCodegen) {
-        var ctx = messageCodegen.ctx();
+        var ctx = messageCodegen;
         var fieldType = ctx.getFieldType(field, messageCodegen.currentScope());
 
         String fieldName = field.getName();
@@ -42,14 +41,6 @@ public record FieldCodegen(
         String internalName = fieldName + "_";
         boolean isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
         boolean isMap = ctx.isMapField(field);
-        List<AnnotationSpec> getterAnnotations = CodegenUtils.getFieldAnnotations(field.getOptions());
-//        List<AnnotationSpec> getterAnnotations = new ArrayList<>();
-//        List<String> configuredAnnotations = messageCodegen.config().getList(CodegenMetadata.FIELD_ANNOTATIONS, field);
-//        for (String annotation : configuredAnnotations) {
-//            getterAnnotations.add(CodegenUtils.parseAnnotation(annotation));
-//        }
-
-
 
         DescriptorProtos.DescriptorProto entryDescriptor = null;
         TypeName keyType = null;
@@ -63,7 +54,7 @@ public record FieldCodegen(
             keyType = ctx.getFieldType(keyField, messageCodegen.currentScope());
             valueType = ctx.getFieldType(valueField, messageCodegen.currentScope());
         } else if (isRepeated) {
-            genericType = ProtoCodegen.PROTO_TYPE_TO_TYPE_NAME.get(field.getType());
+            genericType = CodegenUtils.PROTO_TYPE_TO_TYPE_NAME.get(field.getType());
             if (field.hasTypeName()) {
                 genericType = ctx.resolveTypeName(field.getTypeName(), messageCodegen.currentScope());
             }
@@ -81,7 +72,6 @@ public record FieldCodegen(
                 internalName,
                 isMap,
                 isRepeated,
-                getterAnnotations,
                 entryDescriptor,
                 keyType,
                 valueType,

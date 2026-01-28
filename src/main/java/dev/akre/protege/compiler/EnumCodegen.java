@@ -19,7 +19,6 @@ import javax.lang.model.element.Modifier;
 public record EnumCodegen(
         DescriptorProtos.EnumDescriptorProto descriptor,
         Cons<String> scope,
-        CodegenContext ctx,
         ProtoCodegen protoCodegen,
         CodegenMetadata config
 ) implements CodegenConfig {
@@ -28,7 +27,7 @@ public record EnumCodegen(
     }
 
     public ClassName outerClassName() {
-        return ClassName.get(ctx.packageName(), ctx.outerName());
+        return ClassName.get(getJavaPackage(), getOuterName());
     }
 
     public String[] parentNames() {

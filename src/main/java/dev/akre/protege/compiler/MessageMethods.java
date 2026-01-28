@@ -148,7 +148,7 @@ public class MessageMethods {
         var getterBuilder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(ctx.fieldAnnotations())
+                .addAnnotations(ctx.getFieldAnnotations())
                 .returns(ctx.fieldType());
 
         if (ctx.isString()) {
@@ -217,7 +217,7 @@ public class MessageMethods {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(ctx.fieldAnnotations())
+                .addAnnotations(ctx.getFieldAnnotations())
                 .returns(fieldType)
                 .addStatement("return $L.getMap()", ctx.internalName())
                 .build();
@@ -272,7 +272,7 @@ public class MessageMethods {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(ctx.fieldAnnotations())
+                .addAnnotations(ctx.getFieldAnnotations())
                 .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
                 .addStatement("return new $T($L)", com.google.protobuf.UnmodifiableLazyStringList.class, ctx.internalName())
                 .build();
@@ -282,7 +282,7 @@ public class MessageMethods {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(ctx.fieldAnnotations())
+                .addAnnotations(ctx.getFieldAnnotations())
                 .returns(fieldType)
                 .addStatement("return $L", ctx.internalName())
                 .build();
@@ -407,23 +407,23 @@ public class MessageMethods {
             var isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
             var methodName = ProtoUtils.getWriteMethodName(field.getType());
 
-            if (context.ctx().isMapField(field)) {
+            if (context.isMapField(field)) {
                 writeToBuilder.beginControlFlow("");
-                var innerType = context.ctx().resolveTypeName(field.getTypeName(), context.currentScope());
+                var innerType = context.resolveTypeName(field.getTypeName(), context.currentScope());
                 String entryTypeName = field.getTypeName();
                 if (entryTypeName.startsWith(".")) {
-                    var protoPackage = context.ctx().fileDescriptor().getPackage();
+                    var protoPackage = context.config().fileDescriptor().getPackage();
                     if (!protoPackage.isEmpty() && entryTypeName.startsWith("." + protoPackage + ".")) {
                         entryTypeName = entryTypeName.substring(protoPackage.length() + 2);
                     } else if (entryTypeName.startsWith(".")) {
                         entryTypeName = entryTypeName.substring(1);
                     }
                 }
-                var entryDescriptor = context.ctx().messageDescriptorRegistry().get(entryTypeName);
+                var entryDescriptor = context.getMessageDescriptor(entryTypeName);
                 var keyField = entryDescriptor.getField(0);
                 var valueField = entryDescriptor.getField(1);
-                var keyType = context.ctx().getFieldType(keyField, context.currentScope());
-                var valueType = context.ctx().getFieldType(valueField, context.currentScope());
+                var keyType = context.getFieldType(keyField, context.currentScope());
+                var valueType = context.getFieldType(valueField, context.currentScope());
 
                 writeToBuilder.addStatement("$T<$T, $T> sortedMap = new $T<>($L.getMap())",
                         Map.class, keyType.box(), valueType.box(), java.util.TreeMap.class, fieldName);
@@ -482,7 +482,7 @@ public class MessageMethods {
         for (var field : context.descriptor().getFieldList()) {
             var fieldName = field.getName();
             var pascalName = ProtoUtils.toPascalCase(fieldName);
-            if (context.ctx().isMapField(field)) {
+            if (context.isMapField(field)) {
                 mergeFromSpecificMethod.beginControlFlow("if (!other.get$LMap().isEmpty())", pascalName)
                         .addStatement("$L_.getMutableMap().putAll(other.get$LMap())", fieldName, pascalName)
                         .addStatement("onChanged()")
@@ -529,7 +529,7 @@ public class MessageMethods {
     static MethodSpec abstractGetField(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName())
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .addAnnotations(ctx.fieldAnnotations())
+                .addAnnotations(ctx.getFieldAnnotations())
                 .returns(ctx.fieldType())
                 .build();
     }
@@ -567,7 +567,7 @@ public class MessageMethods {
     static MethodSpec abstractGetMapField(FieldCodegen ctx) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .addAnnotations(ctx.fieldAnnotations())
+                .addAnnotations(ctx.getFieldAnnotations())
                 .returns(ParameterizedTypeName.get(ClassName.get(Map.class), ctx.keyType().box(), ctx.valueType().box()))
                 .build();
     }
@@ -608,7 +608,7 @@ public class MessageMethods {
     static MethodSpec abstractGetRepeatedList(FieldCodegen ctx, TypeName listType) {
         return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .addAnnotations(ctx.fieldAnnotations())
+                .addAnnotations(ctx.getFieldAnnotations())
                 .returns(listType)
                 .build();
     }

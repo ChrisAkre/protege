@@ -520,24 +520,32 @@ public class ProtoUtils {
         return value == null;
     }
 
+    public static Stream<Object> descriptorStream(Object descriptor) {
+        return Stream.concat(Stream.of(descriptor), descriptorChildren(descriptor));
+    }
+
     public static <T> Stream<T> descriptorChildren(Object descriptor, Class<T> descriptorClass) {
         return descriptorChildren(descriptor).filter(descriptorClass::isInstance).map(descriptorClass::cast);
     }
 
     public static Stream<Object> descriptorChildren(Object descriptor) {
         return switch (descriptor) {
-            case DescriptorProtos.FileDescriptorProto f -> Stream.concat(
-                    f.getMessageTypeList().stream(),
-                    f.getEnumTypeList().stream());
+            case DescriptorProtos.FileDescriptorProto f -> Stream.of(
+                            f.getMessageTypeList().stream(),
+                            f.getEnumTypeList().stream(),
+                            f.getServiceList().stream())
+                    .flatMap(s -> s);
             case DescriptorProtos.DescriptorProto m -> Stream.of(
                         m.getNestedTypeList().stream(),
                         m.getEnumTypeList().stream(),
                         m.getFieldList().stream(),
                         m.getOneofDeclList().stream())
                     .flatMap(s -> s);
+            case DescriptorProtos.ServiceDescriptorProto s -> s.getMethodList().stream().map(m -> (Object) m);
             case DescriptorProtos.EnumDescriptorProto ignored -> Stream.empty();
             case DescriptorProtos.FieldDescriptorProto ignored -> Stream.empty();
             case DescriptorProtos.OneofDescriptorProto ignored -> Stream.empty();
+            case DescriptorProtos.MethodDescriptorProto ignored -> Stream.empty();
             default -> throw new IllegalStateException();
         };
     }

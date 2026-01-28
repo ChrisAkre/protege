@@ -12,16 +12,14 @@ import dev.akre.util.Cons;
 
 import javax.lang.model.element.Modifier;
 
-public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen,
+public record OuterClassCodegen(ProtoCodegen protoCodegen,
                                 CodegenMetadata config) implements CodegenConfig {
     public DescriptorProtos.FileDescriptorProto descriptor() {
         return config.fileDescriptor();
     }
 
     public TypeSpec generate() {
-        OneofCodegen.populateOneofInterfaces(this, ctx, protoCodegen.oneofInterfacesByType(), config);
-
-        var outerClassBuilder = TypeSpec.classBuilder(ctx.outerName())
+        var outerClassBuilder = TypeSpec.classBuilder(getOuterName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         // public static final String PROTEGE_VERSION
@@ -32,23 +30,23 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen,
         // public static Descriptors.FileDescriptor getDescriptor()
         outerClassBuilder.addMethod(getDescriptor(this));
 
-        for (var enumType : ctx.fileDescriptor().getEnumTypeList()) {
-            var enumCodegen = new EnumCodegen(enumType, Cons.of(ctx.outerName()), ctx, protoCodegen, config);
+        for (var enumType : config.fileDescriptor().getEnumTypeList()) {
+            var enumCodegen = new EnumCodegen(enumType, Cons.of(getOuterName()), protoCodegen, config);
             // public enum <name> implements ProtocolMessageEnum
             outerClassBuilder.addType(enumCodegen.generate());
         }
 
-        for (var message : ctx.fileDescriptor().getMessageTypeList()) {
-            MessageCodegen messageCodegen = new MessageCodegen(message, ctx, Cons.of(ctx.outerName()), protoCodegen, config);
+        for (var message : config.fileDescriptor().getMessageTypeList()) {
+            MessageCodegen messageCodegen = new MessageCodegen(message, Cons.of(getOuterName()), protoCodegen, config);
             // public interface <name>OrBuilder extends MessageOrBuilder
             outerClassBuilder.addType(messageCodegen.generateMessageInterface());
             // public static final class <name> extends GeneratedMessageV3 implements <name>OrBuilder
             outerClassBuilder.addType(messageCodegen.generateMessageClass());
         }
 
-        if (ProtoUtils.isJavaGenericServicesEnabled(ctx.fileDescriptor())) {
-            for (var service : ctx.fileDescriptor().getServiceList()) {
-                var serviceCodegen = new ServiceCodegen(service, ctx);
+        if (ProtoUtils.isJavaGenericServicesEnabled(config.fileDescriptor())) {
+            for (var service : config.fileDescriptor().getServiceList()) {
+                var serviceCodegen = new ServiceCodegen(service, config);
                 // public static abstract class <name> implements Service
                 outerClassBuilder.addType(serviceCodegen.generate());
             }
@@ -71,7 +69,7 @@ public record OuterClassCodegen(CodegenContext ctx, ProtoCodegen protoCodegen,
     }
 
     static FieldSpec fileDescriptorField(OuterClassCodegen context) {
-        var descriptorChunks =  ProtoUtils.splitAndEscapeBytes(context.ctx().fileDescriptor().toByteArray()).stream()
+        var descriptorChunks =  ProtoUtils.splitAndEscapeBytes(context.config().fileDescriptor().toByteArray()).stream()
                 .map(s -> CodeBlock.of("\"$L\"", s))
                 .collect(CodeBlock.joining(",\n"));
 

@@ -1,6 +1,5 @@
 package dev.akre.protege.compiler;
 
-import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.palantir.javapoet.*;
 
@@ -116,7 +115,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
+        static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenConfig ctx) {
             var method = MethodSpec.methodBuilder("internalGetMapFieldReflection")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -125,7 +124,7 @@ public class CodegenMethods {
                     .beginControlFlow("switch (fieldNumber)");
 
             for (var field : msgCodegen.descriptor().getFieldList()) {
-                if (isMapField(field, ctx)) {
+                if (ctx.isMapField(field)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
             }
@@ -136,7 +135,7 @@ public class CodegenMethods {
             return method.build();
         }
 
-        static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
+        static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenConfig ctx) {
             var method = MethodSpec.methodBuilder("internalGetMutableMapFieldReflection")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -145,7 +144,7 @@ public class CodegenMethods {
                     .beginControlFlow("switch (fieldNumber)");
 
             for (var field : msgCodegen.descriptor().getFieldList()) {
-                if (isMapField(field, ctx)) {
+                if (ctx.isMapField(field)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
             }
@@ -154,29 +153,6 @@ public class CodegenMethods {
                     .endControlFlow();
 
             return method.build();
-        }
-
-        private static boolean isMapField(DescriptorProtos.FieldDescriptorProto field, CodegenContext ctx) {
-            if (field.getLabel() != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
-                return false;
-            }
-            if (field.getType() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                return false;
-            }
-            if (!field.hasTypeName()) {
-                return false;
-            }
-
-            String typeName = field.getTypeName();
-            if (typeName.startsWith(".")) {
-                var protoPackage = ctx.fileDescriptor().getPackage();
-                if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
-                    typeName = typeName.substring(protoPackage.length() + 2);
-                } else if (typeName.startsWith(".")) {
-                    typeName = typeName.substring(1);
-                }
-            }
-            return ctx.isMapEntryMap().getOrDefault(typeName, false);
         }
 
         // Field setters/getters
@@ -193,7 +169,7 @@ public class CodegenMethods {
             var builder = MethodSpec.methodBuilder("get" + ctx.pascalName())
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.fieldAnnotations())
+                    .addAnnotations(ctx.getFieldAnnotations())
                     .returns(ctx.fieldType());
 
             if (ctx.isString()) {
@@ -367,7 +343,7 @@ public class CodegenMethods {
         static MethodSpec getMapField(FieldCodegen ctx, TypeName fieldType) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "Map")
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.fieldAnnotations())
+                    .addAnnotations(ctx.getFieldAnnotations())
                     .returns(fieldType)
                     .addStatement("return $L.getMap()", ctx.internalName())
                     .build();
@@ -484,7 +460,7 @@ public class CodegenMethods {
         static MethodSpec getRepeatedListString(FieldCodegen ctx) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.fieldAnnotations())
+                    .addAnnotations(ctx.getFieldAnnotations())
                     .returns(ClassName.get("com.google.protobuf", "ProtocolStringList"))
                     .addStatement("return $L.getUnmodifiableView()", ctx.internalName())
                     .build();
@@ -516,7 +492,7 @@ public class CodegenMethods {
         static MethodSpec getRepeatedList(FieldCodegen ctx, TypeName listType) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName() + "List")
                     .addModifiers(Modifier.PUBLIC)
-                    .addAnnotations(ctx.fieldAnnotations())
+                    .addAnnotations(ctx.getFieldAnnotations())
                     .returns(listType)
                     .addStatement("return $T.unmodifiableList($L)", java.util.Collections.class, ctx.internalName())
                     .build();
@@ -532,11 +508,11 @@ public class CodegenMethods {
 
         static MethodSpec getRepeatedElement(FieldCodegen ctx) {
             return MethodSpec.methodBuilder("get" + ctx.pascalName())
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ctx.genericType())
-                    .addParameter(int.class, "index")
-                    .addStatement("return $L.get(index)", ctx.internalName())
-                    .build();
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(listType(ctx))
+                        .addParameter(int.class, "index")
+                        .addStatement("return $L.get(index)", ctx.internalName())
+                        .build();
         }
 
         static MethodSpec setRepeatedElement(FieldCodegen ctx, ClassName builderClassName) {
@@ -544,7 +520,7 @@ public class CodegenMethods {
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
                     .addParameter(int.class, "index")
-                    .addParameter(ctx.genericType(), "value")
+                    .addParameter(listType(ctx), "value")
                     .addStatement("ensure$LIsMutable()", ctx.pascalName())
                     .addStatement("$L.set(index, value)", ctx.internalName())
                     .addStatement("onChanged()")
@@ -552,11 +528,12 @@ public class CodegenMethods {
                     .build();
         }
 
+
         static MethodSpec addRepeatedElement(FieldCodegen ctx, ClassName builderClassName) {
             return MethodSpec.methodBuilder("add" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
-                    .addParameter(ctx.genericType(), "value")
+                    .addParameter(listType(ctx), "value")
                     .addStatement("ensure$LIsMutable()", ctx.pascalName())
                     .addStatement("$L.add(value)", ctx.internalName())
                     .addStatement("onChanged()")
@@ -568,7 +545,7 @@ public class CodegenMethods {
             return MethodSpec.methodBuilder("addAll" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
-                    .addParameter(ParameterizedTypeName.get(ClassName.get(Iterable.class), WildcardTypeName.subtypeOf(ctx.genericType())), "values")
+                    .addParameter(ParameterizedTypeName.get(ClassName.get(Iterable.class), WildcardTypeName.subtypeOf(listType(ctx))), "values")
                     .addStatement("ensure$LIsMutable()", ctx.pascalName())
                     .addStatement("$T.addAll(values, $L)", com.google.protobuf.AbstractMessageLite.Builder.class, ctx.internalName())
                     .addStatement("onChanged()")
@@ -620,7 +597,7 @@ public class CodegenMethods {
             return MethodSpec.methodBuilder("add" + ctx.pascalName() + "Builder")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(elementBuilderType)
-                    .addStatement("$T builder = $T.newBuilder()", elementBuilderType, ctx.genericType())
+                    .addStatement("$T builder = $T.newBuilder()", elementBuilderType, listType(ctx))
                     .addStatement("add$L(builder.buildPartial())", ctx.pascalName())
                     .addStatement("return builder")
                     .build();
@@ -631,7 +608,7 @@ public class CodegenMethods {
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(int.class, "index")
                     .returns(elementBuilderType)
-                    .addStatement("$T builder = $T.newBuilder()", elementBuilderType, ctx.genericType())
+                    .addStatement("$T builder = $T.newBuilder()", elementBuilderType, listType(ctx))
                     .addStatement("ensure$LIsMutable()", ctx.pascalName())
                     .addStatement("$L.add(index, builder.buildPartial())", ctx.internalName())
                     .addStatement("onChanged()")
@@ -652,7 +629,7 @@ public class CodegenMethods {
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
                     .addParameter(int.class, "index")
-                    .addParameter(ctx.genericType(), "value")
+                    .addParameter(listType(ctx), "value")
                     .addStatement("ensure$LIsMutable()", ctx.pascalName())
                     .addStatement("$L.add(index, value)", ctx.internalName())
                     .addStatement("onChanged()")
@@ -728,7 +705,7 @@ public class CodegenMethods {
                     .addParameter(int.class, "index")
                     .addParameter(int.class, "value")
                     .addStatement("ensure$LIsMutable()", ctx.pascalName())
-                    .addStatement("$L.set(index, $T.forNumber(value))", ctx.internalName(), ctx.genericType().box())
+                    .addStatement("$L.set(index, $T.forNumber(value))", ctx.internalName(), listType(ctx).box())
                     .addStatement("onChanged()")
                     .addStatement("return this")
                     .build();
@@ -740,7 +717,7 @@ public class CodegenMethods {
                     .returns(builderClassName)
                     .addParameter(int.class, "value")
                     .addStatement("ensure$LIsMutable()", ctx.pascalName())
-                    .addStatement("$L.add($T.forNumber(value))", ctx.internalName(), ctx.genericType().box())
+                    .addStatement("$L.add($T.forNumber(value))", ctx.internalName(), listType(ctx).box())
                     .addStatement("onChanged()")
                     .addStatement("return this")
                     .build();
@@ -753,7 +730,7 @@ public class CodegenMethods {
                     .addParameter(ParameterizedTypeName.get(ClassName.get(Iterable.class), ClassName.get(Integer.class)), "values")
                     .addStatement("ensure$LIsMutable()", ctx.pascalName())
                     .beginControlFlow("for (Integer value : values)")
-                    .addStatement("$L.add($T.forNumber(value))", ctx.internalName(), ctx.genericType().box())
+                    .addStatement("$L.add($T.forNumber(value))", ctx.internalName(), listType(ctx).box())
                     .endControlFlow()
                     .addStatement("onChanged()")
                     .addStatement("return this")
@@ -775,5 +752,9 @@ public class CodegenMethods {
             return ensureIsMutable.build();
         }
     }
+
+    private static TypeName listType(FieldCodegen ctx) {
+        return ((ParameterizedTypeName)ctx.fieldType()).typeArguments().getFirst();
+    }
+
 }
-        
