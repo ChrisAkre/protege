@@ -1,10 +1,7 @@
 package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.*;
 import dev.akre.protege.ProtoUtils;
 
 import java.util.ArrayList;

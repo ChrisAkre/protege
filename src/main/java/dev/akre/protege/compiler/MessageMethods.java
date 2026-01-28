@@ -419,7 +419,7 @@ public class MessageMethods {
                         entryTypeName = entryTypeName.substring(1);
                     }
                 }
-                var entryDescriptor = context.config().messageDescriptorRegistry().get(entryTypeName);
+                var entryDescriptor = context.getMessageDescriptor(entryTypeName);
                 var keyField = entryDescriptor.getField(0);
                 var valueField = entryDescriptor.getField(1);
                 var keyType = context.getFieldType(keyField, context.currentScope());

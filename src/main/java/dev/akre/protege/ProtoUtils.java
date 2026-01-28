@@ -520,6 +520,10 @@ public class ProtoUtils {
         return value == null;
     }
 
+    public static Stream<Object> descriptorStream(Object descriptor) {
+        return Stream.concat(Stream.of(descriptor), descriptorChildren(descriptor));
+    }
+
     public static <T> Stream<T> descriptorChildren(Object descriptor, Class<T> descriptorClass) {
         return descriptorChildren(descriptor).filter(descriptorClass::isInstance).map(descriptorClass::cast);
     }

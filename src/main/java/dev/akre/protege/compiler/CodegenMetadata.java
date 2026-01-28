@@ -6,16 +6,18 @@ import com.google.protobuf.GeneratedMessage;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
-import com.palantir.javapoet.ClassName;
 import dev.akre.protege.ProtoUtils;
 import dev.akre.util.Cons;
+import dev.akre.util.StreamUtils;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dev.akre.protege.compiler.CodegenUtils.getBooleanOption;
+import static dev.akre.util.StreamUtils.mapEntry;
+import static java.util.Map.entry;
 import static java.util.function.Predicate.not;
 
 /**
@@ -36,13 +38,15 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
                               Map<String, List<ClassName>> oneofInterfacesByType
 ) {
 
-    public static final Option FIELD_ANNOTATION = Option.customStringList("dev.akre.protege.java_field_annotation");
-    public static final Option MESSAGE_ANNOTATION = Option.customStringList("dev.akre.protege.java_message_annotation");
+    public static final Option FIELD_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_field_annotation");
+    public static final Option MESSAGE_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_message_annotation");
+    public static final Option BUILDER_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_builder_annotation");
+    public static final Option CLASS_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_class_annotation");
+    public static final Option INTERFACE_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_class_annotation");
+
     public static final Option JAVA_GENERATE_DEPRECATED = Option.customBoolean("dev.akre.protege.java_generate_deprecated");
     public static final Option PACKAGE = Option.fileOption("package", DescriptorProtos.FileDescriptorProto::getPackage);
     public static final Option JAVA_PACKAGE = Option.fileOption("java_package", f -> f.getOptions().getJavaPackage());
-    public static final Option MESSAGE_ANNOTATIONS = Option.customStringList(MESSAGE_ANNOTATION.key());
-    public static final Option BUILDER_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_builder_annotation");
     public static final Option ENHANCED_ONEOF = Option.customBoolean("dev.akre.protege.java_enhanced_oneof");
     public static final Option ONEOF_CASE = Option.customBoolean("dev.akre.protege.java_oneof_case");
     public static final Option JAVA_IMPLEMENTS = Option.customString("dev.akre.protege.java_implements");
@@ -120,7 +124,6 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
 
     public TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
         if (isMapField(field)) {
-            String entryTypeName = relativeToProtoPackage(field.getTypeName());
             var entryDescriptor = getEntryDescriptor(field);
             var keyField = entryDescriptor.getField(0);
             var valueField = entryDescriptor.getField(1);
@@ -216,20 +219,6 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
     List<String> getList(Option key, Object descriptor) {
-
-//        if (getBoolean(JACKSON_ANNOTATIONS, descriptor)) {
-//            if (key == FIELD_ANNOTATION) {
-//                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.annotation.JsonValue");
-//            } else if (key == MESSAGE_ANNOTATIONS) {
-//                if (descriptor instanceof DescriptorProtos.DescriptorProto msg) {
-//                    return ProtoUtils.listConcat(list,
-//                            "@com.fasterxml.jackson.databind.annotation.JsonDeserialize(builder = " + msg.getName() + ".Builder.class)",
-//                            "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)");
-//                }
-//            } else if (key == BUILDER_ANNOTATIONS) {
-//                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder(withPrefix = \"set\")");
-//            }
-//        }
         try {
             return key.<List<String>>get(overrides)
                     .or(() -> Optional.ofNullable(this.hierarchy().get(descriptor)).flatMap(key::lookup))
@@ -329,6 +318,8 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             JACKSON_ANNOTATIONS.setValue(defaults, false);
         }
 
+
+
         static Map<String, Object> buildDescriptorMap(DescriptorProtos.FileDescriptorProto fileDescriptor) {
             return Map.copyOf(updateDescriptorMap(fileDescriptor, new HashMap<>(), Cons.nil()));
         }
@@ -395,24 +386,24 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         }
 
         public Builder addFieldAnnotation(String value) {
-            @SuppressWarnings("unchecked") List<String> list = (List<String>) defaults.computeIfAbsent(FIELD_ANNOTATION.key(), k -> new ArrayList<>());
+            @SuppressWarnings("unchecked") List<String> list = (List<String>) defaults.computeIfAbsent(FIELD_ANNOTATIONS.key(), k -> new ArrayList<>());
             list.add(value);
             return this;
         }
 
         public Builder setFieldAnnotations(List<String> values) {
-            FIELD_ANNOTATION.setValue(defaults, new ArrayList<>(values));
+            FIELD_ANNOTATIONS.setValue(defaults, new ArrayList<>(values));
             return this;
         }
 
         public Builder addOverrideFieldAnnotation(String value) {
-            @SuppressWarnings("unchecked") List<String> list = (List<String>) overrides.computeIfAbsent(FIELD_ANNOTATION.key(), k -> new ArrayList<>());
+            @SuppressWarnings("unchecked") List<String> list = (List<String>) overrides.computeIfAbsent(FIELD_ANNOTATIONS.key(), k -> new ArrayList<>());
             list.add(value);
             return this;
         }
 
         public Builder setOverrideFieldAnnotations(List<String> values) {
-            FIELD_ANNOTATION.setValue(overrides, new ArrayList<>(values));
+            FIELD_ANNOTATIONS.setValue(overrides, new ArrayList<>(values));
             return this;
         }
 
@@ -439,20 +430,13 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
 
             CodegenUtils.registerAllTypes(fileDescriptor, packageName, outerClassName, typeRegistry, isEnumMap, isMapEntryMap, messageDescriptorRegistry);
 
-            var fixedFileDescriptor = CodegenUtils.fixAllFieldTypes(fileDescriptor, isEnumMap);
-
-             // Rebuild hierarchy and descriptor map with fixed file descriptor.
-             hierarchy = buildHierarchy(fixedFileDescriptor);
-             descriptorMap = buildDescriptorMap(fixedFileDescriptor);
-
-             // Create metadata for oneof population (needs type registry)
-             var metadata = new CodegenMetadata(fixedFileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
+             var metadata = new CodegenMetadata(fileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
                      packageName, typeRegistry, isEnumMap, isMapEntryMap, null);
 
              var oneofInterfacesByType = new HashMap<String, List<ClassName>>();
              populateOneofInterfaces(metadata, oneofInterfacesByType);
 
-             return new CodegenMetadata(fixedFileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
+             return new CodegenMetadata(fileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
                      packageName, typeRegistry, isEnumMap, isMapEntryMap, oneofInterfacesByType);
         }
 

@@ -9,6 +9,7 @@ import dev.akre.util.Cons;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface CodegenConfig {
     CodegenMetadata config();
@@ -27,12 +28,25 @@ public interface CodegenConfig {
     }
 
     default List<AnnotationSpec> getFieldAnnotations() {
-        return config().getList(CodegenMetadata.FIELD_ANNOTATION, descriptor()).stream()
+        return config().getList(CodegenMetadata.FIELD_ANNOTATIONS, descriptor()).stream()
                 .map(CodegenUtils::parseAnnotation).toList();
     }
 
     default List<AnnotationSpec> getClassAnnotations() {
-        return config().getList(CodegenMetadata.FIELD_ANNOTATION, descriptor()).stream()
+        return Stream.concat(config().getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor()).stream(),
+                config().getList(CodegenMetadata.CLASS_ANNOTATIONS, descriptor()).stream())
+                .map(CodegenUtils::parseAnnotation).toList();
+    }
+
+    default List<AnnotationSpec> getInterfaceAnnotations() {
+        return Stream.concat(config().getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor()).stream(),
+                        config().getList(CodegenMetadata.INTERFACE_ANNOTATIONS, descriptor()).stream())
+                .map(CodegenUtils::parseAnnotation).toList();
+    }
+
+    default List<AnnotationSpec> getBuilderAnnotations() {
+        return Stream.concat(config().getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor()).stream(),
+                        config().getList(CodegenMetadata.BUILDER_ANNOTATIONS, descriptor()).stream())
                 .map(CodegenUtils::parseAnnotation).toList();
     }
 
@@ -71,6 +85,10 @@ public interface CodegenConfig {
     default TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
         return config().getFieldType(field, currentScope);
     }
+
+//    default TypeName getFieldType() {
+//        return config().getFieldType(descriptor());
+//    }
 
     default boolean isMapField(DescriptorProtos.FieldDescriptorProto field) {
         return config().isMapField(field);
