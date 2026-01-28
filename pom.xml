@@ -228,7 +228,7 @@
                         <project.version>${project.version}</project.version>
                     </filterProperties>
                     <pomExcludes>
-<!--                        <pomExclude>jackson-test/pom.xml</pomExclude>-->
+                        <pomExclude>jackson-test/pom.xml</pomExclude>
                         <pomExclude>hibernate-test/pom.xml</pomExclude>
                     </pomExcludes>
                     <goals>
