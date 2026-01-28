@@ -142,7 +142,7 @@ public record MessageCodegen(
         private FieldSpec descriptorField(TypeSpec.Builder classBuilder) {
             var allNames = allNamesArray();
             var cb = CodeBlock.builder();
-            cb.add("descriptor = $T.getDescriptor().findMessageTypeByName($S)", config.outerClass(), allNames[1]);
+            cb.add("descriptor = $T.getDescriptor().findMessageTypeByName($S)", ClassName.get(getJavaPackage(), getOuterName()), allNames[1]);
             for (int i = 2; i < allNames.length; i++) {
                 cb.add(".findNestedTypeByName($S)", allNames[i]);
             }

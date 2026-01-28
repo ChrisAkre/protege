@@ -50,7 +50,7 @@ public interface CodegenConfig {
     }
 
     default String getOuterName() {
-        return config().outerClassName();
+        return config().getString(CodegenMetadata.OUTER_NAME, descriptor()).orElse("");
     }
 
     default TypeName resolveTypeName(String protoTypeName, List<String> currentScope) {

@@ -32,11 +32,9 @@ public record CodegenMetadata(
         Map<String, Object> overrides,
         Map<String, Object> descriptorMap,
         String packageName,
-        String outerClassName,
         Map<String, ClassName> typeRegistry,
         Map<String, Boolean> isEnumMap,
         Map<String, Boolean> isMapEntryMap,
-        Map<String, DescriptorProtos.DescriptorProto> messageDescriptorRegistry,
         Map<String, List<ClassName>> oneofInterfacesByType
 ) {
     public static final Option FIELD_ANNOTATION = Option.customString("dev.akre.protege.java_field_annotation");
@@ -64,10 +62,6 @@ public record CodegenMetadata(
         return new Builder(fileDescriptor);
     }
 
-    public ClassName outerClass() {
-        return ClassName.get(packageName, outerClassName);
-    }
-
     public ClassName getFieldAccessorTableClass() {
         return getMessageSuperclass().nestedClass("FieldAccessorTable");
     }
@@ -93,6 +87,7 @@ public record CodegenMetadata(
 
 
     public TypeName resolveTypeName(String protoTypeName, List<String> currentScope) {
+        String outerClassName = getString(OUTER_NAME, fileDescriptor).orElse("");
         if (protoTypeName.startsWith(".")) {
             var typeName = relativeToProtoPackage(protoTypeName);
             if (typeRegistry.containsKey(typeName)) {
@@ -126,13 +121,14 @@ public record CodegenMetadata(
             }
         }
 
+        String outerClassName = getString(OUTER_NAME, fileDescriptor).orElse("");
         return ClassName.get(packageName, outerClassName, protoTypeName.split("\\."));
     }
 
     public TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
         if (isMapField(field)) {
             String entryTypeName = relativeToProtoPackage(field.getTypeName());
-            var entryDescriptor = messageDescriptorRegistry.get(entryTypeName);
+            var entryDescriptor = getEntryDescriptor(field);
             var keyField = entryDescriptor.getField(0);
             var valueField = entryDescriptor.getField(1);
 
@@ -165,7 +161,7 @@ public record CodegenMetadata(
 
     public DescriptorProtos.DescriptorProto getEntryDescriptor(DescriptorProtos.FieldDescriptorProto field) {
         String typeEntryName = relativeToProtoPackage(field.getTypeName());
-        return messageDescriptorRegistry().get(typeEntryName);
+        return (DescriptorProtos.DescriptorProto) descriptorMap.get(typeEntryName);
     }
 
     public String protoPackageName() {
@@ -432,11 +428,13 @@ public record CodegenMetadata(
         public CodegenMetadata build() {
             var hierarchy = buildHierarchy(fileDescriptor);
             var descriptorMap = buildDescriptorMap(fileDescriptor);
-            var metadata = new CodegenMetadata(fileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
-                    null, null, null, null, null, null, null);
 
-            String packageName = metadata.getString(JAVA_PACKAGE, fileDescriptor).orElseGet(fileDescriptor::getPackage);
-            String outerClassName = metadata.getString(OUTER_NAME, fileDescriptor).orElseGet(() -> ProtoUtils.getJavaOuterClassName(fileDescriptor));
+            // Temporary metadata for resolving options before full initialization
+            var tempMetadata = new CodegenMetadata(fileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
+                    null, null, null, null, null);
+
+            String packageName = tempMetadata.getString(JAVA_PACKAGE, fileDescriptor).orElseGet(fileDescriptor::getPackage);
+            String outerClassName = tempMetadata.getString(OUTER_NAME, fileDescriptor).orElseGet(() -> ProtoUtils.getJavaOuterClassName(fileDescriptor));
 
             var typeRegistry = new HashMap<String, ClassName>();
             var isEnumMap = new HashMap<String, Boolean>();
@@ -447,33 +445,19 @@ public record CodegenMetadata(
 
             var fixedFileDescriptor = CodegenUtils.fixAllFieldTypes(fileDescriptor, isEnumMap);
 
-            // Rebuild descriptor map and hierarchy with fixed descriptors if needed?
-            // fixAllFieldTypes returns a new FileDescriptorProto.
-            // If we use the fixed one, we should update the metadata to use it.
-
-            // Wait, registerAllTypes uses the original fileDescriptor?
-            // CodegenContexts logic was:
-            // registerAllTypes(fileDescriptor...)
-            // fixedFileDescriptor = fixAllFieldTypes(fileDescriptor...)
-            // return new CodegenContext(..., fixedFileDescriptor, ...)
-
-            // So we should use fixedFileDescriptor for the metadata record.
-
-            // Rebuild hierarchy and descriptor map with fixed file descriptor.
+             // Rebuild hierarchy and descriptor map with fixed file descriptor.
              hierarchy = buildHierarchy(fixedFileDescriptor);
              descriptorMap = buildDescriptorMap(fixedFileDescriptor);
 
-             // Create temporary metadata for calculating Oneof interfaces (requires basic lookups)
-             // But oneof calculation needs typeRegistry which we have.
-
-             metadata = new CodegenMetadata(fixedFileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
-                     packageName, outerClassName, typeRegistry, isEnumMap, isMapEntryMap, messageDescriptorRegistry, null);
+             // Create metadata for oneof population (needs type registry)
+             var metadata = new CodegenMetadata(fixedFileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
+                     packageName, typeRegistry, isEnumMap, isMapEntryMap, null);
 
              var oneofInterfacesByType = new HashMap<String, List<ClassName>>();
              populateOneofInterfaces(metadata, oneofInterfacesByType);
 
              return new CodegenMetadata(fixedFileDescriptor, hierarchy, Map.copyOf(defaults), Map.copyOf(overrides), descriptorMap,
-                     packageName, outerClassName, typeRegistry, isEnumMap, isMapEntryMap, messageDescriptorRegistry, oneofInterfacesByType);
+                     packageName, typeRegistry, isEnumMap, isMapEntryMap, oneofInterfacesByType);
         }
 
         private void populateOneofInterfaces(CodegenMetadata metadata, Map<String, List<ClassName>> oneofInterfacesByType) {
@@ -496,9 +480,10 @@ public record CodegenMetadata(
                     continue;
                 }
                 var pascalName = ProtoUtils.toPascalCase(oneof.getName());
+                var outerName = metadata.getString(OUTER_NAME, metadata.fileDescriptor()).orElse("");
 
                 var capitalizedPath = currentPath.stream().map(ProtoUtils::capitalize).toList();
-                var interfaceClassName = ClassName.get(metadata.packageName(), metadata.outerClassName(), capitalizedPath.toArray(new String[0])).nestedClass(pascalName);
+                var interfaceClassName = ClassName.get(metadata.packageName(), outerName, capitalizedPath.toArray(new String[0])).nestedClass(pascalName);
 
                 for (var field : message.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {

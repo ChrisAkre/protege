@@ -27,7 +27,7 @@ public record EnumCodegen(
     }
 
     public ClassName outerClassName() {
-        return config.outerClass();
+        return ClassName.get(getJavaPackage(), getOuterName());
     }
 
     public String[] parentNames() {
