@@ -82,6 +82,10 @@ public record MessageCodegen(
 
         classBuilder.addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()));
         classBuilder.addAnnotations(CodegenUtils.getClassAnnotations(descriptor.getOptions()));
+//        for (String annotation : config.getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor)) {
+//            classBuilder.addAnnotation(CodegenUtils.parseAnnotation(annotation));
+//        }
+
 
         for (var nestedMessage : descriptor.getNestedTypeList()) {
             var nestedMsgCodegen = new MessageCodegen(nestedMessage, ctx, allNames(), protoCodegen, config);
@@ -640,6 +644,10 @@ public record MessageCodegen(
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(ParameterizedTypeName.get(getMessageSuperclass().nestedClass("Builder"), builderClassName()))
                 .addSuperinterface(interfaceClassName);
+
+        for (String annotation : config.getList(CodegenMetadata.BUILDER_ANNOTATIONS, descriptor)) {
+            builderClassBuilder.addAnnotation(CodegenUtils.parseAnnotation(annotation));
+        }
 
         // Add fields to builder
         for (var field : descriptor.getFieldList()) {

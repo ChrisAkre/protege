@@ -42,7 +42,14 @@ public record FieldCodegen(
         String internalName = fieldName + "_";
         boolean isRepeated = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
         boolean isMap = ctx.isMapField(field);
-        List<AnnotationSpec> fieldAnnotations = CodegenUtils.getFieldAnnotations(field.getOptions());
+        List<AnnotationSpec> getterAnnotations = CodegenUtils.getFieldAnnotations(field.getOptions());
+//        List<AnnotationSpec> getterAnnotations = new ArrayList<>();
+//        List<String> configuredAnnotations = messageCodegen.config().getList(CodegenMetadata.FIELD_ANNOTATIONS, field);
+//        for (String annotation : configuredAnnotations) {
+//            getterAnnotations.add(CodegenUtils.parseAnnotation(annotation));
+//        }
+
+
 
         DescriptorProtos.DescriptorProto entryDescriptor = null;
         TypeName keyType = null;

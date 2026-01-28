@@ -550,4 +550,14 @@ public class ProtoUtils {
             return optionName.equals(key);
         };
     }
+
+    @SafeVarargs
+    public static <T> List<T> listConcat(List<T> list, T... elements) {
+        if (elements.length == 0) {
+            return list;
+        }
+        List<T> result = new ArrayList<>(list);
+        Collections.addAll(result, elements);
+        return result;
+    }
 }
