@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
+// TODO also look at the code and validate that not only is the .proto file generated, but the actual java implementation is generated as well.
 /**
  * Marks a Java interface for Protobuf definition generation.
  * <p>
@@ -17,6 +18,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GenProto {
 
+    // TODO this comment doesn't make sense, because you can't have a class with the same name as this interface
     /**
      * The name of the generated Protobuf message.
      * Defaults to the interface name if empty.

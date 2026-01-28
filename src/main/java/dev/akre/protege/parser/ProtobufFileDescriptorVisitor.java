@@ -80,7 +80,9 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
-        String packageName = ctx.packageStatement().isEmpty() ? "" : ctx.packageStatement().getFirst().name.getText();
+        String packageName = ctx.packageStatement().isEmpty()
+                ? ""
+                : ctx.packageStatement().getFirst().name.getText();
         Cons<String> protoScope = Cons.nil();
         if (!packageName.isEmpty()) {
             for (String part : packageName.split("\\.")) {

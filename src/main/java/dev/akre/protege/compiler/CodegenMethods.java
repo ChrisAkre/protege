@@ -10,12 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Factory class for generating JavaPoet method specifications.
- * <p>
- * This class contains static utility methods that construct {@link MethodSpec} objects
- * for various parts of the generated code (e.g., builders, field accessors, map handling).
- * It delegates the actual logic of <i>what</i> to generate to these methods, keeping the
- * main generator classes cleaner.
+ * Static methods for generating code specifications
  */
 public class CodegenMethods {
 

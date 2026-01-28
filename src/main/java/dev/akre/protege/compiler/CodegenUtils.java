@@ -234,16 +234,12 @@ public class CodegenUtils {
                 return ClassName.get(cn.packageName(), simpleNames.getFirst(), java.util.stream.Stream.concat(simpleNames.subList(1, simpleNames.size() - 1).stream(), java.util.stream.Stream.of(last + "OrBuilder")).toArray(String[]::new));
             }
         }
-        return typeName;
+        throw new IllegalArgumentException("unexpected typename: " + typeName);
     }
 
     /**
      * Relativizes a Protobuf type name by trimming a matching package name from the start. If the package name is not
      * a prefix, the name is unchanged.
-     *
-     * @param typeName     The fully qualified type name (e.g., {@code .my.pkg.Message})
-     * @param protoPackage The package to strip (e.g., {@code my.pkg})
-     * @return The relative type name (e.g., {@code Message})
      */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
@@ -258,10 +254,6 @@ public class CodegenUtils {
 
     /**
      * Generates code to clear fields associated with a specific oneof group.
-     *
-     * @param message    The message containing the oneof.
-     * @param oneofIndex The index of the oneof group to clear.
-     * @return A CodeBlock that resets the oneof case and clears its fields.
      */
     public static CodeBlock generateClearOneofCode(DescriptorProtos.DescriptorProto message, int oneofIndex) {
         var cb = CodeBlock.builder();
