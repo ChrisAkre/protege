@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Static methods for generating code specifications
+ * Static methods for generating code specifications.
+ * <p>
+ * This class serves as a factory for creating {@link MethodSpec} objects used in the generated code.
+ * It delegates the actual generation logic to keep the main generator classes cleaner and more focused.
  */
 public class CodegenMethods {
 
@@ -19,10 +22,16 @@ public class CodegenMethods {
     }
 
     /**
-     * Methods for generating Builder classes
+     * Methods for generating Builder classes.
      */
     static class Builder {
 
+        /**
+         * Generates the {@code build()} method.
+         *
+         * @param messageClassName The class name of the message being built.
+         * @return The method specification.
+         */
         static MethodSpec build(ClassName messageClassName) {
             return MethodSpec.methodBuilder("build")
                     .addAnnotation(Override.class)
@@ -36,6 +45,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code buildPartial()} method.
+         *
+         * @param messageClassName The class name of the message being built.
+         * @return The method specification.
+         */
         static MethodSpec buildPartial(ClassName messageClassName) {
             return MethodSpec.methodBuilder("buildPartial")
                     .addAnnotation(Override.class)
@@ -45,6 +60,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code getDefaultInstanceForType()} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @return The method specification.
+         */
         static MethodSpec getDefaultInstanceForType(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDefaultInstanceForType")
                     .addAnnotation(Override.class)
@@ -54,6 +75,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code getDescriptorForType()} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @return The method specification.
+         */
         static MethodSpec getDescriptorForType(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDescriptorForType")
                     .addAnnotation(Override.class)
@@ -63,6 +90,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the static {@code getDescriptor()} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @return The method specification.
+         */
         static MethodSpec getDescriptor(ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDescriptor")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -71,6 +104,11 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code isInitialized()} method.
+         *
+         * @return The method specification.
+         */
         static MethodSpec isInitialized() {
             return MethodSpec.methodBuilder("isInitialized")
                     .addAnnotation(Override.class)
@@ -80,6 +118,12 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code mergeFrom(CodedInputStream, ExtensionRegistryLite)} method.
+         *
+         * @param builderClassName The class name of the builder.
+         * @return The method specification.
+         */
         static MethodSpec mergeFromCodedInput(ClassName builderClassName) {
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
@@ -92,6 +136,13 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code mergeFrom(Message)} method.
+         *
+         * @param messageClassName The class name of the message.
+         * @param builderClassName The class name of the builder.
+         * @return The method specification.
+         */
         static MethodSpec mergeFromMessage(ClassName messageClassName, ClassName builderClassName) {
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
@@ -107,6 +158,13 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code internalGetFieldAccessorTable()} method.
+         *
+         * @param messageClassName        The class name of the message.
+         * @param fieldAccessorTableClass The class name of the field accessor table.
+         * @return The method specification.
+         */
         static MethodSpec internalGetFieldAccessorTable(ClassName messageClassName, ClassName fieldAccessorTableClass) {
             return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
                     .addAnnotation(Override.class)
@@ -116,6 +174,13 @@ public class CodegenMethods {
                     .build();
         }
 
+        /**
+         * Generates the {@code internalGetMapFieldReflection()} method.
+         *
+         * @param msgCodegen The message codegen context.
+         * @param ctx        The global codegen context.
+         * @return The method specification.
+         */
         static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
             var method = MethodSpec.methodBuilder("internalGetMapFieldReflection")
                     .addAnnotation(Override.class)
@@ -136,6 +201,13 @@ public class CodegenMethods {
             return method.build();
         }
 
+        /**
+         * Generates the {@code internalGetMutableMapFieldReflection()} method.
+         *
+         * @param msgCodegen The message codegen context.
+         * @param ctx        The global codegen context.
+         * @return The method specification.
+         */
         static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
             var method = MethodSpec.methodBuilder("internalGetMutableMapFieldReflection")
                     .addAnnotation(Override.class)
@@ -776,4 +848,3 @@ public class CodegenMethods {
         }
     }
 }
-        

@@ -24,6 +24,14 @@ public record OneofCodegen(
         MessageCodegen messageCodegen,
         CodegenMetadata config
 ) implements CodegenConfig {
+    /**
+     * Creates a new OneofCodegen instance.
+     *
+     * @param oneof          The oneof descriptor.
+     * @param oneofIndex     The index of the oneof in the message.
+     * @param messageCodegen The parent message codegen context.
+     * @return A new OneofCodegen instance.
+     */
     public static OneofCodegen create(
             DescriptorProtos.OneofDescriptorProto oneof,
             int oneofIndex,
@@ -34,18 +42,44 @@ public record OneofCodegen(
         return new OneofCodegen(oneof, oneofIndex, pascalName, enumName, messageCodegen, messageCodegen.config());
     }
 
+    /**
+     * Returns the name of the oneof field.
+     *
+     * @return The name of the oneof field.
+     */
     public String oneofName() {
         return descriptor.getName();
     }
 
+    /**
+     * Returns the class name for the generated case enum.
+     *
+     * @return The case enum class name.
+     */
     public ClassName getEnumClassName() {
         return messageCodegen.messageClassName().nestedClass(enumName);
     }
 
+    /**
+     * Returns the class name for the generated sealed interface.
+     *
+     * @return The sealed interface class name.
+     */
     public ClassName getInterfaceClassName() {
         return messageCodegen.messageClassName().nestedClass(pascalName);
     }
 
+    /**
+     * Populates the map of oneof interfaces by type for the given context.
+     * <p>
+     * This method recursively traverses the descriptor tree to find all enhanced oneof fields
+     * and maps the field types to their corresponding oneof interface class names.
+     *
+     * @param context               The outer class codegen context.
+     * @param ctx                   The global codegen context.
+     * @param oneofInterfacesByType The map to populate.
+     * @param config                The codegen metadata.
+     */
     public static void populateOneofInterfaces(OuterClassCodegen context, CodegenContext ctx, Map<String, List<ClassName>> oneofInterfacesByType, CodegenMetadata config) {
         oneofInterfacesByType.clear();
 

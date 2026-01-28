@@ -20,7 +20,6 @@ public class CanaryTest {
 
     @Test
     public void testCompileOutput() throws Exception {
-        // TODO figure out why there is an extra semicolon after fileDescriptor initialization
         String output = new ProtoCodegen(new TestUtils.MockFiler()).generateFile(ProtoUtils.parseProto(TEST_PROTO, "canary.proto")).toJavaFileObject().getCharContent(false).toString();
         assertThat(output).isEqualTo("""
                 package com.example;
