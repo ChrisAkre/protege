@@ -29,12 +29,20 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     public static final Option JAVA_GENERATE_DEPRECATED = Option.customBoolean("dev.akre.protege.java_generate_deprecated");
     public static final Option PACKAGE = Option.fileOption("package", DescriptorProtos.FileDescriptorProto::getPackage);
     public static final Option JAVA_PACKAGE = Option.fileOption("java_package", f -> f.getOptions().getJavaPackage());
-    public static final Option FIELD_ANNOTATIONS = Option.customStringList(FIELD_ANNOTATION.key());
+    public static final Option FIELD_ANNOTATIONS = new Option(FIELD_ANNOTATION.key(), ValueType.STRING_LIST, scope -> {
+        var list1 = getStringListDescriptorOption(ProtoUtils.nameList(FIELD_ANNOTATION.key()), scope).orElse(List.of());
+        var list2 = getStringListDescriptorOption(ProtoUtils.nameList("dev.akre.protege.java_annotation"), scope).orElse(List.of());
+        if (list1.isEmpty() && list2.isEmpty()) return Optional.empty();
+        return Optional.of(ProtoUtils.listConcat(list1, list2.toArray(String[]::new)));
+    });
+    public static final Option MESSAGE_ANNOTATIONS = Option.customStringList(MESSAGE_ANNOTATION.key());
+    public static final Option BUILDER_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_builder_annotation");
     public static final Option ENHANCED_ONEOF = Option.customBoolean("dev.akre.protege.java_enhanced_oneof");
     public static final Option ONEOF_CASE = Option.customBoolean("dev.akre.protege.java_oneof_case");
     public static final Option JAVA_IMPLEMENTS = Option.customString("dev.akre.protege.java_implements");
     public static final Option JAVA_MESSAGE_SUPERCLASS = Option.customString("dev.akre.protege.message_superclass");
     public static final Option OUTER_NAME = Option.fileOption("outer_name", ProtoUtils::getJavaOuterClassName);
+    public static final Option JACKSON_ANNOTATIONS = Option.customBoolean("dev.akre.protege.java_jackson_annotations");
 
 
     public static CodegenMetadata.Builder build(DescriptorProtos.FileDescriptorProto fileDescriptor) {
@@ -92,7 +100,25 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
     List<String> getList(Option key, Object descriptor) {
-        return key.<List<String>>get(overrides).or(() -> key.lookup(hierarchy().get(descriptor))).or(() -> key.get(defaults)).orElse(List.of());
+        List<String> list = key.<List<String>>get(overrides)
+                .or(() -> Optional.ofNullable(hierarchy().get(descriptor)).flatMap(key::lookup))
+                .or(() -> key.get(defaults))
+                .orElse(List.of());
+
+        if (getBoolean(JACKSON_ANNOTATIONS, descriptor)) {
+            if (key == FIELD_ANNOTATIONS) {
+                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.annotation.JsonValue");
+            } else if (key == MESSAGE_ANNOTATIONS) {
+                if (descriptor instanceof DescriptorProtos.DescriptorProto msg) {
+                    return ProtoUtils.listConcat(list,
+                            "@com.fasterxml.jackson.databind.annotation.JsonDeserialize(builder = " + msg.getName() + ".Builder.class)",
+                            "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)");
+                }
+            } else if (key == BUILDER_ANNOTATIONS) {
+                return ProtoUtils.listConcat(list, "@com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder(withPrefix = \"set\")");
+            }
+        }
+        return list;
     }
 
     public Optional<Boolean> getBooleanDefault(String key) {
@@ -181,6 +207,7 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             ENHANCED_ONEOF.setValue(defaults, false);
             ONEOF_CASE.setValue(defaults, true);
             JAVA_MESSAGE_SUPERCLASS.setValue(defaults, GeneratedMessage.class.getName());
+            JACKSON_ANNOTATIONS.setValue(defaults, false);
         }
 
         static Map<String, Object> buildDescriptorMap(DescriptorProtos.FileDescriptorProto fileDescriptor) {

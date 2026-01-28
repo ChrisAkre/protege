@@ -7,7 +7,7 @@ import dev.akre.util.Cons;
 
 import java.util.*;
 
-class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
+public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
 
     public record MemberNode(String name, String fullName, DescriptorProtos.FieldDescriptorProto.Type type, Map<String, MemberNode> children) {
         public Optional<MemberNode> resolve(String typeName, Cons<String> scope) {

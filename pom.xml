@@ -218,9 +218,6 @@
                 <artifactId>maven-invoker-plugin</artifactId>
                 <version>3.6.0</version>
                 <configuration>
-                    <pomExcludes>
-                        <pomExclude>hibernate-test/*</pomExclude>
-                    </pomExcludes>
                     <debug>true</debug>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
                     <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
@@ -230,6 +227,10 @@
                     <filterProperties>
                         <project.version>${project.version}</project.version>
                     </filterProperties>
+                    <pomExcludes>
+                        <pomExclude>jackson-test/pom.xml</pomExclude>
+                        <pomExclude>hibernate-test/pom.xml</pomExclude>
+                    </pomExcludes>
                     <goals>
                         <goal>clean</goal>
                         <goal>verify</goal>
