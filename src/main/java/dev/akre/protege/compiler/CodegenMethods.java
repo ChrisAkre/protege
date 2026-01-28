@@ -1,6 +1,5 @@
 package dev.akre.protege.compiler;
 
-import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.palantir.javapoet.*;
 
@@ -116,7 +115,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
+        static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenConfig ctx) {
             var method = MethodSpec.methodBuilder("internalGetMapFieldReflection")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -125,7 +124,7 @@ public class CodegenMethods {
                     .beginControlFlow("switch (fieldNumber)");
 
             for (var field : msgCodegen.descriptor().getFieldList()) {
-                if (isMapField(field, ctx)) {
+                if (ctx.isMapField(field)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
             }
@@ -136,7 +135,7 @@ public class CodegenMethods {
             return method.build();
         }
 
-        static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenContext ctx) {
+        static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenConfig ctx) {
             var method = MethodSpec.methodBuilder("internalGetMutableMapFieldReflection")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -145,7 +144,7 @@ public class CodegenMethods {
                     .beginControlFlow("switch (fieldNumber)");
 
             for (var field : msgCodegen.descriptor().getFieldList()) {
-                if (isMapField(field, ctx)) {
+                if (ctx.isMapField(field)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
             }
@@ -154,29 +153,6 @@ public class CodegenMethods {
                     .endControlFlow();
 
             return method.build();
-        }
-
-        private static boolean isMapField(DescriptorProtos.FieldDescriptorProto field, CodegenContext ctx) {
-            if (field.getLabel() != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
-                return false;
-            }
-            if (field.getType() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                return false;
-            }
-            if (!field.hasTypeName()) {
-                return false;
-            }
-
-            String typeName = field.getTypeName();
-            if (typeName.startsWith(".")) {
-                var protoPackage = ctx.fileDescriptor().getPackage();
-                if (!protoPackage.isEmpty() && typeName.startsWith("." + protoPackage + ".")) {
-                    typeName = typeName.substring(protoPackage.length() + 2);
-                } else if (typeName.startsWith(".")) {
-                    typeName = typeName.substring(1);
-                }
-            }
-            return ctx.isMapEntryMap().getOrDefault(typeName, false);
         }
 
         // Field setters/getters
@@ -531,7 +507,7 @@ public class CodegenMethods {
         }
 
         static MethodSpec getRepeatedElement(FieldCodegen ctx) {
-            return MethodSpec.methodBuilder("get" + ctx.pascalName())
+        return MethodSpec.methodBuilder("get" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(ctx.genericType())
                     .addParameter(int.class, "index")
@@ -776,4 +752,3 @@ public class CodegenMethods {
         }
     }
 }
-        

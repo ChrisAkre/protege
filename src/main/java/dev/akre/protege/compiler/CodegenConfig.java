@@ -2,8 +2,11 @@ package dev.akre.protege.compiler;
 
 import com.google.protobuf.DescriptorProtos;
 import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.TypeName;
+import dev.akre.util.Cons;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface CodegenConfig {
@@ -47,6 +50,38 @@ public interface CodegenConfig {
     }
 
     default String getOuterName() {
-        return config().getString(CodegenMetadata.OUTER_NAME, descriptor()).orElse("");
+        return config().outerClassName();
+    }
+
+    default TypeName resolveTypeName(String protoTypeName, List<String> currentScope) {
+        return config().resolveTypeName(protoTypeName, currentScope);
+    }
+
+    default TypeName resolveTypeName(String protoTypeName, Cons<String> currentScope) {
+        return config().resolveTypeName(protoTypeName, currentScope);
+    }
+
+    default TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
+        return config().getFieldType(field, currentScope);
+    }
+
+    default boolean isMapField(DescriptorProtos.FieldDescriptorProto field) {
+        return config().isMapField(field);
+    }
+
+    default DescriptorProtos.DescriptorProto getEntryDescriptor(DescriptorProtos.FieldDescriptorProto field) {
+        return config().getEntryDescriptor(field);
+    }
+
+    default String relativeToProtoPackage(String typeName) {
+        return config().relativeToProtoPackage(typeName);
+    }
+
+    default ClassName getFieldAccessorTableClass() {
+        return config().getFieldAccessorTableClass();
+    }
+
+    default Map<String, ClassName> typeRegistry() {
+        return config().typeRegistry();
     }
 }

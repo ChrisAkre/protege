@@ -22,7 +22,7 @@ public class ServiceMessages {
                 .build();
     }
 
-    public static TypeSpec generateInterface(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static TypeSpec generateInterface(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         var interfaceBuilder = TypeSpec.interfaceBuilder("Interface")
                 .addModifiers(Modifier.PUBLIC);
         for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
@@ -32,7 +32,7 @@ public class ServiceMessages {
         return interfaceBuilder.build();
     }
 
-    public static TypeSpec generateBlockingInterface(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static TypeSpec generateBlockingInterface(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         var blockingInterfaceBuilder = TypeSpec.interfaceBuilder("BlockingInterface")
                 .addModifiers(Modifier.PUBLIC);
         for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
@@ -42,7 +42,7 @@ public class ServiceMessages {
         return blockingInterfaceBuilder.build();
     }
 
-    public static TypeSpec generateServiceStub(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static TypeSpec generateServiceStub(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         var stubBuilder = TypeSpec.classBuilder("Stub")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(ClassName.get("", service.getName()))
@@ -84,7 +84,7 @@ public class ServiceMessages {
         return stubBuilder.build();
     }
 
-    public static TypeSpec generateBlockingServiceStub(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static TypeSpec generateBlockingServiceStub(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         var stubBuilder = TypeSpec.classBuilder("BlockingStub")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(ClassName.get("", "BlockingInterface"));
@@ -119,7 +119,7 @@ public class ServiceMessages {
         return stubBuilder.build();
     }
 
-    public static CodeBlock generateNewReflectiveService(DescriptorProtos.ServiceDescriptorProto service, String serviceName, CodegenContext ctx) {
+    public static CodeBlock generateNewReflectiveService(DescriptorProtos.ServiceDescriptorProto service, String serviceName, CodegenConfig ctx) {
         var builder = TypeSpec.anonymousClassBuilder("")
                 .superclass(ClassName.get("", serviceName));
 
@@ -144,7 +144,7 @@ public class ServiceMessages {
                 .build();
     }
 
-    public static CodeBlock generateNewReflectiveBlockingService(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static CodeBlock generateNewReflectiveBlockingService(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         var builder = TypeSpec.anonymousClassBuilder("")
                 .addSuperinterface(com.google.protobuf.BlockingService.class);
 
@@ -233,11 +233,11 @@ public class ServiceMessages {
                 .build();
     }
 
-    public static MethodSpec getDescriptor(CodegenContext ctx, DescriptorProtos.ServiceDescriptorProto service) {
+    public static MethodSpec getDescriptor(CodegenConfig ctx, DescriptorProtos.ServiceDescriptorProto service) {
         return MethodSpec.methodBuilder("getDescriptor")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .returns(Descriptors.ServiceDescriptor.class)
-                .addStatement("return $T.getDescriptor().getServices().get($L)", ClassName.get(ctx.packageName(), ctx.outerName()), ctx.fileDescriptor().getServiceList().indexOf(service))
+                .addStatement("return $T.getDescriptor().getServices().get($L)", ClassName.get(ctx.getJavaPackage(), ctx.getOuterName()), ctx.config().fileDescriptor().getServiceList().indexOf(service))
                 .build();
     }
 
@@ -250,7 +250,7 @@ public class ServiceMessages {
                 .build();
     }
 
-    public static MethodSpec callMethod(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static MethodSpec callMethod(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         var callMethod = MethodSpec.methodBuilder("callMethod")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -282,7 +282,7 @@ public class ServiceMessages {
         return callMethod.build();
     }
 
-    public static MethodSpec getRequestPrototype(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static MethodSpec getRequestPrototype(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         var getRequestPrototype = MethodSpec.methodBuilder("getRequestPrototype")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -304,7 +304,7 @@ public class ServiceMessages {
         return getRequestPrototype.build();
     }
 
-    public static MethodSpec getResponsePrototype(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static MethodSpec getResponsePrototype(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         var getResponsePrototype = MethodSpec.methodBuilder("getResponsePrototype")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -344,7 +344,7 @@ public class ServiceMessages {
                 .build();
     }
 
-    public static MethodSpec newReflectiveService(DescriptorProtos.ServiceDescriptorProto service, String serviceName, CodegenContext ctx) {
+    public static MethodSpec newReflectiveService(DescriptorProtos.ServiceDescriptorProto service, String serviceName, CodegenConfig ctx) {
         return MethodSpec.methodBuilder("newReflectiveService")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(ClassName.get("", "Interface"), "impl")
@@ -353,7 +353,7 @@ public class ServiceMessages {
                 .build();
     }
 
-    public static MethodSpec newReflectiveBlockingService(DescriptorProtos.ServiceDescriptorProto service, CodegenContext ctx) {
+    public static MethodSpec newReflectiveBlockingService(DescriptorProtos.ServiceDescriptorProto service, CodegenConfig ctx) {
         return MethodSpec.methodBuilder("newReflectiveBlockingService")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(ClassName.get("", "BlockingInterface"), "impl")
@@ -362,7 +362,7 @@ public class ServiceMessages {
                 .build();
     }
 
-    public static MethodSpec rpcMethod(DescriptorProtos.MethodDescriptorProto method, CodegenContext ctx) {
+    public static MethodSpec rpcMethod(DescriptorProtos.MethodDescriptorProto method, CodegenConfig ctx) {
         var methodName = ProtoUtils.toCamelCase(method.getName());
         var inputType = ctx.resolveTypeName(method.getInputType(), new java.util.ArrayList<>());
         var outputType = ctx.resolveTypeName(method.getOutputType(), new java.util.ArrayList<>());
@@ -375,7 +375,7 @@ public class ServiceMessages {
                 .build();
     }
 
-    public static MethodSpec blockingMethod(DescriptorProtos.MethodDescriptorProto method, CodegenContext ctx) {
+    public static MethodSpec blockingMethod(DescriptorProtos.MethodDescriptorProto method, CodegenConfig ctx) {
         var methodName = ProtoUtils.toCamelCase(method.getName());
         var inputType = ctx.resolveTypeName(method.getInputType(), new java.util.ArrayList<>());
         var outputType = ctx.resolveTypeName(method.getOutputType(), new java.util.ArrayList<>());
