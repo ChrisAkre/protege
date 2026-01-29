@@ -237,7 +237,6 @@ public class CodegenUtils {
      * @param typeName The concrete message type (e.g., {@code MyMessage})
      * @return The *OrBuilder type (e.g., {@code MyMessageOrBuilder}), or the original type if not a ClassName.
      */
-    // TODO reimplement this but using ClassName.peerClass ?
     public static TypeName getOrBuilderType(TypeName typeName) {
         if (typeName instanceof ClassName) {
             ClassName cn = (ClassName) typeName;

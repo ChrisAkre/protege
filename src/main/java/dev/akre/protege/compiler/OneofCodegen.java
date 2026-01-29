@@ -9,6 +9,13 @@ import dev.akre.protege.ProtoUtils;
  * <p>
  * This record holds the metadata required to generate the sealed interfaces, case enums,
  * and pattern matching logic used by the enhanced oneof implementation.
+ *
+ * @param descriptor The oneof descriptor.
+ * @param oneofIndex The index of the oneof in the message.
+ * @param pascalName The PascalCase name of the oneof.
+ * @param enumName The name of the case enum.
+ * @param messageCodegen The parent message codegen context.
+ * @param config The configuration metadata.
  */
 public record OneofCodegen(
         DescriptorProtos.OneofDescriptorProto descriptor,

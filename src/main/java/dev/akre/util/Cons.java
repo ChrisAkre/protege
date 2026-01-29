@@ -18,6 +18,8 @@ import java.util.stream.StreamSupport;
  * Head to Tail (Newest to Oldest) traversal in classic Lisp style.
  *
  * @param <T> element type
+ * @param head The head (first element) of the list.
+ * @param tail The tail (rest of the elements) of the list.
  * @see <a href="https://en.wikipedia.org/wiki/Greenspun%27s_tenth_rule">Greenspun's tenth rule</a>
  */
 public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {

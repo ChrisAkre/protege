@@ -7,6 +7,8 @@ import java.util.Spliterators;
 
 /**
  * A read-only collection interface for {@link Cons}, primarily used as a return type for Cons.reversed()
+ *
+ * @param <T> The type of elements in this collection.
  */
 public interface UnmodifiableCons<T> extends Collection<T> {
 

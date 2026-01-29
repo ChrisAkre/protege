@@ -15,6 +15,11 @@ import javax.lang.model.element.Modifier;
  *   <li>Value storage and retrieval</li>
  *   <li>Integration with ProtocolMessageEnum</li>
  * </ul>
+ *
+ * @param descriptor The enum descriptor.
+ * @param scope The current scope.
+ * @param protoCodegen The main codegen instance.
+ * @param config The configuration metadata.
  */
 public record EnumCodegen(
         DescriptorProtos.EnumDescriptorProto descriptor,
