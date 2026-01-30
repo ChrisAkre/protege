@@ -22,6 +22,18 @@ import java.util.stream.Stream;
 import static java.util.Map.entry;
 import static java.util.function.Predicate.not;
 
+/**
+ * Utility methods for parsing, processing, and generating code for Protocol Buffers.
+ * <p>
+ * This class provides helper methods for:
+ * <ul>
+ *   <li>Parsing .proto files into descriptors</li>
+ *   <li>Mapping Protobuf types to Java types and wire formats</li>
+ *   <li>Generating method names for readers/writers</li>
+ *   <li>String manipulation (capitalization, escaping)</li>
+ *   <li>Reconstructing .proto file content from descriptors</li>
+ * </ul>
+ */
 public class ProtoUtils {
 
 
@@ -49,6 +61,13 @@ public class ProtoUtils {
                 entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_BYTES, "bytes")
         );
 
+    /**
+     * Parses a .proto file into a {@link DescriptorProtos.FileDescriptorProto}.
+     *
+     * @param file The .proto file to parse.
+     * @return The parsed file descriptor.
+     * @throws IOException If an I/O error occurs.
+     */
     public static DescriptorProtos.FileDescriptorProto parseProto(File file) throws IOException {
         CharStream input = CharStreams.fromPath(file.toPath());
         return parseProto(input, file.getName());
@@ -190,6 +209,13 @@ public class ProtoUtils {
         return result;
     }
 
+    /**
+     * Returns the name of the method used to write a field of the given type.
+     *
+     * @param type The Protobuf field type.
+     * @return The name of the write method (e.g., "writeString", "writeInt32").
+     * @throws IllegalArgumentException If the type is unsupported.
+     */
     public static String getWriteMethodName(DescriptorProtos.FieldDescriptorProto.Type type) {
         return switch (type) {
             case TYPE_DOUBLE -> "writeDouble";
@@ -282,6 +308,13 @@ public class ProtoUtils {
         };
     }
 
+    /**
+     * Returns the wire type (0-5) for the given Protobuf field type.
+     *
+     * @param type The Protobuf field type.
+     * @return The wire type integer.
+     * @throws IllegalArgumentException If the type is unsupported.
+     */
     public static int getWireType(DescriptorProtos.FieldDescriptorProto.Type type) {
         return switch (type) {
             case TYPE_INT32, TYPE_INT64, TYPE_UINT32, TYPE_UINT64, TYPE_SINT32, TYPE_SINT64, TYPE_BOOL, TYPE_ENUM -> 0;

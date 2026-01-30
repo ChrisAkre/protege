@@ -86,10 +86,6 @@ public interface CodegenConfig {
         return config().getFieldType(field, currentScope);
     }
 
-//    default TypeName getFieldType() {
-//        return config().getFieldType(descriptor());
-//    }
-
     default boolean isMapField(DescriptorProtos.FieldDescriptorProto field) {
         return config().isMapField(field);
     }
