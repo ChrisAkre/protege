@@ -20,7 +20,6 @@ public class CanaryTest {
 
     @Test
     public void testCompileOutput() throws Exception {
-        // TODO figure out why there is an extra semicolon after fileDescriptor initialization
         String output = new ProtoCodegen(new TestUtils.MockFiler()).generateFile(ProtoUtils.parseProto(TEST_PROTO, "canary.proto")).toJavaFileObject().getCharContent(false).toString();
         assertThat(output).isEqualTo("""
                 package com.example;
@@ -51,12 +50,11 @@ public class CanaryTest {
                   public static final String PROTEGE_VERSION = "0.0.1-SNAPSHOT";
                 
                   private static final Descriptors.FileDescriptor fileDescriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(new String[] {
-                        "\\n",
-                        "\\014canary.proto\\022\\013com.example\\"\\026\\n",
-                        "\\006Canary\\022\\014\\n",
-                        "\\004name\\030\\001 \\001(\\tB\\000b\\006proto3"
-                      }, new Descriptors.FileDescriptor[0]);
-                  ;
+                    "\\n",
+                    "\\014canary.proto\\022\\013com.example\\"\\026\\n",
+                    "\\006Canary\\022\\014\\n",
+                    "\\004name\\030\\001 \\001(\\tB\\000b\\006proto3"
+                  }, new Descriptors.FileDescriptor[0]);
                 
                   public static Descriptors.FileDescriptor getDescriptor() {
                     return fileDescriptor;

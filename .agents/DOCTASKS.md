@@ -17,3 +17,9 @@
 - [x] Add Javadocs to `dev.akre.protege.parser` package.
 - [ ] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [ ] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
+- [ ] Fix double semicolon bug in `OuterClassCodegen.java` and update `CanaryTest`.
+- [ ] Refactor `CodegenUtils.getOrBuilderType` to use `ClassName.peerClass`.
+- [ ] Fix confusing comments and Javadoc in `GenProto.java`.
+- [ ] Add Javadoc to `ProtoCodegen.java` (entry point).
+- [ ] Add Javadoc to `ProtobufFileDescriptorVisitor.java` (scope handling).
+- [ ] Document "Dark Zones" in `CodegenUtils.java` (`getWriteCondition`, `relativeToProtoPackage`).

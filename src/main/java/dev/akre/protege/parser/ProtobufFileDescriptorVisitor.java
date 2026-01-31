@@ -78,6 +78,9 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
+    /**
+     * Initializes the package scope before traversing the tree to allow for full type name resolution.
+     */
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
         String packageName = ctx.packageStatement().isEmpty()
@@ -172,6 +175,9 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         return result;
     }
 
+    /**
+     * Pushes the message name onto the scope stack to handle nested type resolution.
+     */
     @Override
     public DescriptorProto.Builder visitMessageDef(ProtobufParser.MessageDefContext ctx) {
         String messageName = ctx.name.getText();

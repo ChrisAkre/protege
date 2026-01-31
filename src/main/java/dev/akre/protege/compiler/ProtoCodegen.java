@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Main entry point for the Protobuf-to-Java compiler. Orchestrates the generation of the Outer Class and all nested Message classes from a FileDescriptorProto.
+ */
 public class ProtoCodegen {
 
     public static final ClassName OR_BUILDER_INTERFACE = ClassName.get("com.google.protobuf", "MessageOrBuilder");

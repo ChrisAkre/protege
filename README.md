@@ -190,7 +190,7 @@ generation happens automatically during the standard build lifecycle.
 
 ### Gradle Integration
 
-¯\\\_(ツ)_/¯
+Not yet supported.
 
 ## Build Instructions
 
