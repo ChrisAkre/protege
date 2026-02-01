@@ -125,7 +125,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
     @Override
     public Syntax visitSyntax(ProtobufParser.SyntaxContext ctx) {
         try {
-            return new Syntax(getStringLiteral(ctx.protoVersion().getText()));
+            return new Syntax(ProtoUtils.getStringLiteral(ctx.protoVersion().getText()));
         } catch (NullPointerException e) {
             throw new InvalidProtoException("missing syntax declaration");
         }
@@ -139,7 +139,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
     @Override
     public Import visitImportStatement(ProtobufParser.ImportStatementContext ctx) {
         return new Import(
-                getStringLiteral(ctx.strLit().getText()),
+                ProtoUtils.getStringLiteral(ctx.strLit().getText()),
                 ctx.WEAK() != null,
                 ctx.PUBLIC() != null
         );
@@ -148,8 +148,8 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
     @Override
     public Object visitOptionDecl(ProtobufParser.OptionDeclContext ctx) {
         return switch (ctx.option().optionName().getText()) {
-            case "java_package" -> FileOption.javaPackage(getStringLiteral(ctx.option().constant().getText()));
-            case "java_outer_classname" -> FileOption.javaOuterClass(getStringLiteral(ctx.option().constant().getText()));
+            case "java_package" -> FileOption.javaPackage(ProtoUtils.getStringLiteral(ctx.option().constant().getText()));
+            case "java_outer_classname" -> FileOption.javaOuterClass(ProtoUtils.getStringLiteral(ctx.option().constant().getText()));
             case "java_generic_services" -> FileOption.javaGenericServices(Boolean.parseBoolean(ctx.option().constant().getText()));
             default -> visitOption(ctx.option());
         };
@@ -380,7 +380,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                     });
             case ProtobufParser.ReservedContext c when c.fieldNames() != null ->
                     c.fieldNames().strLit().forEach(strCtx ->
-                            messageBuilder.addReservedName(getStringLiteral(strCtx.getText()))
+                            messageBuilder.addReservedName(ProtoUtils.getStringLiteral(strCtx.getText()))
                     );
             default -> {} // EOF
         }
@@ -426,24 +426,14 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                 default -> Double.parseDouble(text);
             };
         } else if (ctx.strLit() != null) {
-            return ByteString.copyFromUtf8(getStringLiteral(ctx.strLit().getText()));
+            return ByteString.copyFromUtf8(ProtoUtils.getStringLiteral(ctx.strLit().getText()));
         } else {
             throw new IllegalStateException();
         }
     }
 
     static String getStringConstant(ProtobufParser.OptionContext ctx) {
-        return getStringLiteral(ctx.constant().getText());
-    }
-
-    static String getStringLiteral(String text) {
-        return text.substring(1, text.length() - 1)
-                .replace("\\n", "\n")
-                .replace("\\r", "\r")
-                .replace("\\t", "\t")
-                .replace("\\\"", "\"")
-                .replace("\\'", "'")
-                .replace("\\\\", "\\");
+        return ProtoUtils.getStringLiteral(ctx.constant().getText());
     }
 
     private void setFieldTypeName(ProtobufParser.Type_Context ctx, FieldDescriptorProto.Builder fieldBuilder) {

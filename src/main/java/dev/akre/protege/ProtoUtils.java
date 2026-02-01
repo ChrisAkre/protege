@@ -3,6 +3,7 @@ package dev.akre.protege;
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.parser.ProtobufFileDescriptorVisitor;
 import dev.akre.util.Cons;
+import org.apache.commons.text.StringEscapeUtils;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -61,6 +62,13 @@ public class ProtoUtils {
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent, String filename) {
         CharStream input = CharStreams.fromString(protoContent);
         return parseProto(input, filename);
+    }
+
+    public static String getStringLiteral(String text) {
+        if (text.length() <= 2) {
+            return "";
+        }
+        return StringEscapeUtils.unescapeJava(text.substring(1, text.length() - 1));
     }
 
     private static DescriptorProtos.FileDescriptorProto parseProto(CharStream input, String filename) {
