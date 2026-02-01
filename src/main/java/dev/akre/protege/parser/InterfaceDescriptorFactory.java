@@ -189,6 +189,13 @@ public class InterfaceDescriptorFactory {
 
         messageOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_implements", javaImplements));
 
+        for (java.lang.annotation.Annotation ann : cls.getAnnotations()) {
+            if (ann.annotationType().getName().equals(GenProto.class.getName())) {
+                continue;
+            }
+            messageOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_class_annotation", ProtoUtils.annotationToString(ann)));
+        }
+
         if (messageOptions.getUninterpretedOptionCount() > 0) {
             messageBuilder.setOptions(messageOptions);
         }
@@ -224,7 +231,7 @@ public class InterfaceDescriptorFactory {
                             continue;
                         }
 
-                        fieldOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_annotation", ProtoUtils.annotationToString(ann)));
+                        fieldOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_field_annotation", ProtoUtils.annotationToString(ann)));
                     }
                     if (fieldOptions.getUninterpretedOptionCount() > 0) {
                         fieldBuilder.setOptions(fieldOptions);

@@ -22,3 +22,17 @@ message User {
     (dev.akre.protege.java_field_annotation) = "@org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.VARCHAR)"
   ];
 }
+
+message Customer {
+  option (dev.akre.protege.java_message_annotation) = "@jakarta.persistence.Entity";
+  option (dev.akre.protege.java_message_annotation) = "@jakarta.persistence.Table(name = \"customers\")";
+
+  int64 id = 1 [
+    (dev.akre.protege.java_field_annotation) = "@jakarta.persistence.Id",
+    (dev.akre.protege.java_field_annotation) = "@jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)"
+  ];
+
+  string name = 2 [
+    (dev.akre.protege.java_field_annotation) = "@jakarta.persistence.Column(nullable = false)"
+  ];
+}

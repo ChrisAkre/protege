@@ -473,7 +473,7 @@ public class ProtoUtils {
             case String s -> "\"" + s + "\"";
             case Character c -> "'" + c + "'";
             case Class<?> clazz -> clazz.getSimpleName() + ".class";
-            case Enum<?> e -> e.name();
+            case Enum<?> e -> e.getDeclaringClass().getCanonicalName() + "." + e.name();
             case null -> "null";
             case Object o when o.getClass().isArray() -> {
                 StringBuilder sb = new StringBuilder("{");
