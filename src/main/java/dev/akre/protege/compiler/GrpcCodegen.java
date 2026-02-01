@@ -4,6 +4,7 @@ import com.google.protobuf.DescriptorProtos;
 import com.palantir.javapoet.*;
 import dev.akre.protege.ProtegeVersion;
 import dev.akre.protege.ProtoUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
@@ -231,7 +232,7 @@ public record GrpcCodegen(Filer filer, CodegenMetadata config) implements Codege
                 .build());
 
         for (var method : service.getMethodList()) {
-            String methodName = ProtoUtils.decapitalize(ProtoUtils.toCamelCase(method.getName()));
+            String methodName = StringUtils.uncapitalize(ProtoUtils.toCamelCase(method.getName()));
             TypeName inputType = resolveTypeName(method.getInputType(), fileDescriptor, packageName, outerClassName, typeRegistry, isEnumMap, new ArrayList<>());
             TypeName outputType = resolveTypeName(method.getOutputType(), fileDescriptor, packageName, outerClassName, typeRegistry, isEnumMap, new ArrayList<>());
 
@@ -286,7 +287,7 @@ public record GrpcCodegen(Filer filer, CodegenMetadata config) implements Codege
                 .addSuperinterface(ClassName.get("io.grpc", "BindableService"));
 
         for (var method : service.getMethodList()) {
-            String methodName = ProtoUtils.decapitalize(ProtoUtils.toCamelCase(method.getName()));
+            String methodName = StringUtils.uncapitalize(ProtoUtils.toCamelCase(method.getName()));
             TypeName inputType = resolveTypeName(method.getInputType(), fileDescriptor, packageName, outerClassName, typeRegistry, isEnumMap, new ArrayList<>());
             TypeName outputType = resolveTypeName(method.getOutputType(), fileDescriptor, packageName, outerClassName, typeRegistry, isEnumMap, new ArrayList<>());
 
@@ -322,7 +323,7 @@ public record GrpcCodegen(Filer filer, CodegenMetadata config) implements Codege
                 ClassName.get("io.grpc", "ServerServiceDefinition"));
 
         for (var method : service.getMethodList()) {
-            String methodName = ProtoUtils.decapitalize(ProtoUtils.toCamelCase(method.getName()));
+            String methodName = StringUtils.uncapitalize(ProtoUtils.toCamelCase(method.getName()));
             TypeName inputType = resolveTypeName(method.getInputType(), fileDescriptor, packageName, outerClassName, typeRegistry, isEnumMap, new ArrayList<>());
             TypeName outputType = resolveTypeName(method.getOutputType(), fileDescriptor, packageName, outerClassName, typeRegistry, isEnumMap, new ArrayList<>());
 
@@ -366,7 +367,7 @@ public record GrpcCodegen(Filer filer, CodegenMetadata config) implements Codege
         var currentPath = new ArrayList<>(parentNames);
         currentPath.add(message.getName());
 
-        var capitalizedPath = currentPath.stream().map(ProtoUtils::capitalize).toList();
+        var capitalizedPath = currentPath.stream().map(StringUtils::capitalize).toList();
         var className = ClassName.get(packageName, outerClassName, capitalizedPath.toArray(new String[0]));
         var relativeProtoName = String.join(".", currentPath);
         typeRegistry.put(relativeProtoName, className);

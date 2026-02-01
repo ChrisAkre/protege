@@ -1,6 +1,7 @@
 package dev.akre.protege;
 
 import com.google.protobuf.DescriptorProtos;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -63,7 +64,7 @@ public class ProtoUtilsTest {
         assertThat(ProtoUtils.toCamelCase("TestName")).isEqualTo("testName");
         assertThat(ProtoUtils.toCamelCase("First_Second")).isEqualTo("firstSecond");
         assertThat(ProtoUtils.toCamelCase("MyField")).isEqualTo("myField");
-        assertThat(ProtoUtils.toCamelCase("_first")).isEqualTo("First");
+        assertThat(ProtoUtils.toCamelCase("_first")).isEqualTo("first");
         assertThat(ProtoUtils.toCamelCase("")).isEqualTo("");
         assertThat(ProtoUtils.toCamelCase(null)).isNull();
     }
@@ -71,11 +72,11 @@ public class ProtoUtilsTest {
     @Test
     @DisplayName("Should correctly capitalize the first letter of a string")
     void shouldCapitalizeFirstLetter() {
-        assertThat(ProtoUtils.capitalize("test")).isEqualTo("Test");
-        assertThat(ProtoUtils.capitalize("test_name")).isEqualTo("Test_name");
-        assertThat(ProtoUtils.capitalize("TestName")).isEqualTo("TestName");
-        assertThat(ProtoUtils.capitalize("")).isEqualTo("");
-        assertThat(ProtoUtils.capitalize(null)).isNull();
+        assertThat(StringUtils.capitalize("test")).isEqualTo("Test");
+        assertThat(StringUtils.capitalize("test_name")).isEqualTo("Test_name");
+        assertThat(StringUtils.capitalize("TestName")).isEqualTo("TestName");
+        assertThat(StringUtils.capitalize("")).isEqualTo("");
+        assertThat(StringUtils.capitalize(null)).isNull();
     }
 
     @Test

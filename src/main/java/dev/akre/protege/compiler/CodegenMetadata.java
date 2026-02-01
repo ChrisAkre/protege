@@ -8,6 +8,7 @@ import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import dev.akre.protege.ProtoUtils;
 import dev.akre.util.Cons;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -652,7 +653,7 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
                 var pascalName = ProtoUtils.toPascalCase(oneof.getName());
                 var outerName = metadata.getString(OUTER_NAME, metadata.fileDescriptor()).orElse("");
 
-                var capitalizedPath = currentPath.stream().map(ProtoUtils::capitalize).toList();
+                var capitalizedPath = currentPath.stream().map(StringUtils::capitalize).toList();
                 var interfaceClassName = ClassName.get(metadata.packageName(), outerName, capitalizedPath.toArray(new String[0])).nestedClass(pascalName);
 
                 for (var field : message.getFieldList()) {

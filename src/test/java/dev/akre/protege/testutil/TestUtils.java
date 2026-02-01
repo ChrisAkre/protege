@@ -12,6 +12,7 @@ import com.google.testing.compile.JavaFileObjects;
 import dev.akre.protege.ProtoUtils;
 import io.grpc.*;
 import io.grpc.stub.ServerCalls;
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractAssert;
 
 import javax.annotation.processing.Filer;
@@ -126,7 +127,7 @@ public class TestUtils {
     }
 
     public static String toCamelCase(String s) {
-        return ProtoUtils.decapitalize(ProtoUtils.toCamelCase(s));
+        return StringUtils.uncapitalize(ProtoUtils.toCamelCase(s));
     }
 
     public static String getJavaPackage(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {

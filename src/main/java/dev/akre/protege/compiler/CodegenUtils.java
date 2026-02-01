@@ -3,6 +3,7 @@ package dev.akre.protege.compiler;
 import com.google.protobuf.DescriptorProtos;
 import com.palantir.javapoet.*;
 import dev.akre.protege.ProtoUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +127,7 @@ public class CodegenUtils {
         var currentPath = new ArrayList<>(parentNames);
         currentPath.add(message.getName());
 
-        var capitalizedPath = currentPath.stream().map(ProtoUtils::capitalize).collect(Collectors.toList());
+        var capitalizedPath = currentPath.stream().map(StringUtils::capitalize).collect(Collectors.toList());
         var className = ClassName.get(packageName, outerClassName, capitalizedPath.toArray(new String[0]));
         var relativeProtoName = String.join(".", currentPath);
         typeRegistry.put(relativeProtoName, className);
@@ -146,7 +147,7 @@ public class CodegenUtils {
         var currentPath = new ArrayList<>(parentNames);
         currentPath.add(enumType.getName());
 
-        var capitalizedPath = currentPath.stream().map(ProtoUtils::capitalize).collect(Collectors.toList());
+        var capitalizedPath = currentPath.stream().map(StringUtils::capitalize).collect(Collectors.toList());
         var className = ClassName.get(packageName, outerClassName, capitalizedPath.toArray(new String[0]));
         var relativeProtoName = String.join(".", currentPath);
         typeRegistry.put(relativeProtoName, className);
