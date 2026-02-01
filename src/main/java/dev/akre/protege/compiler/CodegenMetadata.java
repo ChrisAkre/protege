@@ -38,35 +38,71 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
                               Map<String, List<ClassName>> oneofInterfacesByType
 ) {
 
+    /** Option for specifying annotations on generated fields. */
     public static final Option FIELD_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_field_annotation");
+    /** Option for specifying annotations on generated message classes. */
     public static final Option MESSAGE_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_message_annotation");
+    /** Option for specifying annotations on generated builder classes. */
     public static final Option BUILDER_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_builder_annotation");
+    /** Option for specifying annotations on generated classes (legacy alias). */
     public static final Option CLASS_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_class_annotation");
+    /** Option for specifying annotations on generated interfaces (legacy alias). */
     public static final Option INTERFACE_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_class_annotation");
 
+    /** Option for controlling generation of @Deprecated annotations. */
     public static final Option JAVA_GENERATE_DEPRECATED = Option.customBoolean("dev.akre.protege.java_generate_deprecated");
+    /** Option for the package name from the proto file. */
     public static final Option PACKAGE = Option.fileOption("package", DescriptorProtos.FileDescriptorProto::getPackage);
+    /** Option for the Java package name. */
     public static final Option JAVA_PACKAGE = Option.fileOption("java_package", f -> f.getOptions().getJavaPackage());
+    /** Option for enabling enhanced oneof generation (sealed interfaces). */
     public static final Option ENHANCED_ONEOF = Option.customBoolean("dev.akre.protege.java_enhanced_oneof");
+    /** Option for enabling generation of the legacy oneof Case enum. */
     public static final Option ONEOF_CASE = Option.customBoolean("dev.akre.protege.java_oneof_case");
+    /** Option for specifying an interface the generated message should implement. */
     public static final Option JAVA_IMPLEMENTS = Option.customString("dev.akre.protege.java_implements");
+    /** Option for specifying a custom superclass for generated messages. */
     public static final Option JAVA_MESSAGE_SUPERCLASS = Option.customString("dev.akre.protege.message_superclass");
+    /** Option for specifying the outer class name. */
     public static final Option OUTER_NAME = Option.fileOption("outer_name", ProtoUtils::getJavaOuterClassName);
+    /** Option for enabling Jackson annotations. */
     public static final Option JACKSON_ANNOTATIONS = Option.customBoolean("dev.akre.protege.java_jackson_annotations");
 
 
+    /**
+     * Creates a new Builder for the given file descriptor.
+     *
+     * @param fileDescriptor The Protobuf file descriptor to process.
+     * @return A new Builder instance.
+     */
     public static CodegenMetadata.Builder build(DescriptorProtos.FileDescriptorProto fileDescriptor) {
         return new Builder(fileDescriptor);
     }
 
+    /**
+     * Returns the class name for the FieldAccessorTable nested class.
+     *
+     * @return The ClassName of the FieldAccessorTable.
+     */
     public ClassName getFieldAccessorTableClass() {
         return getMessageSuperclass().nestedClass("FieldAccessorTable");
     }
 
+    /**
+     * Returns the configured superclass for generated messages.
+     *
+     * @return The ClassName of the message superclass.
+     */
     public ClassName getMessageSuperclass() {
         return getString(JAVA_MESSAGE_SUPERCLASS, fileDescriptor).map(ClassName::bestGuess).orElseThrow();
     }
 
+    /**
+     * Checks if a field is a map field.
+     *
+     * @param field The field descriptor.
+     * @return True if the field is a map, false otherwise.
+     */
     public boolean isMapField(DescriptorProtos.FieldDescriptorProto field) {
         if (field.getLabel() != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
             return false;
@@ -83,6 +119,13 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
 
+    /**
+     * Resolves a Protobuf type name to a JavaPoet TypeName within the current scope.
+     *
+     * @param protoTypeName The Protobuf type name.
+     * @param currentScope  The current scope as a list of names.
+     * @return The resolved TypeName.
+     */
     public TypeName resolveTypeName(String protoTypeName, List<String> currentScope) {
         String outerClassName = getString(OUTER_NAME, fileDescriptor).orElse("");
         if (protoTypeName.startsWith(".")) {
@@ -104,6 +147,13 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         return ClassName.get(packageName, outerClassName, protoTypeName.split("\\."));
     }
 
+    /**
+     * Resolves a Protobuf type name to a JavaPoet TypeName within the current scope.
+     *
+     * @param protoTypeName The Protobuf type name.
+     * @param currentScope  The current scope as a Cons list of names.
+     * @return The resolved TypeName.
+     */
     public TypeName resolveTypeName(String protoTypeName, Cons<String> currentScope) {
         if (protoTypeName.startsWith(".")) {
             return resolveTypeName(protoTypeName, java.util.Collections.<String>emptyList());
@@ -122,6 +172,13 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         return ClassName.get(packageName, outerClassName, protoTypeName.split("\\."));
     }
 
+    /**
+     * Determines the Java type for a given Protobuf field.
+     *
+     * @param field        The field descriptor.
+     * @param currentScope The current scope.
+     * @return The Java TypeName for the field.
+     */
     public TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
         if (isMapField(field)) {
             var entryDescriptor = getEntryDescriptor(field);
@@ -155,15 +212,32 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     }
 
 
+    /**
+     * Retrieves the descriptor for the map entry message associated with a map field.
+     *
+     * @param field The field descriptor.
+     * @return The DescriptorProto for the map entry.
+     */
     public DescriptorProtos.DescriptorProto getEntryDescriptor(DescriptorProtos.FieldDescriptorProto field) {
         String typeEntryName = relativeToProtoPackage(field.getTypeName());
         return (DescriptorProtos.DescriptorProto) descriptorMap.get(typeEntryName);
     }
 
+    /**
+     * Returns the package name defined in the proto file.
+     *
+     * @return The package name.
+     */
     public String protoPackageName() {
         return fileDescriptor.getPackage();
     }
 
+    /**
+     * Relativizes a type name against the current proto package.
+     *
+     * @param typeName The full type name.
+     * @return The relative type name.
+     */
     public String relativeToProtoPackage(String typeName) {
         return CodegenUtils.relativeToProtoPackage(typeName, protoPackageName());
     }
@@ -229,10 +303,22 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         }
     }
 
+    /**
+     * Gets a boolean default value by key.
+     *
+     * @param key The option key.
+     * @return The optional boolean value.
+     */
     public Optional<Boolean> getBooleanDefault(String key) {
         return Optional.ofNullable((Boolean) defaults.get(key));
     }
 
+    /**
+     * Gets a boolean override value by key.
+     *
+     * @param key The option key.
+     * @return The optional boolean value.
+     */
     public Optional<Boolean> getBooleanOverride(String key) {
         return Optional.ofNullable((Boolean) overrides.get(key));
     }
@@ -242,8 +328,11 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
      * when retrieving options.
      */
     public enum ValueType {
+        /** Boolean type. */
         BOOLEAN(Boolean.class),
+        /** String type. */
         STRING(String.class),
+        /** List of Strings type. */
         STRING_LIST(List.class);
 
         private final Predicate<Object> check;
@@ -263,25 +352,51 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
      * to resolve its value from a descriptor hierarchy.
      */
     public record Option(String key, ValueType type, Function<Cons<Object>, Optional<?>> lookup) {
+        /**
+         * Creates a custom boolean option.
+         * @param key The option key.
+         * @return The Option.
+         */
         public static Option customBoolean(String key) {
             var p = ProtoUtils.nameList(key);
             return new Option(key, ValueType.BOOLEAN, scope -> getBooleanDescriptorOption(p, scope));
         }
 
+        /**
+         * Creates a custom string option.
+         * @param key The option key.
+         * @return The Option.
+         */
         public static Option customString(String key) {
             var p = ProtoUtils.nameList(key);
             return new Option(key, ValueType.STRING, scope -> getDescriptorStringOption(p, scope));
         }
 
+        /**
+         * Creates a custom string list option.
+         * @param key The option key.
+         * @return The Option.
+         */
         public static Option customStringList(String key) {
             var p = ProtoUtils.nameList(key);
             return new Option(key, ValueType.STRING_LIST, scope -> getStringListDescriptorOption(p, scope));
         }
 
+        /**
+         * Creates a file-level option.
+         * @param key The option key.
+         * @param f Function to extract the value from the file descriptor.
+         * @return The Option.
+         */
         public static Option fileOption(String key, Function<DescriptorProtos.FileDescriptorProto, String> f) {
             return new Option(key, ValueType.STRING, scope -> getFileDescriptorStringOption(scope, f));
         }
 
+        /**
+         * Sets a value in the provided map, ensuring type safety.
+         * @param values The map to set the value in.
+         * @param value The value to set.
+         */
         public void setValue(HashMap<String, Object> values, Object value) {
             if (!type.isInstance(value)) {
                 throw new IllegalStateException("bad option type for %s: %s".formatted(key, value));
@@ -289,11 +404,23 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             values.put(key, value);
         }
 
+        /**
+         * Looks up the option value in the given scope.
+         * @param scope The scope chain.
+         * @param <T> The return type.
+         * @return The optional value.
+         */
         @SuppressWarnings("unchecked")
         public <T> Optional<T> lookup(Cons<Object> scope) {
             return (Optional<T>) lookup.apply(scope);
         }
 
+        /**
+         * Gets the option value from the provided map.
+         * @param values The map of values.
+         * @param <T> The return type.
+         * @return The optional value.
+         */
         @SuppressWarnings("unchecked")
         public <T> Optional<T> get(Map<String, Object> values) {
             return Optional.ofNullable((T) values.get(key));
@@ -309,6 +436,10 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         private final HashMap<String, Object> defaults = new HashMap<>();
         private final HashMap<String, Object> overrides = new HashMap<>();
 
+        /**
+         * Creates a new Builder.
+         * @param fileDescriptor The file descriptor.
+         */
         public Builder(DescriptorProtos.FileDescriptorProto fileDescriptor) {
             this.fileDescriptor = fileDescriptor;
             JAVA_GENERATE_DEPRECATED.setValue(defaults, true);
@@ -355,63 +486,122 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
             return hierarchy;
         }
 
+        /**
+         * Sets whether to generate @Deprecated annotations by default.
+         * @param value True to generate, false otherwise.
+         * @return This builder.
+         */
         public Builder setGenerateDeprecated(boolean value) {
             JAVA_GENERATE_DEPRECATED.setValue(defaults, value);
             return this;
         }
 
+        /**
+         * Overrides whether to generate @Deprecated annotations.
+         * @param value True to generate, false otherwise.
+         * @return This builder.
+         */
         public Builder overrideGenerateDeprecated(boolean value) {
             JAVA_GENERATE_DEPRECATED.setValue(overrides, value);
             return this;
         }
 
+        /**
+         * Sets the default package name.
+         * @param value The package name.
+         * @return This builder.
+         */
         public Builder setPackage(String value) {
             PACKAGE.setValue(defaults, value);
             return this;
         }
 
+        /**
+         * Overrides the package name.
+         * @param value The package name.
+         * @return This builder.
+         */
         public Builder overridePackage(String value) {
             PACKAGE.setValue(overrides, value);
             return this;
         }
 
+        /**
+         * Sets the default Java package name.
+         * @param value The Java package name.
+         * @return This builder.
+         */
         public Builder setJavaPackage(String value) {
             JAVA_PACKAGE.setValue(defaults, value);
             return this;
         }
 
+        /**
+         * Overrides the Java package name.
+         * @param value The Java package name.
+         * @return This builder.
+         */
         public Builder overrideJavaPackage(String value) {
             JAVA_PACKAGE.setValue(overrides, value);
             return this;
         }
 
+        /**
+         * Adds a default field annotation.
+         * @param value The annotation string.
+         * @return This builder.
+         */
         public Builder addFieldAnnotation(String value) {
             @SuppressWarnings("unchecked") List<String> list = (List<String>) defaults.computeIfAbsent(FIELD_ANNOTATIONS.key(), k -> new ArrayList<>());
             list.add(value);
             return this;
         }
 
+        /**
+         * Sets the default field annotations.
+         * @param values The list of annotation strings.
+         * @return This builder.
+         */
         public Builder setFieldAnnotations(List<String> values) {
             FIELD_ANNOTATIONS.setValue(defaults, new ArrayList<>(values));
             return this;
         }
 
+        /**
+         * Adds an override field annotation.
+         * @param value The annotation string.
+         * @return This builder.
+         */
         public Builder addOverrideFieldAnnotation(String value) {
             @SuppressWarnings("unchecked") List<String> list = (List<String>) overrides.computeIfAbsent(FIELD_ANNOTATIONS.key(), k -> new ArrayList<>());
             list.add(value);
             return this;
         }
 
+        /**
+         * Sets the override field annotations.
+         * @param values The list of annotation strings.
+         * @return This builder.
+         */
         public Builder setOverrideFieldAnnotations(List<String> values) {
             FIELD_ANNOTATIONS.setValue(overrides, new ArrayList<>(values));
             return this;
         }
 
+        /**
+         * Sets the default message superclass.
+         * @param value The superclass name.
+         * @return This builder.
+         */
         public Builder setJavaMessageSuperclass(String value) {
             JAVA_MESSAGE_SUPERCLASS.setValue(defaults, value);
             return this;
         }
 
+        /**
+         * Builds the CodegenMetadata instance.
+         * @return The configured CodegenMetadata.
+         */
         public CodegenMetadata build() {
             var hierarchy = buildHierarchy(fileDescriptor);
             var descriptorMap = buildDescriptorMap(fileDescriptor);

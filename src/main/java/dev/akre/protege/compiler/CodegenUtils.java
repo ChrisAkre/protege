@@ -241,8 +241,7 @@ public class CodegenUtils {
      * @return The *OrBuilder type (e.g., {@code MyMessageOrBuilder}), or the original type if not a ClassName.
      */
     public static TypeName getOrBuilderType(TypeName typeName) {
-        if (typeName instanceof ClassName) {
-            ClassName cn = (ClassName) typeName;
+        if (typeName instanceof ClassName cn) {
             return cn.peerClass(cn.simpleName() + "OrBuilder");
         }
         throw new IllegalArgumentException("unexpected typename: " + typeName);
