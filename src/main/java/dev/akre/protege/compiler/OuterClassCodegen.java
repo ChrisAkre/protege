@@ -76,7 +76,7 @@ public record OuterClassCodegen(ProtoCodegen protoCodegen,
         var data = CodeBlock.builder().add("new String[] {\n").indent().add(descriptorChunks).unindent().add("\n}").build();
 
         CodeBlock descriptorInitializer = CodeBlock.builder()
-                .addStatement("$T.internalBuildGeneratedFileFrom($L, new $T[0])",
+                .add("$T.internalBuildGeneratedFileFrom($L, new $T[0])",
                         Descriptors.FileDescriptor.class, data, Descriptors.FileDescriptor.class)
                 .build();
         return FieldSpec.builder(Descriptors.FileDescriptor.class, "fileDescriptor", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)

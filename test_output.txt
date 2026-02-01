@@ -1,0 +1,1868 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 6.8
+[INFO] os.detected.version.major: 6
+[INFO] os.detected.version.minor: 8
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 24.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO]
+[INFO] --------------------------< dev.akre:protege >--------------------------
+[INFO] Building Protege 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- antlr4:4.13.2:antlr4 (default) @ protege ---
+[INFO] No grammars to process
+[INFO] ANTLR 4: Processing source directory /app/src/main/antlr4
+[INFO]
+[INFO] --- templating:3.0.0:filter-sources (filter-src) @ protege ---
+[INFO] Copying files with filtering to temporary directory.
+[INFO] Copying 1 resource from src/main/java-templates to target/templates-tmp3430681449
+[INFO] No files need to be copied to output directory. Up to date: /app/target/generated-sources/java-templates
+[INFO] Source directory: /app/target/generated-sources/java-templates added.
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ protege ---
+[INFO] skip non existing resourceDirectory /app/src/main/resources
+[INFO]
+[INFO] --- compiler:3.13.0:compile (default-compile) @ protege ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO]
+[INFO] --- protobuf:0.6.1:test-compile (default) @ protege ---
+[INFO] Compiling 21 proto file(s) to /app/target/generated-test-sources/protobuf/java
+[INFO]
+[INFO] --- protobuf:0.6.1:test-compile-custom (default) @ protege ---
+[INFO] Compiling 21 proto file(s) to /app/target/generated-test-sources/protobuf/grpc-java
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ protege ---
+[INFO] skip non existing resourceDirectory /app/src/test/resources
+[INFO] Copying 21 resources from src/test/proto to target/test-classes
+[INFO] Copying 21 resources from src/test/proto to target/test-classes
+[INFO]
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ protege ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 62 source files with javac [debug target 21] to target/test-classes
+[INFO] /app/src/test/java/dev/akre/protege/testutil/DescriptorAssert.java: Some input files use unchecked or unsafe operations.
+[INFO] /app/src/test/java/dev/akre/protege/testutil/DescriptorAssert.java: Recompile with -Xlint:unchecked for details.
+[INFO]
+[INFO] --- surefire:3.2.5:test (default-test) @ protege ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.akre.protege.temp.CanaryTest
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.770 s <<< FAILURE! -- in dev.akre.protege.temp.CanaryTest
+[ERROR] dev.akre.protege.temp.CanaryTest.testCompileOutput -- Time elapsed: 0.715 s <<< FAILURE!
+org.opentest4j.AssertionFailedError:
+
+expected:
+  "package com.example;
+
+  import com.google.protobuf.AbstractParser;
+  import com.google.protobuf.ByteString;
+  import com.google.protobuf.CodedInputStream;
+  import com.google.protobuf.CodedOutputStream;
+  import com.google.protobuf.Descriptors;
+  import com.google.protobuf.ExtensionRegistryLite;
+  import com.google.protobuf.GeneratedMessage;
+  import com.google.protobuf.InvalidProtocolBufferException;
+  import com.google.protobuf.MapFieldReflectionAccessor;
+  import com.google.protobuf.Message;
+  import com.google.protobuf.MessageOrBuilder;
+  import com.google.protobuf.Parser;
+  import com.google.protobuf.UnknownFieldSet;
+  import dev.akre.protege.ProtoUtils;
+  import java.io.IOException;
+  import java.io.InputStream;
+  import java.lang.Object;
+  import java.lang.Override;
+  import java.lang.RuntimeException;
+  import java.lang.String;
+  import java.nio.ByteBuffer;
+
+  public final class CanaryOuterClass {
+    public static final String PROTEGE_VERSION = "0.0.1-SNAPSHOT";
+
+    private static final Descriptors.FileDescriptor fileDescriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(new String[] {
+          "\n",
+          "\014canary.proto\022\013com.example\"\026\n",
+          "\006Canary\022\014\n",
+          "\004name\030\001 \001(\tB\000b\006proto3"
+        }, new Descriptors.FileDescriptor[0]);
+
+    public static Descriptors.FileDescriptor getDescriptor() {
+      return fileDescriptor;
+    }
+
+    public interface CanaryOrBuilder extends MessageOrBuilder {
+      String getName();
+
+      ByteString getNameBytes();
+    }
+
+    public static final class Canary extends GeneratedMessage implements CanaryOuterClass.CanaryOrBuilder {
+      private static Descriptors.Descriptor descriptor;
+
+      private static final CanaryOuterClass.Canary DEFAULT_INSTANCE;
+
+      private static GeneratedMessage.FieldAccessorTable internal_fieldAccessorTable;
+
+      public static final Parser<CanaryOuterClass.Canary> PARSER = new AbstractParser<CanaryOuterClass.Canary>() {
+        @Override
+        public CanaryOuterClass.Canary parsePartialFrom(CodedInputStream input,
+            ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+          try {
+            return new CanaryOuterClass.Canary(input, extensionRegistry);
+          } catch (IOException e) {
+            throw new InvalidProtocolBufferException(e).setUnfinishedMessage(getDefaultInstance());
+          }
+        }
+      };
+
+      static {
+        descriptor = CanaryOuterClass.getDescriptor().findMessageTypeByName("Canary");
+      }
+      static {
+        DEFAULT_INSTANCE = new CanaryOuterClass.Canary();
+      }
+      static {
+        internal_fieldAccessorTable = new GeneratedMessage.FieldAccessorTable(getDescriptor(), new String[] { "Name" });
+      }
+
+      private Object name_;
+
+      private int memoizedSize = -1;
+
+      private Canary() {
+        name_ = "";
+      }
+
+      private Canary(CanaryOuterClass.Canary.Builder builder) {
+        super(builder);
+        this.name_ = builder.name_;
+      }
+
+      private Canary(CodedInputStream input, ExtensionRegistryLite extensionRegistry) throws
+          IOException {
+        this();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                break;
+              }
+              default: {
+                if (!input.skipField(tag)) { done = true; };
+                break;
+              }
+            }
+          }
+        } catch (InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (IOException e) {
+          throw new InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+        } finally {
+        }
+      }
+
+      public static final Descriptors.Descriptor getDescriptor() {
+        return descriptor;
+      }
+
+      public static CanaryOuterClass.Canary getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @Override
+      protected GeneratedMessage.FieldAccessorTable internalGetFieldAccessorTable() {
+        return internal_fieldAccessorTable.ensureFieldAccessorsInitialized(CanaryOuterClass.Canary.class, CanaryOuterClass.Canary.Builder.class);
+      }
+
+      @Override
+      public String getName() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) { return (String) ref; };
+        ByteString bs = (ByteString) ref;
+        String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+
+      @Override
+      public ByteString getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          ByteString b = ByteString.copyFromUtf8((String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (ByteString) ref;
+        }
+      }
+
+      @Override
+      protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
+        switch (fieldNumber) {
+          default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+        }
+      }
+
+      @Override
+      public void writeTo(CodedOutputStream output) throws IOException {
+        if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
+          GeneratedMessage.writeString(output, 1, name_);
+        }
+      }
+
+      @Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) {
+          return size;
+        }
+        size = 0;
+        if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
+          size += GeneratedMessage.computeStringSize(1, name_);
+        }
+        memoizedSize = size;
+        return size;
+      }
+
+      @Override
+      public CanaryOuterClass.Canary.Builder toBuilder() {
+        return this == DEFAULT_INSTANCE ? new CanaryOuterClass.Canary.Builder() : new CanaryOuterClass.Canary.Builder().mergeFrom(this);
+      }
+
+      @Override
+      public Parser getParserForType() {
+        return PARSER;
+      }
+
+      @Override
+      public CanaryOuterClass.Canary.Builder newBuilderForType() {
+        return newBuilder();
+      }
+
+      @Override
+      protected CanaryOuterClass.Canary.Builder newBuilderForType(
+          GeneratedMessage.BuilderParent parent) {
+        return new CanaryOuterClass.Canary.Builder(parent);
+      }
+
+      @Override
+      public CanaryOuterClass.Canary getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @Override
+      public UnknownFieldSet getUnknownFields() {
+        return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public static CanaryOuterClass.Canary.Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+
+      public static CanaryOuterClass.Canary.Builder newBuilder(CanaryOuterClass.Canary prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+
+      public static Parser<CanaryOuterClass.Canary> parser() {
+        return PARSER;
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteBuffer data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteBuffer data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteString data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteString data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(byte[] data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(byte[] data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(InputStream input) throws IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(InputStream input,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(CodedInputStream input) throws IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(CodedInputStream input,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseDelimitedFrom(InputStream input) throws IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseDelimitedFrom(InputStream input,
+          ExtensionRegistryLite extensionRegistry) throws IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+
+      public static final class Builder extends GeneratedMessage.Builder<CanaryOuterClass.Canary.Builder> implements CanaryOuterClass.CanaryOrBuilder {
+        private Object name_ = "";
+
+        private Builder() {
+          super();
+        }
+
+        private Builder(GeneratedMessage.BuilderParent parent) {
+          super(parent);
+        }
+
+        @Override
+        public String getName() {
+          java.lang.Object ref = name_;
+          if (!(ref instanceof String)) {
+            ByteString bs = (ByteString) ref;
+            String s = bs.toStringUtf8();
+            name_ = s;
+            return s;
+          }
+          return (String) ref;
+        }
+
+        @Override
+        public ByteString getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            ByteString b = ByteString.copyFromUtf8((String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (ByteString) ref;
+          }
+        }
+
+        public CanaryOuterClass.Canary.Builder setNameBytes(ByteString value) {
+          if (value == null) { throw new NullPointerException(); };
+          this.name_ = value;
+          onChanged();
+          return this;
+        }
+
+        public CanaryOuterClass.Canary.Builder setName(String value) {
+          this.name_ = value;
+          onChanged();
+          return this;
+        }
+
+        public CanaryOuterClass.Canary.Builder clearName() {
+          this.name_ = "";
+          onChanged();
+          return this;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary build() {
+          CanaryOuterClass.Canary result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary buildPartial() {
+          return new CanaryOuterClass.Canary(this);
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder clear() {
+          super.clear();
+          name_ = "";
+          return this;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary getDefaultInstanceForType() {
+          return CanaryOuterClass.Canary.getDefaultInstance();
+        }
+
+        @Override
+        public Descriptors.Descriptor getDescriptorForType() {
+          return CanaryOuterClass.Canary.getDescriptor();
+        }
+
+        public static final Descriptors.Descriptor getDescriptor() {
+          return CanaryOuterClass.Canary.getDescriptor();
+        }
+
+        @Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder mergeFrom(CodedInputStream input,
+            ExtensionRegistryLite extensionRegistry) throws IOException {
+          return (CanaryOuterClass.Canary.Builder) super.mergeFrom(input, extensionRegistry);
+        }
+
+        @Override
+        protected GeneratedMessage.FieldAccessorTable internalGetFieldAccessorTable() {
+          return CanaryOuterClass.Canary.internal_fieldAccessorTable.ensureFieldAccessorsInitialized(CanaryOuterClass.Canary.class, CanaryOuterClass.Canary.Builder.class);
+        }
+
+        @Override
+        protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
+          switch (fieldNumber) {
+            default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+          }
+        }
+
+        @Override
+        protected MapFieldReflectionAccessor internalGetMutableMapFieldReflection(int fieldNumber) {
+          switch (fieldNumber) {
+            default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+          }
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder mergeFrom(Message other) {
+          if (other instanceof CanaryOuterClass.Canary) {
+            return mergeFrom((CanaryOuterClass.Canary) other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public CanaryOuterClass.Canary.Builder mergeFrom(CanaryOuterClass.Canary other) {
+          if (other == CanaryOuterClass.Canary.getDefaultInstance()) {
+            return this;
+          }
+          if (!ProtoUtils.isStringEmpty((java.lang.Object)other.getName())) {
+            setName(other.getName());
+          }
+          onChanged();
+          return this;
+        }
+      }
+    }
+  }
+  "
+ but was:
+  "package com.example;
+
+  import com.google.protobuf.AbstractParser;
+  import com.google.protobuf.ByteString;
+  import com.google.protobuf.CodedInputStream;
+  import com.google.protobuf.CodedOutputStream;
+  import com.google.protobuf.Descriptors;
+  import com.google.protobuf.ExtensionRegistryLite;
+  import com.google.protobuf.GeneratedMessage;
+  import com.google.protobuf.InvalidProtocolBufferException;
+  import com.google.protobuf.MapFieldReflectionAccessor;
+  import com.google.protobuf.Message;
+  import com.google.protobuf.MessageOrBuilder;
+  import com.google.protobuf.Parser;
+  import com.google.protobuf.UnknownFieldSet;
+  import dev.akre.protege.ProtoUtils;
+  import java.io.IOException;
+  import java.io.InputStream;
+  import java.lang.Object;
+  import java.lang.Override;
+  import java.lang.RuntimeException;
+  import java.lang.String;
+  import java.nio.ByteBuffer;
+
+  public final class CanaryOuterClass {
+    public static final String PROTEGE_VERSION = "0.0.1-SNAPSHOT";
+
+    private static final Descriptors.FileDescriptor fileDescriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(new String[] {
+      "\n",
+      "\014canary.proto\022\013com.example\"\026\n",
+      "\006Canary\022\014\n",
+      "\004name\030\001 \001(\tB\000b\006proto3"
+    }, new Descriptors.FileDescriptor[0]);
+
+    public static Descriptors.FileDescriptor getDescriptor() {
+      return fileDescriptor;
+    }
+
+    public interface CanaryOrBuilder extends MessageOrBuilder {
+      String getName();
+
+      ByteString getNameBytes();
+    }
+
+    public static final class Canary extends GeneratedMessage implements CanaryOuterClass.CanaryOrBuilder {
+      private static Descriptors.Descriptor descriptor;
+
+      private static final CanaryOuterClass.Canary DEFAULT_INSTANCE;
+
+      private static GeneratedMessage.FieldAccessorTable internal_fieldAccessorTable;
+
+      public static final Parser<CanaryOuterClass.Canary> PARSER = new AbstractParser<CanaryOuterClass.Canary>() {
+        @Override
+        public CanaryOuterClass.Canary parsePartialFrom(CodedInputStream input,
+            ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+          try {
+            return new CanaryOuterClass.Canary(input, extensionRegistry);
+          } catch (IOException e) {
+            throw new InvalidProtocolBufferException(e).setUnfinishedMessage(getDefaultInstance());
+          }
+        }
+      };
+
+      static {
+        descriptor = CanaryOuterClass.getDescriptor().findMessageTypeByName("Canary");
+      }
+      static {
+        DEFAULT_INSTANCE = new CanaryOuterClass.Canary();
+      }
+      static {
+        internal_fieldAccessorTable = new GeneratedMessage.FieldAccessorTable(getDescriptor(), new String[] { "Name" });
+      }
+
+      private Object name_;
+
+      private int memoizedSize = -1;
+
+      private Canary() {
+        name_ = "";
+      }
+
+      private Canary(CanaryOuterClass.Canary.Builder builder) {
+        super(builder);
+        this.name_ = builder.name_;
+      }
+
+      private Canary(CodedInputStream input, ExtensionRegistryLite extensionRegistry) throws
+          IOException {
+        this();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                break;
+              }
+              default: {
+                if (!input.skipField(tag)) { done = true; };
+                break;
+              }
+            }
+          }
+        } catch (InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (IOException e) {
+          throw new InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+        } finally {
+        }
+      }
+
+      public static final Descriptors.Descriptor getDescriptor() {
+        return descriptor;
+      }
+
+      public static CanaryOuterClass.Canary getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @Override
+      protected GeneratedMessage.FieldAccessorTable internalGetFieldAccessorTable() {
+        return internal_fieldAccessorTable.ensureFieldAccessorsInitialized(CanaryOuterClass.Canary.class, CanaryOuterClass.Canary.Builder.class);
+      }
+
+      @Override
+      public String getName() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) { return (String) ref; };
+        ByteString bs = (ByteString) ref;
+        String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+
+      @Override
+      public ByteString getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          ByteString b = ByteString.copyFromUtf8((String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (ByteString) ref;
+        }
+      }
+
+      @Override
+      protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
+        switch (fieldNumber) {
+          default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+        }
+      }
+
+      @Override
+      public void writeTo(CodedOutputStream output) throws IOException {
+        if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
+          GeneratedMessage.writeString(output, 1, name_);
+        }
+      }
+
+      @Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) {
+          return size;
+        }
+        size = 0;
+        if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
+          size += GeneratedMessage.computeStringSize(1, name_);
+        }
+        memoizedSize = size;
+        return size;
+      }
+
+      @Override
+      public CanaryOuterClass.Canary.Builder toBuilder() {
+        return this == DEFAULT_INSTANCE ? new CanaryOuterClass.Canary.Builder() : new CanaryOuterClass.Canary.Builder().mergeFrom(this);
+      }
+
+      @Override
+      public Parser getParserForType() {
+        return PARSER;
+      }
+
+      @Override
+      public CanaryOuterClass.Canary.Builder newBuilderForType() {
+        return newBuilder();
+      }
+
+      @Override
+      protected CanaryOuterClass.Canary.Builder newBuilderForType(
+          GeneratedMessage.BuilderParent parent) {
+        return new CanaryOuterClass.Canary.Builder(parent);
+      }
+
+      @Override
+      public CanaryOuterClass.Canary getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @Override
+      public UnknownFieldSet getUnknownFields() {
+        return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public static CanaryOuterClass.Canary.Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+
+      public static CanaryOuterClass.Canary.Builder newBuilder(CanaryOuterClass.Canary prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+
+      public static Parser<CanaryOuterClass.Canary> parser() {
+        return PARSER;
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteBuffer data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteBuffer data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteString data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteString data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(byte[] data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(byte[] data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(InputStream input) throws IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(InputStream input,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(CodedInputStream input) throws IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(CodedInputStream input,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseDelimitedFrom(InputStream input) throws IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseDelimitedFrom(InputStream input,
+          ExtensionRegistryLite extensionRegistry) throws IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+
+      public static final class Builder extends GeneratedMessage.Builder<CanaryOuterClass.Canary.Builder> implements CanaryOuterClass.CanaryOrBuilder {
+        private Object name_ = "";
+
+        private Builder() {
+          super();
+        }
+
+        private Builder(GeneratedMessage.BuilderParent parent) {
+          super(parent);
+        }
+
+        @Override
+        public String getName() {
+          java.lang.Object ref = name_;
+          if (!(ref instanceof String)) {
+            ByteString bs = (ByteString) ref;
+            String s = bs.toStringUtf8();
+            name_ = s;
+            return s;
+          }
+          return (String) ref;
+        }
+
+        @Override
+        public ByteString getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            ByteString b = ByteString.copyFromUtf8((String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (ByteString) ref;
+          }
+        }
+
+        public CanaryOuterClass.Canary.Builder setNameBytes(ByteString value) {
+          if (value == null) { throw new NullPointerException(); };
+          this.name_ = value;
+          onChanged();
+          return this;
+        }
+
+        public CanaryOuterClass.Canary.Builder setName(String value) {
+          this.name_ = value;
+          onChanged();
+          return this;
+        }
+
+        public CanaryOuterClass.Canary.Builder clearName() {
+          this.name_ = "";
+          onChanged();
+          return this;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary build() {
+          CanaryOuterClass.Canary result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary buildPartial() {
+          return new CanaryOuterClass.Canary(this);
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder clear() {
+          super.clear();
+          name_ = "";
+          return this;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary getDefaultInstanceForType() {
+          return CanaryOuterClass.Canary.getDefaultInstance();
+        }
+
+        @Override
+        public Descriptors.Descriptor getDescriptorForType() {
+          return CanaryOuterClass.Canary.getDescriptor();
+        }
+
+        public static final Descriptors.Descriptor getDescriptor() {
+          return CanaryOuterClass.Canary.getDescriptor();
+        }
+
+        @Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder mergeFrom(CodedInputStream input,
+            ExtensionRegistryLite extensionRegistry) throws IOException {
+          return (CanaryOuterClass.Canary.Builder) super.mergeFrom(input, extensionRegistry);
+        }
+
+        @Override
+        protected GeneratedMessage.FieldAccessorTable internalGetFieldAccessorTable() {
+          return CanaryOuterClass.Canary.internal_fieldAccessorTable.ensureFieldAccessorsInitialized(CanaryOuterClass.Canary.class, CanaryOuterClass.Canary.Builder.class);
+        }
+
+        @Override
+        protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
+          switch (fieldNumber) {
+            default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+          }
+        }
+
+        @Override
+        protected MapFieldReflectionAccessor internalGetMutableMapFieldReflection(int fieldNumber) {
+          switch (fieldNumber) {
+            default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+          }
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder mergeFrom(Message other) {
+          if (other instanceof CanaryOuterClass.Canary) {
+            return mergeFrom((CanaryOuterClass.Canary) other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public CanaryOuterClass.Canary.Builder mergeFrom(CanaryOuterClass.Canary other) {
+          if (other == CanaryOuterClass.Canary.getDefaultInstance()) {
+            return this;
+          }
+          if (!ProtoUtils.isStringEmpty((java.lang.Object)other.getName())) {
+            setName(other.getName());
+          }
+          onChanged();
+          return this;
+        }
+      }
+    }
+  }
+  "
+	at dev.akre.protege.temp.CanaryTest.testCompileOutput(CanaryTest.java:24)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:725)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:149)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:140)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:84)
+	at org.junit.jupiter.engine.execution.ExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(ExecutableInvoker.java:115)
+	at org.junit.jupiter.engine.execution.ExecutableInvoker.lambda$invoke$0(ExecutableInvoker.java:105)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.ExecutableInvoker.invoke(ExecutableInvoker.java:104)
+	at org.junit.jupiter.engine.execution.ExecutableInvoker.invoke(ExecutableInvoker.java:98)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:214)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:210)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:135)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:66)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:107)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:88)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:67)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:52)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:86)
+	at org.junit.platform.launcher.core.DefaultLauncherSession$DelegatingLauncher.execute(DefaultLauncherSession.java:86)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Failures:
+[ERROR]   CanaryTest.testCompileOutput:24
+expected:
+  "package com.example;
+
+  import com.google.protobuf.AbstractParser;
+  import com.google.protobuf.ByteString;
+  import com.google.protobuf.CodedInputStream;
+  import com.google.protobuf.CodedOutputStream;
+  import com.google.protobuf.Descriptors;
+  import com.google.protobuf.ExtensionRegistryLite;
+  import com.google.protobuf.GeneratedMessage;
+  import com.google.protobuf.InvalidProtocolBufferException;
+  import com.google.protobuf.MapFieldReflectionAccessor;
+  import com.google.protobuf.Message;
+  import com.google.protobuf.MessageOrBuilder;
+  import com.google.protobuf.Parser;
+  import com.google.protobuf.UnknownFieldSet;
+  import dev.akre.protege.ProtoUtils;
+  import java.io.IOException;
+  import java.io.InputStream;
+  import java.lang.Object;
+  import java.lang.Override;
+  import java.lang.RuntimeException;
+  import java.lang.String;
+  import java.nio.ByteBuffer;
+
+  public final class CanaryOuterClass {
+    public static final String PROTEGE_VERSION = "0.0.1-SNAPSHOT";
+
+    private static final Descriptors.FileDescriptor fileDescriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(new String[] {
+          "\n",
+          "\014canary.proto\022\013com.example\"\026\n",
+          "\006Canary\022\014\n",
+          "\004name\030\001 \001(\tB\000b\006proto3"
+        }, new Descriptors.FileDescriptor[0]);
+
+    public static Descriptors.FileDescriptor getDescriptor() {
+      return fileDescriptor;
+    }
+
+    public interface CanaryOrBuilder extends MessageOrBuilder {
+      String getName();
+
+      ByteString getNameBytes();
+    }
+
+    public static final class Canary extends GeneratedMessage implements CanaryOuterClass.CanaryOrBuilder {
+      private static Descriptors.Descriptor descriptor;
+
+      private static final CanaryOuterClass.Canary DEFAULT_INSTANCE;
+
+      private static GeneratedMessage.FieldAccessorTable internal_fieldAccessorTable;
+
+      public static final Parser<CanaryOuterClass.Canary> PARSER = new AbstractParser<CanaryOuterClass.Canary>() {
+        @Override
+        public CanaryOuterClass.Canary parsePartialFrom(CodedInputStream input,
+            ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+          try {
+            return new CanaryOuterClass.Canary(input, extensionRegistry);
+          } catch (IOException e) {
+            throw new InvalidProtocolBufferException(e).setUnfinishedMessage(getDefaultInstance());
+          }
+        }
+      };
+
+      static {
+        descriptor = CanaryOuterClass.getDescriptor().findMessageTypeByName("Canary");
+      }
+      static {
+        DEFAULT_INSTANCE = new CanaryOuterClass.Canary();
+      }
+      static {
+        internal_fieldAccessorTable = new GeneratedMessage.FieldAccessorTable(getDescriptor(), new String[] { "Name" });
+      }
+
+      private Object name_;
+
+      private int memoizedSize = -1;
+
+      private Canary() {
+        name_ = "";
+      }
+
+      private Canary(CanaryOuterClass.Canary.Builder builder) {
+        super(builder);
+        this.name_ = builder.name_;
+      }
+
+      private Canary(CodedInputStream input, ExtensionRegistryLite extensionRegistry) throws
+          IOException {
+        this();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                break;
+              }
+              default: {
+                if (!input.skipField(tag)) { done = true; };
+                break;
+              }
+            }
+          }
+        } catch (InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (IOException e) {
+          throw new InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+        } finally {
+        }
+      }
+
+      public static final Descriptors.Descriptor getDescriptor() {
+        return descriptor;
+      }
+
+      public static CanaryOuterClass.Canary getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @Override
+      protected GeneratedMessage.FieldAccessorTable internalGetFieldAccessorTable() {
+        return internal_fieldAccessorTable.ensureFieldAccessorsInitialized(CanaryOuterClass.Canary.class, CanaryOuterClass.Canary.Builder.class);
+      }
+
+      @Override
+      public String getName() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) { return (String) ref; };
+        ByteString bs = (ByteString) ref;
+        String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+
+      @Override
+      public ByteString getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          ByteString b = ByteString.copyFromUtf8((String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (ByteString) ref;
+        }
+      }
+
+      @Override
+      protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
+        switch (fieldNumber) {
+          default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+        }
+      }
+
+      @Override
+      public void writeTo(CodedOutputStream output) throws IOException {
+        if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
+          GeneratedMessage.writeString(output, 1, name_);
+        }
+      }
+
+      @Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) {
+          return size;
+        }
+        size = 0;
+        if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
+          size += GeneratedMessage.computeStringSize(1, name_);
+        }
+        memoizedSize = size;
+        return size;
+      }
+
+      @Override
+      public CanaryOuterClass.Canary.Builder toBuilder() {
+        return this == DEFAULT_INSTANCE ? new CanaryOuterClass.Canary.Builder() : new CanaryOuterClass.Canary.Builder().mergeFrom(this);
+      }
+
+      @Override
+      public Parser getParserForType() {
+        return PARSER;
+      }
+
+      @Override
+      public CanaryOuterClass.Canary.Builder newBuilderForType() {
+        return newBuilder();
+      }
+
+      @Override
+      protected CanaryOuterClass.Canary.Builder newBuilderForType(
+          GeneratedMessage.BuilderParent parent) {
+        return new CanaryOuterClass.Canary.Builder(parent);
+      }
+
+      @Override
+      public CanaryOuterClass.Canary getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @Override
+      public UnknownFieldSet getUnknownFields() {
+        return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public static CanaryOuterClass.Canary.Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+
+      public static CanaryOuterClass.Canary.Builder newBuilder(CanaryOuterClass.Canary prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+
+      public static Parser<CanaryOuterClass.Canary> parser() {
+        return PARSER;
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteBuffer data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteBuffer data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteString data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteString data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(byte[] data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(byte[] data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(InputStream input) throws IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(InputStream input,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(CodedInputStream input) throws IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(CodedInputStream input,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseDelimitedFrom(InputStream input) throws IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseDelimitedFrom(InputStream input,
+          ExtensionRegistryLite extensionRegistry) throws IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+
+      public static final class Builder extends GeneratedMessage.Builder<CanaryOuterClass.Canary.Builder> implements CanaryOuterClass.CanaryOrBuilder {
+        private Object name_ = "";
+
+        private Builder() {
+          super();
+        }
+
+        private Builder(GeneratedMessage.BuilderParent parent) {
+          super(parent);
+        }
+
+        @Override
+        public String getName() {
+          java.lang.Object ref = name_;
+          if (!(ref instanceof String)) {
+            ByteString bs = (ByteString) ref;
+            String s = bs.toStringUtf8();
+            name_ = s;
+            return s;
+          }
+          return (String) ref;
+        }
+
+        @Override
+        public ByteString getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            ByteString b = ByteString.copyFromUtf8((String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (ByteString) ref;
+          }
+        }
+
+        public CanaryOuterClass.Canary.Builder setNameBytes(ByteString value) {
+          if (value == null) { throw new NullPointerException(); };
+          this.name_ = value;
+          onChanged();
+          return this;
+        }
+
+        public CanaryOuterClass.Canary.Builder setName(String value) {
+          this.name_ = value;
+          onChanged();
+          return this;
+        }
+
+        public CanaryOuterClass.Canary.Builder clearName() {
+          this.name_ = "";
+          onChanged();
+          return this;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary build() {
+          CanaryOuterClass.Canary result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary buildPartial() {
+          return new CanaryOuterClass.Canary(this);
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder clear() {
+          super.clear();
+          name_ = "";
+          return this;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary getDefaultInstanceForType() {
+          return CanaryOuterClass.Canary.getDefaultInstance();
+        }
+
+        @Override
+        public Descriptors.Descriptor getDescriptorForType() {
+          return CanaryOuterClass.Canary.getDescriptor();
+        }
+
+        public static final Descriptors.Descriptor getDescriptor() {
+          return CanaryOuterClass.Canary.getDescriptor();
+        }
+
+        @Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder mergeFrom(CodedInputStream input,
+            ExtensionRegistryLite extensionRegistry) throws IOException {
+          return (CanaryOuterClass.Canary.Builder) super.mergeFrom(input, extensionRegistry);
+        }
+
+        @Override
+        protected GeneratedMessage.FieldAccessorTable internalGetFieldAccessorTable() {
+          return CanaryOuterClass.Canary.internal_fieldAccessorTable.ensureFieldAccessorsInitialized(CanaryOuterClass.Canary.class, CanaryOuterClass.Canary.Builder.class);
+        }
+
+        @Override
+        protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
+          switch (fieldNumber) {
+            default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+          }
+        }
+
+        @Override
+        protected MapFieldReflectionAccessor internalGetMutableMapFieldReflection(int fieldNumber) {
+          switch (fieldNumber) {
+            default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+          }
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder mergeFrom(Message other) {
+          if (other instanceof CanaryOuterClass.Canary) {
+            return mergeFrom((CanaryOuterClass.Canary) other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public CanaryOuterClass.Canary.Builder mergeFrom(CanaryOuterClass.Canary other) {
+          if (other == CanaryOuterClass.Canary.getDefaultInstance()) {
+            return this;
+          }
+          if (!ProtoUtils.isStringEmpty((java.lang.Object)other.getName())) {
+            setName(other.getName());
+          }
+          onChanged();
+          return this;
+        }
+      }
+    }
+  }
+  "
+ but was:
+  "package com.example;
+
+  import com.google.protobuf.AbstractParser;
+  import com.google.protobuf.ByteString;
+  import com.google.protobuf.CodedInputStream;
+  import com.google.protobuf.CodedOutputStream;
+  import com.google.protobuf.Descriptors;
+  import com.google.protobuf.ExtensionRegistryLite;
+  import com.google.protobuf.GeneratedMessage;
+  import com.google.protobuf.InvalidProtocolBufferException;
+  import com.google.protobuf.MapFieldReflectionAccessor;
+  import com.google.protobuf.Message;
+  import com.google.protobuf.MessageOrBuilder;
+  import com.google.protobuf.Parser;
+  import com.google.protobuf.UnknownFieldSet;
+  import dev.akre.protege.ProtoUtils;
+  import java.io.IOException;
+  import java.io.InputStream;
+  import java.lang.Object;
+  import java.lang.Override;
+  import java.lang.RuntimeException;
+  import java.lang.String;
+  import java.nio.ByteBuffer;
+
+  public final class CanaryOuterClass {
+    public static final String PROTEGE_VERSION = "0.0.1-SNAPSHOT";
+
+    private static final Descriptors.FileDescriptor fileDescriptor = Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(new String[] {
+      "\n",
+      "\014canary.proto\022\013com.example\"\026\n",
+      "\006Canary\022\014\n",
+      "\004name\030\001 \001(\tB\000b\006proto3"
+    }, new Descriptors.FileDescriptor[0]);
+
+    public static Descriptors.FileDescriptor getDescriptor() {
+      return fileDescriptor;
+    }
+
+    public interface CanaryOrBuilder extends MessageOrBuilder {
+      String getName();
+
+      ByteString getNameBytes();
+    }
+
+    public static final class Canary extends GeneratedMessage implements CanaryOuterClass.CanaryOrBuilder {
+      private static Descriptors.Descriptor descriptor;
+
+      private static final CanaryOuterClass.Canary DEFAULT_INSTANCE;
+
+      private static GeneratedMessage.FieldAccessorTable internal_fieldAccessorTable;
+
+      public static final Parser<CanaryOuterClass.Canary> PARSER = new AbstractParser<CanaryOuterClass.Canary>() {
+        @Override
+        public CanaryOuterClass.Canary parsePartialFrom(CodedInputStream input,
+            ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+          try {
+            return new CanaryOuterClass.Canary(input, extensionRegistry);
+          } catch (IOException e) {
+            throw new InvalidProtocolBufferException(e).setUnfinishedMessage(getDefaultInstance());
+          }
+        }
+      };
+
+      static {
+        descriptor = CanaryOuterClass.getDescriptor().findMessageTypeByName("Canary");
+      }
+      static {
+        DEFAULT_INSTANCE = new CanaryOuterClass.Canary();
+      }
+      static {
+        internal_fieldAccessorTable = new GeneratedMessage.FieldAccessorTable(getDescriptor(), new String[] { "Name" });
+      }
+
+      private Object name_;
+
+      private int memoizedSize = -1;
+
+      private Canary() {
+        name_ = "";
+      }
+
+      private Canary(CanaryOuterClass.Canary.Builder builder) {
+        super(builder);
+        this.name_ = builder.name_;
+      }
+
+      private Canary(CodedInputStream input, ExtensionRegistryLite extensionRegistry) throws
+          IOException {
+        this();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                break;
+              }
+              default: {
+                if (!input.skipField(tag)) { done = true; };
+                break;
+              }
+            }
+          }
+        } catch (InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (IOException e) {
+          throw new InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+        } finally {
+        }
+      }
+
+      public static final Descriptors.Descriptor getDescriptor() {
+        return descriptor;
+      }
+
+      public static CanaryOuterClass.Canary getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @Override
+      protected GeneratedMessage.FieldAccessorTable internalGetFieldAccessorTable() {
+        return internal_fieldAccessorTable.ensureFieldAccessorsInitialized(CanaryOuterClass.Canary.class, CanaryOuterClass.Canary.Builder.class);
+      }
+
+      @Override
+      public String getName() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) { return (String) ref; };
+        ByteString bs = (ByteString) ref;
+        String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+
+      @Override
+      public ByteString getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          ByteString b = ByteString.copyFromUtf8((String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (ByteString) ref;
+        }
+      }
+
+      @Override
+      protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
+        switch (fieldNumber) {
+          default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+        }
+      }
+
+      @Override
+      public void writeTo(CodedOutputStream output) throws IOException {
+        if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
+          GeneratedMessage.writeString(output, 1, name_);
+        }
+      }
+
+      @Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) {
+          return size;
+        }
+        size = 0;
+        if (!ProtoUtils.isStringEmpty((java.lang.Object)name_)) {
+          size += GeneratedMessage.computeStringSize(1, name_);
+        }
+        memoizedSize = size;
+        return size;
+      }
+
+      @Override
+      public CanaryOuterClass.Canary.Builder toBuilder() {
+        return this == DEFAULT_INSTANCE ? new CanaryOuterClass.Canary.Builder() : new CanaryOuterClass.Canary.Builder().mergeFrom(this);
+      }
+
+      @Override
+      public Parser getParserForType() {
+        return PARSER;
+      }
+
+      @Override
+      public CanaryOuterClass.Canary.Builder newBuilderForType() {
+        return newBuilder();
+      }
+
+      @Override
+      protected CanaryOuterClass.Canary.Builder newBuilderForType(
+          GeneratedMessage.BuilderParent parent) {
+        return new CanaryOuterClass.Canary.Builder(parent);
+      }
+
+      @Override
+      public CanaryOuterClass.Canary getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @Override
+      public UnknownFieldSet getUnknownFields() {
+        return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public static CanaryOuterClass.Canary.Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+
+      public static CanaryOuterClass.Canary.Builder newBuilder(CanaryOuterClass.Canary prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+
+      public static Parser<CanaryOuterClass.Canary> parser() {
+        return PARSER;
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteBuffer data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteBuffer data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteString data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(ByteString data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(byte[] data) throws
+          InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(byte[] data,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(InputStream input) throws IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(InputStream input,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(CodedInputStream input) throws IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseFrom(CodedInputStream input,
+          ExtensionRegistryLite extensionRegistry) throws InvalidProtocolBufferException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static CanaryOuterClass.Canary parseDelimitedFrom(InputStream input) throws IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+
+      public static CanaryOuterClass.Canary parseDelimitedFrom(InputStream input,
+          ExtensionRegistryLite extensionRegistry) throws IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+
+      public static final class Builder extends GeneratedMessage.Builder<CanaryOuterClass.Canary.Builder> implements CanaryOuterClass.CanaryOrBuilder {
+        private Object name_ = "";
+
+        private Builder() {
+          super();
+        }
+
+        private Builder(GeneratedMessage.BuilderParent parent) {
+          super(parent);
+        }
+
+        @Override
+        public String getName() {
+          java.lang.Object ref = name_;
+          if (!(ref instanceof String)) {
+            ByteString bs = (ByteString) ref;
+            String s = bs.toStringUtf8();
+            name_ = s;
+            return s;
+          }
+          return (String) ref;
+        }
+
+        @Override
+        public ByteString getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            ByteString b = ByteString.copyFromUtf8((String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (ByteString) ref;
+          }
+        }
+
+        public CanaryOuterClass.Canary.Builder setNameBytes(ByteString value) {
+          if (value == null) { throw new NullPointerException(); };
+          this.name_ = value;
+          onChanged();
+          return this;
+        }
+
+        public CanaryOuterClass.Canary.Builder setName(String value) {
+          this.name_ = value;
+          onChanged();
+          return this;
+        }
+
+        public CanaryOuterClass.Canary.Builder clearName() {
+          this.name_ = "";
+          onChanged();
+          return this;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary build() {
+          CanaryOuterClass.Canary result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary buildPartial() {
+          return new CanaryOuterClass.Canary(this);
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder clear() {
+          super.clear();
+          name_ = "";
+          return this;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary getDefaultInstanceForType() {
+          return CanaryOuterClass.Canary.getDefaultInstance();
+        }
+
+        @Override
+        public Descriptors.Descriptor getDescriptorForType() {
+          return CanaryOuterClass.Canary.getDescriptor();
+        }
+
+        public static final Descriptors.Descriptor getDescriptor() {
+          return CanaryOuterClass.Canary.getDescriptor();
+        }
+
+        @Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder mergeFrom(CodedInputStream input,
+            ExtensionRegistryLite extensionRegistry) throws IOException {
+          return (CanaryOuterClass.Canary.Builder) super.mergeFrom(input, extensionRegistry);
+        }
+
+        @Override
+        protected GeneratedMessage.FieldAccessorTable internalGetFieldAccessorTable() {
+          return CanaryOuterClass.Canary.internal_fieldAccessorTable.ensureFieldAccessorsInitialized(CanaryOuterClass.Canary.class, CanaryOuterClass.Canary.Builder.class);
+        }
+
+        @Override
+        protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
+          switch (fieldNumber) {
+            default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+          }
+        }
+
+        @Override
+        protected MapFieldReflectionAccessor internalGetMutableMapFieldReflection(int fieldNumber) {
+          switch (fieldNumber) {
+            default: throw new RuntimeException("Invalid map field number: " + fieldNumber);
+          }
+        }
+
+        @Override
+        public CanaryOuterClass.Canary.Builder mergeFrom(Message other) {
+          if (other instanceof CanaryOuterClass.Canary) {
+            return mergeFrom((CanaryOuterClass.Canary) other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public CanaryOuterClass.Canary.Builder mergeFrom(CanaryOuterClass.Canary other) {
+          if (other == CanaryOuterClass.Canary.getDefaultInstance()) {
+            return this;
+          }
+          if (!ProtoUtils.isStringEmpty((java.lang.Object)other.getName())) {
+            setName(other.getName());
+          }
+          onChanged();
+          return this;
+        }
+      }
+    }
+  }
+  "
+[INFO]
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  15.183 s
+[INFO] Finished at: 2026-02-01T13:19:28Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.2.5:test (default-test) on project protege: There are test failures.
+[ERROR]
+[ERROR] Please refer to /app/target/surefire-reports for the individual test results.
+[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
