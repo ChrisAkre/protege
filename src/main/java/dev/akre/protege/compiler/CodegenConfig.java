@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 public interface CodegenConfig {
     CodegenMetadata config();
-    Object descriptor();
+    <T> T descriptor();
 
     default boolean isGenerateDeprecated(Object descriptor) {
         return config().getBoolean(CodegenMetadata.JAVA_GENERATE_DEPRECATED, descriptor);
@@ -109,4 +109,12 @@ public interface CodegenConfig {
     default Map<String, ClassName> typeRegistry() {
         return config().typeRegistry();
     }
+
+    interface MessageConfig extends CodegenConfig {
+
+//        default Iterable<DescriptorProtos.FieldDescriptorProto> mapFields() {
+//            return () -> this.<DescriptorProtos.DescriptorProto>descriptor().getFieldList().stream().filter(f -> f.getOptions());
+//        }
+    }
+
 }

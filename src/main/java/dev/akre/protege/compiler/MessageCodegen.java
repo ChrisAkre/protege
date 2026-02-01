@@ -28,7 +28,7 @@ public record MessageCodegen(
         Cons<String> scope,
         ProtoCodegen protoCodegen,
         CodegenMetadata config
-) implements CodegenConfig {
+) implements CodegenConfig.MessageConfig {
 
     public Cons<String> allNames() {
         return scope.cons(messageName());
