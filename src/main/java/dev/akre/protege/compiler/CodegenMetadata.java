@@ -40,14 +40,14 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
 
     /** Option for specifying annotations on generated fields. */
     public static final Option FIELD_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_field_annotation");
-    /** Option for specifying annotations on generated message classes. */
+    /** Option for specifying annotations on all generated message classes. */
     public static final Option MESSAGE_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_message_annotation");
     /** Option for specifying annotations on generated builder classes. */
     public static final Option BUILDER_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_builder_annotation");
-    /** Option for specifying annotations on generated classes (legacy alias). */
+    /** Option for specifying annotations on generated immutable data classes. */
     public static final Option CLASS_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_class_annotation");
-    /** Option for specifying annotations on generated interfaces (legacy alias). */
-    public static final Option INTERFACE_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_class_annotation");
+    /** Option for specifying annotations on generated interfaces. */
+    public static final Option INTERFACE_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_interface_annotation");
 
     /** Option for controlling generation of @Deprecated annotations. */
     public static final Option JAVA_GENERATE_DEPRECATED = Option.customBoolean("dev.akre.protege.java_generate_deprecated");
