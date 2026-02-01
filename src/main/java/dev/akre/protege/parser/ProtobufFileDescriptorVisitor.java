@@ -78,24 +78,26 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
+    // TODO rephrase and formate this javadoc
+    /**
+     * generate a file descriptor by first reading the options present at the file level, and then recursively descending through all children.
+     *
+     * this.scope is updated as the graph is traversed, and is used to determine the full name of the object being processed
+     *
+     * each visit operation returns a descriptor or a record that is merged into the file descriptor
+     */
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
         String packageName = ctx.packageStatement().isEmpty()
                 ? ""
                 : ctx.packageStatement().getFirst().name.getText();
-        Cons<String> protoScope = Cons.nil();
-        if (!packageName.isEmpty()) {
-            for (String part : packageName.split("\\.")) {
-                protoScope = protoScope.cons(part);
-            }
-        }
-        this.scope = protoScope;
+        this.scope = Cons.of(packageName.split("\\."));
         FileDescriptorProto.Builder fileBuilder = FileDescriptorProto.newBuilder();
         var fileOptions = FileOptions.newBuilder();
         // configure scope prior to walking the tree to allow creating full type names
 
-        ctx.children.forEach(c -> {
-            switch (visit(c)) {
+        ctx.children.stream().map(this::visit).forEach(ret -> {
+            switch (ret) {
                 case Syntax s -> fileBuilder.setSyntax(s.version());
                 case Package p -> fileBuilder.setPackage(p.name());
                 case FileOption o -> o.set(fileOptions);
@@ -105,7 +107,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                 case ServiceDescriptorProto.Builder s -> fileBuilder.addService(s);
                 case UninterpretedOption.Builder o -> fileOptions.addUninterpretedOption(o);
                 case null -> {} // EOF
-                default -> throw new IllegalStateException("unexpected: " + c);
+                default -> throw new IllegalStateException("unexpected: " + ret);
             }
         });
         fileBuilder.setOptions(fileOptions.build());
@@ -172,6 +174,9 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         return result;
     }
 
+    /**
+     * Pushes the message name onto the scope stack to handle nested type resolution.
+     */
     @Override
     public DescriptorProto.Builder visitMessageDef(ProtobufParser.MessageDefContext ctx) {
         String messageName = ctx.name.getText();

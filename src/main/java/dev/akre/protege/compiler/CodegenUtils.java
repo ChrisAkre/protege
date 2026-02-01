@@ -44,7 +44,6 @@ public class CodegenUtils {
     );
 
     private CodegenUtils() {
-        // Utility class
     }
 
     static List<AnnotationSpec> getFieldAnnotations(DescriptorProtos.FieldOptions options) {
@@ -208,6 +207,10 @@ public class CodegenUtils {
         return defaultValue;
     }
 
+    /**
+     * Generates the condition to check if a field has a non-default value (proto3 semantics) and should be written to
+     * the output stream.
+     */
     static CodeBlock getWriteCondition(DescriptorProtos.FieldDescriptorProto.Type type, String fieldName, MessageCodegen context) {
         if (context.descriptor().getOptions().getMapEntry()) {
             return null;
@@ -237,17 +240,9 @@ public class CodegenUtils {
      * @param typeName The concrete message type (e.g., {@code MyMessage})
      * @return The *OrBuilder type (e.g., {@code MyMessageOrBuilder}), or the original type if not a ClassName.
      */
-    // TODO reimplement this but using ClassName.peerClass ?
     public static TypeName getOrBuilderType(TypeName typeName) {
-        if (typeName instanceof ClassName) {
-            ClassName cn = (ClassName) typeName;
-            List<String> simpleNames = cn.simpleNames();
-            String last = simpleNames.getLast();
-            if (simpleNames.size() == 1) {
-                return ClassName.get(cn.packageName(), last + "OrBuilder");
-            } else {
-                return ClassName.get(cn.packageName(), simpleNames.getFirst(), java.util.stream.Stream.concat(simpleNames.subList(1, simpleNames.size() - 1).stream(), java.util.stream.Stream.of(last + "OrBuilder")).toArray(String[]::new));
-            }
+        if (typeName instanceof ClassName cn) {
+            return cn.peerClass(cn.simpleName() + "OrBuilder");
         }
         throw new IllegalArgumentException("unexpected typename: " + typeName);
     }
@@ -270,7 +265,8 @@ public class CodegenUtils {
     /**
      * Generates code to clear fields associated with a specific oneof group.
      */
-    public static CodeBlock generateClearOneofCode(DescriptorProtos.DescriptorProto message, int oneofIndex) {
+    public static CodeBlock generateClearOneofCode(MessageCodegen context, int oneofIndex) {
+        var message = context.descriptor();
         var cb = CodeBlock.builder();
         cb.addStatement("$LCase_ = 0", message.getOneofDecl(oneofIndex).getName());
         for (var field : message.getFieldList()) {
@@ -279,17 +275,29 @@ public class CodegenUtils {
                 if (field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
                     // Should not happen in oneof according to protobuf spec, but just in case
                     cb.addStatement("$L = $T.emptyList()", fieldName, java.util.Collections.class);
-                } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-                    cb.addStatement("$L = null", fieldName);
-                } else if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
-                    cb.addStatement("$L = \"\"", fieldName);
                 } else {
-                    // Primitive types. This is a bit hacky without full type mapping here,
-                    // but we can use common defaults.
-                    cb.addStatement("$L = $L", fieldName, ProtoUtils.getDefaultReturnValue(PROTO_TYPE_TO_TYPE_NAME.get(field.getType()).toString()));
+                    cb.addStatement("$L = $L", fieldName, getDefaultValueCode(field, context));
                 }
             }
         }
         return cb.build();
+    }
+
+    private static CodeBlock getDefaultValueCode(DescriptorProtos.FieldDescriptorProto field, MessageCodegen context) {
+        return switch (field.getType()) {
+            case TYPE_DOUBLE -> CodeBlock.of("0.0d");
+            case TYPE_FLOAT -> CodeBlock.of("0.0f");
+            case TYPE_INT64, TYPE_UINT64, TYPE_FIXED64, TYPE_SFIXED64, TYPE_SINT64 -> CodeBlock.of("0L");
+            case TYPE_INT32, TYPE_UINT32, TYPE_FIXED32, TYPE_SFIXED32, TYPE_SINT32 -> CodeBlock.of("0");
+            case TYPE_BOOL -> CodeBlock.of("false");
+            case TYPE_STRING -> CodeBlock.of("\"\"");
+            case TYPE_BYTES -> CodeBlock.of("$T.EMPTY", com.google.protobuf.ByteString.class);
+            case TYPE_MESSAGE -> CodeBlock.of("null");
+            case TYPE_ENUM -> {
+                var type = context.getFieldType(field, context.currentScope());
+                yield CodeBlock.of("$T.forNumber(0)", type);
+            }
+            default -> CodeBlock.of("null");
+        };
     }
 }
