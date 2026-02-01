@@ -398,11 +398,37 @@ public class ProtoUtils {
     }
 
     private static String indent(String s) {
-        return (s == null || s.isEmpty())
-                ? ""
-                : s.lines()
-                    .map(line -> line.isEmpty() ? line : "  " + line)
-                    .collect(Collectors.joining("\n")) + "\n";
+        if (s == null || s.isEmpty()) {
+            return "";
+        }
+        // Estimate output size: original + 10% overhead for indentation
+        StringBuilder sb = new StringBuilder(s.length() + s.length() / 10);
+        int len = s.length();
+        int lineStart = 0;
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+            if (c == '\n' || c == '\r') {
+                boolean isEmpty = (lineStart == i);
+                if (!isEmpty) {
+                    sb.append("  ");
+                }
+                sb.append(s, lineStart, i);
+                sb.append('\n');
+
+                if (c == '\r' && i + 1 < len && s.charAt(i + 1) == '\n') {
+                    i++;
+                }
+                lineStart = i + 1;
+            }
+        }
+
+        if (lineStart < len) {
+            sb.append("  ");
+            sb.append(s, lineStart, len);
+            sb.append('\n');
+        }
+
+        return sb.toString();
     }
 
     public static String annotationToString(java.lang.annotation.Annotation ann) {
