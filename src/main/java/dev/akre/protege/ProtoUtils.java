@@ -3,6 +3,7 @@ package dev.akre.protege;
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.parser.ProtobufFileDescriptorVisitor;
 import dev.akre.util.Cons;
+import org.apache.commons.text.StringEscapeUtils;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -64,55 +65,10 @@ public class ProtoUtils {
     }
 
     public static String getStringLiteral(String text) {
-        // Strip quotes
-        int len = text.length();
-        if (len <= 2) {
+        if (text.length() <= 2) {
             return "";
         }
-
-        StringBuilder sb = new StringBuilder(len - 2);
-        for (int i = 1; i < len - 1; i++) {
-            char c = text.charAt(i);
-            if (c == '\\') {
-                if (i + 1 < len - 1) {
-                    char next = text.charAt(i + 1);
-                    i++;
-                    switch (next) {
-                        case 'n' -> sb.append('\n');
-                        case 'r' -> sb.append('\r');
-                        case 't' -> sb.append('\t');
-                        case '"' -> sb.append('"');
-                        case '\'' -> sb.append('\'');
-                        case '\\' -> sb.append('\\');
-                        case 'u' -> {
-                            // Unicode escape
-                            if (i + 4 < len - 1) {
-                                try {
-                                    String hex = text.substring(i + 1, i + 5);
-                                    int codePoint = Integer.parseInt(hex, 16);
-                                    sb.append((char) codePoint);
-                                    i += 4;
-                                } catch (NumberFormatException e) {
-                                    // Not a valid unicode escape, treat as literal backslash u
-                                    sb.append('\\').append('u');
-                                }
-                            } else {
-                                sb.append('\\').append('u');
-                            }
-                        }
-                        default -> {
-                            sb.append('\\');
-                            sb.append(next);
-                        }
-                    }
-                } else {
-                    sb.append(c);
-                }
-            } else {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
+        return StringEscapeUtils.unescapeJava(text.substring(1, text.length() - 1));
     }
 
     private static DescriptorProtos.FileDescriptorProto parseProto(CharStream input, String filename) {
