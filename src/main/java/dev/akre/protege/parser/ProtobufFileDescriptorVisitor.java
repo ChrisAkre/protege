@@ -437,13 +437,37 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
     }
 
     static String getStringLiteral(String text) {
-        return text.substring(1, text.length() - 1)
-                .replace("\\n", "\n")
-                .replace("\\r", "\r")
-                .replace("\\t", "\t")
-                .replace("\\\"", "\"")
-                .replace("\\'", "'")
-                .replace("\\\\", "\\");
+        int len = text.length();
+        if (len <= 2) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(len - 2);
+        for (int i = 1; i < len - 1; i++) {
+            char c = text.charAt(i);
+            if (c == '\\') {
+                if (i + 1 < len - 1) {
+                    char next = text.charAt(i + 1);
+                    switch (next) {
+                        case 'n' -> sb.append('\n');
+                        case 'r' -> sb.append('\r');
+                        case 't' -> sb.append('\t');
+                        case '"' -> sb.append('"');
+                        case '\'' -> sb.append('\'');
+                        case '\\' -> sb.append('\\');
+                        default -> {
+                            sb.append('\\');
+                            sb.append(next);
+                        }
+                    }
+                    i++;
+                } else {
+                    sb.append(c);
+                }
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     private void setFieldTypeName(ProtobufParser.Type_Context ctx, FieldDescriptorProto.Builder fieldBuilder) {
