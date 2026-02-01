@@ -18,9 +18,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GenProto {
 
-    // TODO this comment doesn't make sense, because you can't have a class with the same name as this interface
     /**
      * The name of the generated Protobuf message.
+     * <p>
      * Defaults to the interface name if empty.
      *
      * @return The message name.

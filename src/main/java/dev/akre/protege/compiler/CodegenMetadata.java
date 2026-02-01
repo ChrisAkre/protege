@@ -8,16 +8,16 @@ import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import dev.akre.protege.ProtoUtils;
 import dev.akre.util.Cons;
-import dev.akre.util.StreamUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dev.akre.util.StreamUtils.mapEntry;
-import static java.util.Map.entry;
 import static java.util.function.Predicate.not;
 
 /**

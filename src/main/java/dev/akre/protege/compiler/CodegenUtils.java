@@ -44,7 +44,6 @@ public class CodegenUtils {
     );
 
     private CodegenUtils() {
-        // Utility class
     }
 
     static List<AnnotationSpec> getFieldAnnotations(DescriptorProtos.FieldOptions options) {
@@ -208,6 +207,10 @@ public class CodegenUtils {
         return defaultValue;
     }
 
+    /**
+     * Generates the condition to check if a field has a non-default value (proto3 semantics) and should be written to
+     * the output stream.
+     */
     static CodeBlock getWriteCondition(DescriptorProtos.FieldDescriptorProto.Type type, String fieldName, MessageCodegen context) {
         if (context.descriptor().getOptions().getMapEntry()) {
             return null;
@@ -237,17 +240,10 @@ public class CodegenUtils {
      * @param typeName The concrete message type (e.g., {@code MyMessage})
      * @return The *OrBuilder type (e.g., {@code MyMessageOrBuilder}), or the original type if not a ClassName.
      */
-    // TODO reimplement this but using ClassName.peerClass ?
     public static TypeName getOrBuilderType(TypeName typeName) {
         if (typeName instanceof ClassName) {
             ClassName cn = (ClassName) typeName;
-            List<String> simpleNames = cn.simpleNames();
-            String last = simpleNames.getLast();
-            if (simpleNames.size() == 1) {
-                return ClassName.get(cn.packageName(), last + "OrBuilder");
-            } else {
-                return ClassName.get(cn.packageName(), simpleNames.getFirst(), java.util.stream.Stream.concat(simpleNames.subList(1, simpleNames.size() - 1).stream(), java.util.stream.Stream.of(last + "OrBuilder")).toArray(String[]::new));
-            }
+            return cn.peerClass(cn.simpleName() + "OrBuilder");
         }
         throw new IllegalArgumentException("unexpected typename: " + typeName);
     }
