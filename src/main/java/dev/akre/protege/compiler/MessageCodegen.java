@@ -574,7 +574,7 @@ public record MessageCodegen(
                 }
             } else {
                 if (field.hasOneofIndex()) {
-                    constructor.addCode(CodegenUtils.generateClearOneofCode(descriptor, field.getOneofIndex()));
+                    constructor.addCode(CodegenUtils.generateClearOneofCode(this, field.getOneofIndex()));
                     constructor.addStatement("$LCase_ = $L", descriptor.getOneofDecl(field.getOneofIndex()).getName(), field.getNumber());
                 }
                 if (field.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
@@ -729,7 +729,7 @@ public record MessageCodegen(
             }
 
             // public Builder clear<OneofName>()
-            builderClassBuilder.addMethod(OneofMessages.clearOneof(oneofCtx, builderClassName(), CodegenUtils.generateClearOneofCode(descriptor, i)));
+            builderClassBuilder.addMethod(OneofMessages.clearOneof(oneofCtx, builderClassName(), CodegenUtils.generateClearOneofCode(this, i)));
         }
 
         // public <MessageName> build()
