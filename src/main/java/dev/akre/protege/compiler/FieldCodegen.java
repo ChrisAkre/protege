@@ -416,7 +416,7 @@ public record FieldCodegen(
          if (!descriptor.hasOneofIndex()) {
              return CodeBlock.of("");
          }
-         return CodegenUtils.generateClearOneofCode(messageCodegen.descriptor(), descriptor.getOneofIndex());
+         return CodegenUtils.generateClearOneofCode(messageCodegen, descriptor.getOneofIndex());
     }
 
     private DescriptorProtos.FieldDescriptorProto.Type valueFieldType() {
