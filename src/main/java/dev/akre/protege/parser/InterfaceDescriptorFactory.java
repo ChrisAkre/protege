@@ -9,6 +9,7 @@ import com.google.protobuf.DescriptorProtos.MessageOptions;
 import dev.akre.protege.Field;
 import dev.akre.protege.GenProto;
 import dev.akre.protege.ProtoUtils;
+import dev.akre.protege.compiler.CodegenMetadata;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -187,13 +188,13 @@ public class InterfaceDescriptorFactory {
         MessageOptions.Builder messageOptions = messageBuilder.getOptions().toBuilder();
         String javaImplements = cls.getName();
 
-        messageOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_implements", javaImplements));
+        messageOptions.addUninterpretedOption(ProtoUtils.createOption(CodegenMetadata.JAVA_IMPLEMENTS, javaImplements));
 
         for (java.lang.annotation.Annotation ann : cls.getAnnotations()) {
             if (ann.annotationType().getName().equals(GenProto.class.getName())) {
                 continue;
             }
-            messageOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_class_annotation", ProtoUtils.annotationToString(ann)));
+            messageOptions.addUninterpretedOption(ProtoUtils.createOption(CodegenMetadata.CLASS_ANNOTATIONS, ProtoUtils.annotationToString(ann)));
         }
 
         if (messageOptions.getUninterpretedOptionCount() > 0) {
@@ -231,7 +232,7 @@ public class InterfaceDescriptorFactory {
                             continue;
                         }
 
-                        fieldOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_field_annotation", ProtoUtils.annotationToString(ann)));
+                        fieldOptions.addUninterpretedOption(ProtoUtils.createOption(CodegenMetadata.FIELD_ANNOTATIONS, ProtoUtils.annotationToString(ann)));
                     }
                     if (fieldOptions.getUninterpretedOptionCount() > 0) {
                         fieldBuilder.setOptions(fieldOptions);

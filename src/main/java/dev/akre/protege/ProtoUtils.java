@@ -1,6 +1,7 @@
 package dev.akre.protege;
 
 import com.google.protobuf.DescriptorProtos;
+import dev.akre.protege.compiler.CodegenMetadata;
 import dev.akre.protege.parser.ProtobufFileDescriptorVisitor;
 import dev.akre.util.Cons;
 import org.apache.commons.text.StringEscapeUtils;
@@ -353,6 +354,10 @@ public class ProtoUtils {
                         .build())
                 .setStringValue(com.google.protobuf.ByteString.copyFromUtf8(value))
                 .build();
+    }
+
+    public static DescriptorProtos.UninterpretedOption createOption(CodegenMetadata.Option option, String value) {
+        return createUninterpretedOption(option.key(), value);
     }
 
     public static String toProtoString(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
