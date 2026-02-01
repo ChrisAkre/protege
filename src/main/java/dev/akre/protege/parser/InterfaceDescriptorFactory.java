@@ -9,6 +9,7 @@ import com.google.protobuf.DescriptorProtos.MessageOptions;
 import dev.akre.protege.Field;
 import dev.akre.protege.GenProto;
 import dev.akre.protege.ProtoUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -199,7 +200,7 @@ public class InterfaceDescriptorFactory {
             if (method.getParameterCount() == 0 && !method.isDefault() && !method.isSynthetic()) {
                 String propertyName = method.getName();
                 if (propertyName.startsWith("get") && propertyName.length() > 3) {
-                    propertyName = ProtoUtils.decapitalize(propertyName.substring(3));
+                    propertyName = StringUtils.uncapitalize(propertyName.substring(3));
                 }
                 FieldDescriptorProto.Builder fieldBuilder = FieldDescriptorProto.newBuilder();
                 fieldBuilder.setName(propertyName);

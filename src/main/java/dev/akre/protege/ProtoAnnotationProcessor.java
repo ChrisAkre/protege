@@ -1,6 +1,7 @@
 package dev.akre.protege;
 
 import com.google.auto.service.AutoService;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -58,7 +59,7 @@ public class ProtoAnnotationProcessor extends AbstractProcessor {
                 ExecutableElement method = (ExecutableElement) enclosed;
                 String name = method.getSimpleName().toString();
                 if (name.startsWith("get")) {
-                    name = decapitalize(name.substring(3));
+                    name = StringUtils.uncapitalize(name.substring(3));
                     String type = getProtoType(method.getReturnType());
                     sb.append("  ").append(type).append(" ").append(name).append(" = ").append(count++).append(";\n");
                 }
@@ -78,12 +79,5 @@ public class ProtoAnnotationProcessor extends AbstractProcessor {
             case "double" -> "double";
             default -> "string"; // Default
         };
-    }
-
-    private String decapitalize(String s) {
-        if (s == null || s.isEmpty()) {
-            return s;
-        }
-        return Character.toLowerCase(s.charAt(0)) + s.substring(1);
     }
 }

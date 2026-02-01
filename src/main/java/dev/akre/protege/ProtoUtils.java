@@ -3,6 +3,8 @@ package dev.akre.protege;
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.parser.ProtobufFileDescriptorVisitor;
 import dev.akre.util.Cons;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.CaseUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -111,10 +113,6 @@ public class ProtoUtils {
         };
     }
 
-    public static String capitalize(String s) {
-        return s == null || s.isEmpty() ? s : s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
-
     public static String getJavaPackage(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         return fileDescriptorProto.getOptions().hasJavaPackage()
                 ? fileDescriptorProto.getOptions().getJavaPackage()
@@ -152,39 +150,23 @@ public class ProtoUtils {
     }
 
     public static String toPascalCase(String s) {
-        return capitalizeAtUnderscore(s, true);
-    }
-
-    public static String toCamelCase(String s) {
-        return capitalizeAtUnderscore(s, false);
-    }
-
-    private static String capitalizeAtUnderscore(String s, boolean capitalizeNext) {
         if (s == null) {
             return null;
         }
-        if (s.isEmpty()) {
-            return "";
+        if (s.contains("_")) {
+            return CaseUtils.toCamelCase(s, true, '_');
         }
-        StringBuilder sb = new StringBuilder(s.length());
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (c == '_') {
-                capitalizeNext = true;
-            } else {
-                if (capitalizeNext) {
-                    sb.append(Character.toUpperCase(c));
-                    capitalizeNext = false;
-                } else {
-                    if (i == 0) {
-                        sb.append(Character.toLowerCase(c));
-                    } else {
-                        sb.append(c);
-                    }
-                }
-            }
+        return StringUtils.capitalize(s);
+    }
+
+    public static String toCamelCase(String s) {
+        if (s == null) {
+            return null;
         }
-        return sb.toString();
+        if (s.contains("_")) {
+            return CaseUtils.toCamelCase(s, false, '_');
+        }
+        return StringUtils.uncapitalize(s);
     }
 
     public static List<String> splitAndEscapeBytes(byte[] bytes) {
@@ -522,13 +504,6 @@ public class ProtoUtils {
             return getTypeName(((ParameterizedType) type).getRawType());
         }
         return "Object";
-    }
-
-    public static String decapitalize(String s) {
-        if (s == null || s.isEmpty() || Character.isLowerCase(s.charAt(0))) {
-            return s;
-        }
-        return Character.toLowerCase(s.charAt(0)) + s.substring(1);
     }
 
     public static boolean isJavaGenericServicesEnabled(DescriptorProtos.FileDescriptorProto fileDescriptor) {
