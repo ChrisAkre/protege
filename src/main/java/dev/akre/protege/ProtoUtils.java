@@ -144,6 +144,14 @@ public class ProtoUtils {
     }
 
     public static String toPascalCase(String s) {
+        return capitalizeAtUnderscore(s, true);
+    }
+
+    public static String toCamelCase(String s) {
+        return capitalizeAtUnderscore(s, false);
+    }
+
+    private static String capitalizeAtUnderscore(String s, boolean capitalizeNext) {
         if (s == null) {
             return null;
         }
@@ -151,7 +159,6 @@ public class ProtoUtils {
             return "";
         }
         StringBuilder sb = new StringBuilder(s.length());
-        boolean capitalizeNext = true;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (c == '_') {
@@ -161,20 +168,15 @@ public class ProtoUtils {
                     sb.append(Character.toUpperCase(c));
                     capitalizeNext = false;
                 } else {
-                    sb.append(c);
+                    if (i == 0) {
+                        sb.append(Character.toLowerCase(c));
+                    } else {
+                        sb.append(c);
+                    }
                 }
             }
         }
         return sb.toString();
-    }
-
-    public static String toCamelCase(String s) {
-        if (s == null) {
-            return null;
-        }
-        String[] parts = s.split("_");
-        return Stream.concat(Stream.of(decapitalize(parts[0])), Arrays.stream(parts).skip(1).map(ProtoUtils::capitalize))
-                .collect(Collectors.joining(""));
     }
 
     public static List<String> splitAndEscapeBytes(byte[] bytes) {

@@ -55,6 +55,20 @@ public class ProtoUtilsTest {
     }
 
     @Test
+    @DisplayName("Should correctly convert strings to CamelCase")
+    void shouldConvertToCamelCase() {
+        assertThat(ProtoUtils.toCamelCase("test")).isEqualTo("test");
+        assertThat(ProtoUtils.toCamelCase("test_name")).isEqualTo("testName");
+        assertThat(ProtoUtils.toCamelCase("test_name_long")).isEqualTo("testNameLong");
+        assertThat(ProtoUtils.toCamelCase("TestName")).isEqualTo("testName");
+        assertThat(ProtoUtils.toCamelCase("First_Second")).isEqualTo("firstSecond");
+        assertThat(ProtoUtils.toCamelCase("MyField")).isEqualTo("myField");
+        assertThat(ProtoUtils.toCamelCase("_first")).isEqualTo("First");
+        assertThat(ProtoUtils.toCamelCase("")).isEqualTo("");
+        assertThat(ProtoUtils.toCamelCase(null)).isNull();
+    }
+
+    @Test
     @DisplayName("Should correctly capitalize the first letter of a string")
     void shouldCapitalizeFirstLetter() {
         assertThat(ProtoUtils.capitalize("test")).isEqualTo("Test");
