@@ -19,22 +19,37 @@ public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.Mem
                 return resolveRelative(typeParts);
             }
 
-            List<String> scopeList = scope.stream().toList();
+            List<MemberNode> scopeNodes = new ArrayList<>();
+            scopeNodes.add(this);
+            collectScopeNodes(scope, scopeNodes);
 
-            return resolveInScope(scopeList, 0, typeParts);
-        }
-
-        private Optional<MemberNode> resolveInScope(List<String> scopeParts, int index, String[] typeParts) {
-            if (index < scopeParts.size()) {
-                MemberNode next = children.get(scopeParts.get(index));
-                if (next != null) {
-                    Optional<MemberNode> result = next.resolveInScope(scopeParts, index + 1, typeParts);
-                    if (result.isPresent()) {
-                        return result;
-                    }
+            for (int i = scopeNodes.size() - 1; i >= 0; i--) {
+                Optional<MemberNode> result = scopeNodes.get(i).resolveRelative(typeParts);
+                if (result.isPresent()) {
+                    return result;
                 }
             }
-            return resolveRelative(typeParts);
+
+            return Optional.empty();
+        }
+
+        private boolean collectScopeNodes(Cons<String> scope, List<MemberNode> nodes) {
+            if (scope.isEmpty()) {
+                return true;
+            }
+            boolean parentValid = collectScopeNodes(scope.tail(), nodes);
+            if (!parentValid) {
+                return false;
+            }
+
+            MemberNode current = nodes.getLast();
+            MemberNode next = current.children.get(scope.head());
+            if (next != null) {
+                nodes.add(next);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         private Optional<MemberNode> resolveRelative(String[] parts) {
