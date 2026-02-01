@@ -3,6 +3,7 @@ package dev.akre.protege;
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.parser.ProtobufFileDescriptorVisitor;
 import dev.akre.util.Cons;
+import org.apache.commons.text.StringEscapeUtils;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -61,6 +62,13 @@ public class ProtoUtils {
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent, String filename) {
         CharStream input = CharStreams.fromString(protoContent);
         return parseProto(input, filename);
+    }
+
+    public static String getStringLiteral(String text) {
+        if (text.length() <= 2) {
+            return "";
+        }
+        return StringEscapeUtils.unescapeJava(text.substring(1, text.length() - 1));
     }
 
     private static DescriptorProtos.FileDescriptorProto parseProto(CharStream input, String filename) {
@@ -144,19 +152,39 @@ public class ProtoUtils {
     }
 
     public static String toPascalCase(String s) {
-        return s == null ? null : Arrays.stream(s.split("_"))
-                .filter(not(String::isEmpty))
-                .map(ProtoUtils::capitalize)
-                .collect(Collectors.joining(""));
+        return capitalizeAtUnderscore(s, true);
     }
 
     public static String toCamelCase(String s) {
+        return capitalizeAtUnderscore(s, false);
+    }
+
+    private static String capitalizeAtUnderscore(String s, boolean capitalizeNext) {
         if (s == null) {
             return null;
         }
-        String[] parts = s.split("_");
-        return Stream.concat(Stream.of(decapitalize(parts[0])), Arrays.stream(parts).skip(1).map(ProtoUtils::capitalize))
-                .collect(Collectors.joining(""));
+        if (s.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '_') {
+                capitalizeNext = true;
+            } else {
+                if (capitalizeNext) {
+                    sb.append(Character.toUpperCase(c));
+                    capitalizeNext = false;
+                } else {
+                    if (i == 0) {
+                        sb.append(Character.toLowerCase(c));
+                    } else {
+                        sb.append(c);
+                    }
+                }
+            }
+        }
+        return sb.toString();
     }
 
     public static List<String> splitAndEscapeBytes(byte[] bytes) {

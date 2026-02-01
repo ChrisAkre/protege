@@ -19,16 +19,14 @@ public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.Mem
                 return resolveRelative(typeParts);
             }
 
-            List<String> scopeList = scope.stream().toList();
-
-            return resolveInScope(scopeList, 0, typeParts);
+            return resolveInScope(Cons.copyOf(scope.reversed()), typeParts);
         }
 
-        private Optional<MemberNode> resolveInScope(List<String> scopeParts, int index, String[] typeParts) {
-            if (index < scopeParts.size()) {
-                MemberNode next = children.get(scopeParts.get(index));
+        private Optional<MemberNode> resolveInScope(Cons<String> scopeParts, String[] typeParts) {
+            if (!scopeParts.isEmpty()) {
+                MemberNode next = children.get(scopeParts.head());
                 if (next != null) {
-                    Optional<MemberNode> result = next.resolveInScope(scopeParts, index + 1, typeParts);
+                    Optional<MemberNode> result = next.resolveInScope(scopeParts.tail(), typeParts);
                     if (result.isPresent()) {
                         return result;
                     }
