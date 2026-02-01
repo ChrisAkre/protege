@@ -5,6 +5,7 @@ import com.google.protobuf.BlockingService;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.ServiceException;
+import dev.akre.protege.ProtoUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -95,7 +96,7 @@ public class ServiceAssert extends ClassAssert {
             Descriptors.MethodDescriptor methodDescriptor,
             Map<String, Message> methodResponses) throws Exception {
         String methodName = methodDescriptor.getName();
-        String camelCaseName = TestUtils.toCamelCase(methodName);
+        String camelCaseName = ProtoUtils.toCamelCase(methodName);
 
         Method stubMethod = Arrays.stream(blockingInterface.getMethods())
                 .filter(m -> m.getName().equals(camelCaseName))

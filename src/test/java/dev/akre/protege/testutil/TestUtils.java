@@ -126,10 +126,6 @@ public class TestUtils {
         return methodProto.getName();
     }
 
-    public static String toCamelCase(String s) {
-        return StringUtils.uncapitalize(ProtoUtils.toCamelCase(s));
-    }
-
     public static String getJavaPackage(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         return ProtoUtils.getJavaPackage(fileDescriptorProto);
     }
