@@ -9,7 +9,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Static methods for generating code specifications
+ * Static utility methods for generating JavaPoet {@link MethodSpec} objects.
+ * <p>
+ * This class contains factory methods for creating standard Protobuf accessor methods
+ * (getters, setters, builders) and other generated code structures.
  */
 public class CodegenMethods {
 
