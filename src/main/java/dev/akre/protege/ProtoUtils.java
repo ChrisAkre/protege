@@ -144,10 +144,28 @@ public class ProtoUtils {
     }
 
     public static String toPascalCase(String s) {
-        return s == null ? null : Arrays.stream(s.split("_"))
-                .filter(not(String::isEmpty))
-                .map(ProtoUtils::capitalize)
-                .collect(Collectors.joining(""));
+        if (s == null) {
+            return null;
+        }
+        if (s.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(s.length());
+        boolean capitalizeNext = true;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '_') {
+                capitalizeNext = true;
+            } else {
+                if (capitalizeNext) {
+                    sb.append(Character.toUpperCase(c));
+                    capitalizeNext = false;
+                } else {
+                    sb.append(c);
+                }
+            }
+        }
+        return sb.toString();
     }
 
     public static String toCamelCase(String s) {
