@@ -176,12 +176,36 @@ public class CodegenUtils {
                         isEnum = true;
                     }
                 } else {
+                    StringBuilder sb = new StringBuilder();
+                    for (String part : nextScope) {
+                        if (sb.length() > 0) {
+                            sb.append('.');
+                        }
+                        sb.append(part);
+                    }
+
                     for (int i = nextScope.size(); i >= 0; i--) {
-                        var scope = nextScope.subList(0, i);
-                        var candidateName = scope.isEmpty() ? typeName : String.join(".", scope) + "." + typeName;
+                        int len = sb.length();
+                        if (len > 0) {
+                            sb.append('.').append(typeName);
+                        } else {
+                            sb.append(typeName);
+                        }
+                        String candidateName = sb.toString();
+                        sb.setLength(len);
+
                         if (isEnumMap.getOrDefault(candidateName, false)) {
                             isEnum = true;
                             break;
+                        }
+
+                        if (i > 0) {
+                            String partToRemove = nextScope.get(i - 1);
+                            int newLen = sb.length() - partToRemove.length();
+                            if (newLen > 0) {
+                                newLen--; // Remove the dot
+                            }
+                            sb.setLength(newLen);
                         }
                     }
                 }
