@@ -407,7 +407,9 @@ public class ProtoUtils {
         return label + typeName + " " + field.getName() + " = " + field.getNumber() + ";\n";
     }
 
-    // TODO optimize this by refactoring messageToString to track current indentation level and passing the string builder and indentation level to enumToString and fieldToString
+    // TODO: Optimize indentation handling.
+    // Instead of string manipulation in this method, refactor messageToString/enumToString/fieldToString
+    // to pass a StringBuilder and a current indentation level (int) down the stack.
     private static String indent(String s) {
         return (s == null || s.isEmpty())
                 ? ""

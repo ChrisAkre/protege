@@ -1,23 +1,17 @@
-# Oliver's Documentation Tasks
+# Oliver's Task Log
 
 ## Memories
-- Project uses Maven and Java 21.
-- Documentation standards are strict: "Why" over "What".
-- `dev.akre.util` contains immutable collection utilities (`Cons`).
-- Many missing Javadocs in `compiler` and `parser` packages.
-- Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code 
+- The project is called "Protege" (Proto-J).
+- It uses ANTLR4 for parsing and JavaPoet for generation.
+- There are two main workflows: Java-to-Proto and Proto-to-Java.
 
 ## Pending Approval
-- None.
+- [ ] Remove `ProtoCodegen.java` refactoring TODO if it is stale.
 
 ## Approved
-- [x] Fix Javadoc error in `CodegenUtils.java`.
-- [x] Add Javadocs to `dev.akre.util` package.
-- [x] Add Javadocs to `dev.akre.protege` root package.
-- [x] Add Javadocs to `dev.akre.protege.compiler` package.
-- [x] Add Javadocs to `dev.akre.protege.parser` package.
-- [x] Refactor `CodegenUtils.getOrBuilderType` to use `ClassName.peerClass`.
-- [x] Document "Dark Zones" in `CodegenUtils.java` (`getWriteCondition`, `relativeToProtoPackage`).
-- [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
-- [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
-- [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+
+## Completed
+- [x] Fix Javadoc in `ProtobufFileDescriptorVisitor.java`.
+- [x] Check for missing Javadocs in public classes. (Added to `MemberTreeVisitor` and `ProtoCompilerProcessor`).
+- [x] Clarify `ProtoUtils.java` optimization TODO.
+- [x] Review `README.md`.

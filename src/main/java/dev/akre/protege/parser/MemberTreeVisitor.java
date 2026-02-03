@@ -7,6 +7,13 @@ import dev.akre.util.Cons;
 
 import java.util.*;
 
+/**
+ * A visitor that builds a symbol table of all declared members (Messages, Enums) in the Protobuf file.
+ * <p>
+ * This visitor performs the first pass of the parsing process. It traverses the parse tree to construct
+ * a hierarchical tree of {@link MemberNode} objects. This symbol table is then used by the
+ * {@link ProtobufFileDescriptorVisitor} (the second pass) to resolve type names and dependencies.
+ */
 public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
 
     public record MemberNode(String name, String fullName, DescriptorProtos.FieldDescriptorProto.Type type, Map<String, MemberNode> children) {

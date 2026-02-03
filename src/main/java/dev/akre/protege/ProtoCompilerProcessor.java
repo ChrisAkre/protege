@@ -19,6 +19,14 @@ import java.util.Set;
 @SupportedAnnotationTypes("*")
 @SupportedOptions("protoDir")
 @AutoService(Processor.class)
+/**
+ * An annotation processor that serves as the entry point for the Proto-to-Java code generation pipeline.
+ * <p>
+ * This processor scans for {@code .proto} files in the configured source directory (via the {@code -AprotoDir} option
+ * or implicitly in {@code src/main/proto}) and triggers the generation of Java source files using {@link ProtoCodegen}.
+ * <p>
+ * It ensures that the compilation runs exactly once per build cycle.
+ */
 public class ProtoCompilerProcessor extends AbstractProcessor {
 
     private boolean hasRun = false;
