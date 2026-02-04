@@ -91,6 +91,8 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 * **README Synchronization**: When making changes to the codebase (adding features, changing configuration options,
   etc.), always check `README.md` to see if documentation updates are required to reflect the new functionality or
   changes.
+* **Comment Hygiene**: Remove stale TODOs. Use `// TODO` only for active tasks.
+* **Documentation Tasks**: Check `.agents/DOCTASKS.md` for the current documentation backlog.
 
 ## Common Workflows
 

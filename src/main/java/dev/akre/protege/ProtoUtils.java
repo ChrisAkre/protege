@@ -407,7 +407,12 @@ public class ProtoUtils {
         return label + typeName + " " + field.getName() + " = " + field.getNumber() + ";\n";
     }
 
-    // TODO optimize this by refactoring messageToString to track current indentation level and passing the string builder and indentation level to enumToString and fieldToString
+    /**
+     * Indents the given string with two spaces.
+     * <p>
+     * Note: This implementation uses {@link String#lines()} for simplicity.
+     * See .agents/DOCTASKS.md for future optimization plans using a shared StringBuilder.
+     */
     private static String indent(String s) {
         return (s == null || s.isEmpty())
                 ? ""

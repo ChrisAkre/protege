@@ -18,18 +18,30 @@ import java.util.stream.StreamSupport;
  * Head to Tail (Newest to Oldest) traversal in classic Lisp style.
  *
  * @param <T> element type
+ * @param head the head element
+ * @param tail the tail list
  * @see <a href="https://en.wikipedia.org/wiki/Greenspun%27s_tenth_rule">Greenspun's tenth rule</a>
  */
 public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     public static final Cons<?> NIL = new Cons<>(null, null);
 
+    /**
+     * Compact constructor for validation.
+     * @param head the head element
+     * @param tail the tail list
+     */
     public Cons {
         if ((head == null || tail == null) && NIL != null) {
             throw new IllegalArgumentException("must provide a non-null value");
         }
     }
 
+    /**
+     * Returns the empty list (nil).
+     * @param <T> the type of elements
+     * @return the empty list
+     */
     @SuppressWarnings("unchecked")
     public static <T> Cons<T> nil() {
         return (Cons<T>) NIL;
@@ -42,11 +54,19 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     /**
      * Prepends an element to this list, creating a new head.
+     * @param t the element to prepend
+     * @return a new Cons with t as the head and this as the tail
      */
     public Cons<T> cons(T t) {
         return new Cons<>(t, this);
     }
 
+    /**
+     * Creates a list from the given elements.
+     * @param elements the elements to include
+     * @param <T> the type of elements
+     * @return a new Cons list containing the elements
+     */
     @SafeVarargs
     public static <T> Cons<T> of(T... elements) {
         return copyOf(Arrays.asList(elements));
@@ -58,6 +78,9 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
      * <p>
      * Note that a reversed cons list will be iterated using {@link #descendingIterator()}
      * and thus will be copied using the classic "reverse a linked list" implementation.
+     * @param values the values to copy
+     * @param <T> the type of elements
+     * @return a new Cons list containing the values
      */
     public static <T> Cons<T> copyOf(Iterable<T> values) {
         if (values instanceof Cons<T> c) {

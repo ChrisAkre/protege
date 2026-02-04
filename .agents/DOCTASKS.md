@@ -1,23 +1,19 @@
-# Oliver's Documentation Tasks
+# Oliver's Doc Tasks
 
 ## Memories
-- Project uses Maven and Java 21.
-- Documentation standards are strict: "Why" over "What".
-- `dev.akre.util` contains immutable collection utilities (`Cons`).
-- Many missing Javadocs in `compiler` and `parser` packages.
-- Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code 
+* Project is "Protege" (Proto-J).
+* Uses Java 21, Maven, ANTLR v4, JavaPoet.
+* Two main flows: Proto -> Java (Compiler), Java -> Proto (Generator).
+* `src/it` has integration tests via `maven-invoker-plugin`.
 
 ## Pending Approval
-- None.
+* [ ] Refactor ProtoUtils.messageToString to use a single StringBuilder and pass indentation level. (Optimization)
+* [ ] Refactor ProtoCodegen: Evaluate merging functionality into CodegenMetadata. (Refactoring)
+* [ ] Verify generated code correctness for @GenProto interfaces. (Verification)
 
 ## Approved
-- [x] Fix Javadoc error in `CodegenUtils.java`.
-- [x] Add Javadocs to `dev.akre.util` package.
-- [x] Add Javadocs to `dev.akre.protege` root package.
-- [x] Add Javadocs to `dev.akre.protege.compiler` package.
-- [x] Add Javadocs to `dev.akre.protege.parser` package.
-- [x] Refactor `CodegenUtils.getOrBuilderType` to use `ClassName.peerClass`.
-- [x] Document "Dark Zones" in `CodegenUtils.java` (`getWriteCondition`, `relativeToProtoPackage`).
-- [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
-- [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
-- [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+* [x] Review and update `README.md`
+* [x] Review and update `AGENTS.md`
+* [x] Scan for and prune "Zombies" (TODOs, commented out code)
+* [x] Identify and illuminate "Dark Zones"
+* [ ] Verify Javadoc `mvn javadoc:javadoc`
