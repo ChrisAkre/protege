@@ -10,8 +10,18 @@ import java.util.Spliterators;
  */
 public interface UnmodifiableCons<T> extends Collection<T> {
 
+    /**
+     * Returns a view of this list in reversed order.
+     *
+     * @return a reversed view of the list
+     */
     UnmodifiableCons<T> reversed();
 
+    /**
+     * Returns an iterator over the elements in this list in descending order (Head to Tail).
+     *
+     * @return an iterator in descending order
+     */
     Iterator<T> descendingIterator();
 
     @Override
@@ -64,6 +74,11 @@ public interface UnmodifiableCons<T> extends Collection<T> {
         return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.IMMUTABLE | Spliterator.ORDERED | Spliterator.NONNULL);
     }
 
+    /**
+     * Returns a Spliterator over the elements in this list in descending order (Head to Tail).
+     *
+     * @return a spliterator in descending order
+     */
     default Spliterator<T> descendingSpliterator() {
         return Spliterators.spliteratorUnknownSize(descendingIterator(), Spliterator.IMMUTABLE | Spliterator.ORDERED | Spliterator.NONNULL);
     }

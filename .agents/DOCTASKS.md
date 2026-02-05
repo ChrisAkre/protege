@@ -21,3 +21,12 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [x] Fix missing Javadoc warnings in `CodegenConfig` (default methods).
+- [x] Fix missing Javadoc warnings in `CodegenUtils` (constants and methods).
+- [x] Fix missing Javadoc warnings in `Cons` (factories and methods).
+- [x] Fix missing Javadoc warnings in `UnmodifiableCons`.
+- [x] Fix missing Javadoc warnings in `EnumCodegen`.
+- [x] Fix missing Javadoc warnings in `Field` (enum constants and methods).
+- [x] Fix TODO: Rephrase and format Javadoc in `ProtobufFileDescriptorVisitor.java`.
+- [ ] Fix TODO: Refactor `ProtoUtils` string manipulation (optimization).
+- [ ] Fix TODO: Remove/Refactor `ProtoCodegen` class.

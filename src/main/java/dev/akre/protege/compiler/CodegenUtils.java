@@ -26,6 +26,11 @@ public class CodegenUtils {
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
     private static final String CLASS_ANNOTATION = "dev.akre.protege.java_class_annotation";
 
+    /**
+     * Mapping from Protobuf FieldDescriptor types to JavaPoet TypeNames.
+     * <p>
+     * Note: This mapping handles primitive types and standard wrappers (like ByteString).
+     */
     public static final Map<DescriptorProtos.FieldDescriptorProto.Type, TypeName> PROTO_TYPE_TO_TYPE_NAME = Map.ofEntries(
             Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING, ClassName.get(String.class)),
             Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32, TypeName.INT),
@@ -211,6 +216,11 @@ public class CodegenUtils {
     /**
      * Generates the condition to check if a field has a non-default value (proto3 semantics) and should be written to
      * the output stream.
+     *
+     * @param type the protobuf field type
+     * @param fieldName the name of the field variable in the generated code
+     * @param context the codegen context providing access to descriptors and options
+     * @return a CodeBlock representing the boolean condition, or null if no check is needed (e.g. map entries)
      */
     static CodeBlock getWriteCondition(DescriptorProtos.FieldDescriptorProto.Type type, String fieldName, MessageCodegen context) {
         if (context.descriptor().getOptions().getMapEntry()) {
@@ -251,6 +261,10 @@ public class CodegenUtils {
     /**
      * Relativizes a Protobuf type name by trimming a matching package name from the start. If the package name is not
      * a prefix, the name is unchanged.
+     *
+     * @param typeName the fully qualified type name
+     * @param protoPackage the package to relativize against
+     * @return the simple or relative name
      */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
@@ -265,6 +279,10 @@ public class CodegenUtils {
 
     /**
      * Generates code to clear fields associated with a specific oneof group.
+     *
+     * @param context the codegen context
+     * @param oneofIndex the index of the oneof declaration
+     * @return a CodeBlock containing statements to reset fields in the oneof
      */
     public static CodeBlock generateClearOneofCode(MessageCodegen context, int oneofIndex) {
         var message = context.descriptor();
