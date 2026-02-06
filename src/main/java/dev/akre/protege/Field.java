@@ -40,25 +40,49 @@ public @interface Field {
      */
     String oneof() default "";
 
+    /**
+     * Enumeration of supported Protobuf field types.
+     * <p>
+     * These correspond directly to {@link FieldDescriptorProto.Type}.
+     */
     enum ProtoFieldType {
+        /** Type not specified. */
         TYPE_UNSPECIFIED(null),
+        /** Double type. */
         TYPE_DOUBLE(FieldDescriptorProto.Type.TYPE_DOUBLE),
+        /** Float type. */
         TYPE_FLOAT(FieldDescriptorProto.Type.TYPE_FLOAT),
+        /** Int64 type. */
         TYPE_INT64(FieldDescriptorProto.Type.TYPE_INT64),
+        /** UInt64 type. */
         TYPE_UINT64(FieldDescriptorProto.Type.TYPE_UINT64),
+        /** Int32 type. */
         TYPE_INT32(FieldDescriptorProto.Type.TYPE_INT32),
+        /** Fixed64 type. */
         TYPE_FIXED64(FieldDescriptorProto.Type.TYPE_FIXED64),
+        /** Fixed32 type. */
         TYPE_FIXED32(FieldDescriptorProto.Type.TYPE_FIXED32),
+        /** Bool type. */
         TYPE_BOOL(FieldDescriptorProto.Type.TYPE_BOOL),
+        /** String type. */
         TYPE_STRING(FieldDescriptorProto.Type.TYPE_STRING),
+        /** Group type (deprecated). */
         TYPE_GROUP(FieldDescriptorProto.Type.TYPE_GROUP),
+        /** Message type. */
         TYPE_MESSAGE(FieldDescriptorProto.Type.TYPE_MESSAGE),
+        /** Bytes type. */
         TYPE_BYTES(FieldDescriptorProto.Type.TYPE_BYTES),
+        /** UInt32 type. */
         TYPE_UINT32(FieldDescriptorProto.Type.TYPE_UINT32),
+        /** Enum type. */
         TYPE_ENUM(FieldDescriptorProto.Type.TYPE_ENUM),
+        /** SFixed32 type. */
         TYPE_SFIXED32(FieldDescriptorProto.Type.TYPE_SFIXED32),
+        /** SFixed64 type. */
         TYPE_SFIXED64(FieldDescriptorProto.Type.TYPE_SFIXED64),
+        /** SInt32 type. */
         TYPE_SINT32(FieldDescriptorProto.Type.TYPE_SINT32),
+        /** SInt64 type. */
         TYPE_SINT64(FieldDescriptorProto.Type.TYPE_SINT64);
 
         private final FieldDescriptorProto.Type protoType;

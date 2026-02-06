@@ -12,6 +12,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
 
+/**
+ * An annotation processor that generates {@code .proto} files from Java interfaces.
+ * <p>
+ * This processor scans for interfaces annotated with {@link GenProto} and generates
+ * a corresponding {@code .proto} definition file in the source output.
+ */
 @SupportedAnnotationTypes("dev.akre.protege.GenProto")
 @AutoService(Processor.class)
 public class ProtoAnnotationProcessor extends AbstractProcessor {
@@ -21,6 +27,13 @@ public class ProtoAnnotationProcessor extends AbstractProcessor {
         return SourceVersion.latestSupported();
     }
 
+    /**
+     * Processes {@link GenProto} annotations.
+     *
+     * @param annotations the annotations to process
+     * @param roundEnv    the environment for the current round
+     * @return {@code true} as this processor claims the {@link GenProto} annotation
+     */
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {
@@ -48,6 +61,12 @@ public class ProtoAnnotationProcessor extends AbstractProcessor {
         return true;
     }
 
+    /**
+     * Generates the content of a .proto file for the given type element.
+     *
+     * @param typeElement the interface element to generate from
+     * @return the content of the .proto file
+     */
     private String generateProto(TypeElement typeElement) {
         StringBuilder sb = new StringBuilder();
         sb.append("syntax = \"proto3\";\n\n");
@@ -69,6 +88,12 @@ public class ProtoAnnotationProcessor extends AbstractProcessor {
         return sb.toString();
     }
 
+    /**
+     * Maps a Java type to a Protobuf type string.
+     *
+     * @param type the Java type mirror
+     * @return the corresponding Protobuf type string
+     */
     private String getProtoType(javax.lang.model.type.TypeMirror type) {
         return switch (type.toString()) {
             case "java.lang.String" -> "string";

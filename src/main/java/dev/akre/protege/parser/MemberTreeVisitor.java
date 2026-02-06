@@ -7,9 +7,30 @@ import dev.akre.util.Cons;
 
 import java.util.*;
 
+/**
+ * Visitor that builds a tree of members (messages, enums) from a Protobuf parse tree.
+ * <p>
+ * This is the first pass of the parsing process. It constructs a symbol table allowing
+ * for type resolution in the subsequent {@link ProtobufFileDescriptorVisitor} pass.
+ */
 public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
 
+    /**
+     * Represents a node in the member tree (e.g., a Message or Enum).
+     *
+     * @param name     the simple name of the member
+     * @param fullName the fully qualified name of the member
+     * @param type     the type of the member (MESSAGE or ENUM)
+     * @param children map of child members
+     */
     public record MemberNode(String name, String fullName, DescriptorProtos.FieldDescriptorProto.Type type, Map<String, MemberNode> children) {
+        /**
+         * Resolves a type name against the current scope.
+         *
+         * @param typeName the type name to resolve
+         * @param scope    the current scope
+         * @return the resolved member node, if found
+         */
         public Optional<MemberNode> resolve(String typeName, Cons<String> scope) {
             String[] typeParts = typeName.startsWith(".")
                     ? typeName.substring(1).split("\\.")

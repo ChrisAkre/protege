@@ -17,14 +17,19 @@ import java.util.stream.Collectors;
 public class CodegenMethods {
 
     private CodegenMethods() {
-        // Utility class
     }
 
     /**
-     * Methods for generating Builder classes
+     * Methods for generating Builder classes.
      */
     static class Builder {
 
+        /**
+         * Generates the {@code build()} method.
+         *
+         * @param messageClassName the name of the message class being built
+         * @return the build method spec
+         */
         static MethodSpec build(ClassName messageClassName) {
             return MethodSpec.methodBuilder("build")
                     .addAnnotation(Override.class)

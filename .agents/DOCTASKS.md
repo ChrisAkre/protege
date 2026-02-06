@@ -21,3 +21,9 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [x] Remove commented out code in `src/main/java/dev/akre/protege/compiler/CodegenConfig.java` (mapFields).
+- [x] Remove redundant `// Utility class` comment in `src/main/java/dev/akre/protege/compiler/CodegenMethods.java`.
+- [ ] Optimize `ProtoUtils.java` (refactor messageToString).
+- [ ] Refactor `ProtoCodegen.java` (rename/refactor CodegenMetadata).
+- [ ] Validate `GenProto.java` (generated java implementation check).
+- [x] Fix Javadoc in `ProtobufFileDescriptorVisitor.java`.

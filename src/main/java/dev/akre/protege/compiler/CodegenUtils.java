@@ -26,6 +26,7 @@ public class CodegenUtils {
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
     private static final String CLASS_ANNOTATION = "dev.akre.protege.java_class_annotation";
 
+    /** Maps Protobuf field types to their corresponding JavaPoet {@link TypeName}. */
     public static final Map<DescriptorProtos.FieldDescriptorProto.Type, TypeName> PROTO_TYPE_TO_TYPE_NAME = Map.ofEntries(
             Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING, ClassName.get(String.class)),
             Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32, TypeName.INT),
@@ -211,6 +212,11 @@ public class CodegenUtils {
     /**
      * Generates the condition to check if a field has a non-default value (proto3 semantics) and should be written to
      * the output stream.
+     *
+     * @param type      the protobuf field type
+     * @param fieldName the name of the field variable
+     * @param context   the code generation context
+     * @return a {@link CodeBlock} representing the boolean condition
      */
     static CodeBlock getWriteCondition(DescriptorProtos.FieldDescriptorProto.Type type, String fieldName, MessageCodegen context) {
         if (context.descriptor().getOptions().getMapEntry()) {
@@ -251,6 +257,10 @@ public class CodegenUtils {
     /**
      * Relativizes a Protobuf type name by trimming a matching package name from the start. If the package name is not
      * a prefix, the name is unchanged.
+     *
+     * @param typeName     the fully qualified type name
+     * @param protoPackage the package name to strip
+     * @return the relative type name
      */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
@@ -265,6 +275,10 @@ public class CodegenUtils {
 
     /**
      * Generates code to clear fields associated with a specific oneof group.
+     *
+     * @param context    the code generation context
+     * @param oneofIndex the index of the oneof declaration
+     * @return a {@link CodeBlock} that resets the oneof fields
      */
     public static CodeBlock generateClearOneofCode(MessageCodegen context, int oneofIndex) {
         var message = context.descriptor();

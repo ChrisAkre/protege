@@ -52,15 +52,35 @@ public class ProtoUtils {
                 entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_BYTES, "bytes")
         );
 
+    /**
+     * Parses a .proto file into a FileDescriptorProto.
+     *
+     * @param file the .proto file
+     * @return the parsed FileDescriptorProto
+     * @throws IOException if an I/O error occurs
+     */
     public static DescriptorProtos.FileDescriptorProto parseProto(File file) throws IOException {
         CharStream input = CharStreams.fromPath(file.toPath());
         return parseProto(input, file.getName());
     }
 
+    /**
+     * Parses a .proto string content into a FileDescriptorProto.
+     *
+     * @param protoContent the .proto content
+     * @return the parsed FileDescriptorProto
+     */
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent) {
         return parseProto(protoContent, null);
     }
 
+    /**
+     * Parses a .proto string content with a filename into a FileDescriptorProto.
+     *
+     * @param protoContent the .proto content
+     * @param filename     the filename
+     * @return the parsed FileDescriptorProto
+     */
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent, String filename) {
         CharStream input = CharStreams.fromString(protoContent);
         return parseProto(input, filename);
@@ -149,6 +169,12 @@ public class ProtoUtils {
         };
     }
 
+    /**
+     * Converts a string to PascalCase (UpperCamelCase).
+     *
+     * @param s the input string
+     * @return the PascalCase string
+     */
     public static String toPascalCase(String s) {
         if (s == null) {
             return null;
@@ -159,6 +185,12 @@ public class ProtoUtils {
         return StringUtils.capitalize(s);
     }
 
+    /**
+     * Converts a string to camelCase (lowerCamelCase).
+     *
+     * @param s the input string
+     * @return the camelCase string
+     */
     public static String toCamelCase(String s) {
         if (s == null) {
             return null;
@@ -407,7 +439,6 @@ public class ProtoUtils {
         return label + typeName + " " + field.getName() + " = " + field.getNumber() + ";\n";
     }
 
-    // TODO optimize this by refactoring messageToString to track current indentation level and passing the string builder and indentation level to enumToString and fieldToString
     private static String indent(String s) {
         return (s == null || s.isEmpty())
                 ? ""
