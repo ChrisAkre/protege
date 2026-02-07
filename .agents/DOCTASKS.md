@@ -21,3 +21,6 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [ ] Optimization: Refactor `messageToString` in `ProtoUtils.java` to track current indentation level and pass `StringBuilder` to `enumToString` and `fieldToString` to improve performance.
+- [ ] Technical Debt: Refactor `ProtoCodegen.java` to rename `CodegenMetadata` and use it as the entry point, removing the `ProtoCodegen` class itself if possible.
+- [ ] Verification: Validate that `GenProto` correctly generates both the `.proto` file and the Java implementation (ensure integration tests cover this).
