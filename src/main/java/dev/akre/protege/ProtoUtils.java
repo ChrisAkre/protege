@@ -66,6 +66,12 @@ public class ProtoUtils {
         return parseProto(input, filename);
     }
 
+    /**
+     * Unescapes a string literal (which includes surrounding quotes).
+     *
+     * @param text The string literal including quotes (e.g., "\"hello\"").
+     * @return The unescaped string content.
+     */
     public static String getStringLiteral(String text) {
         if (text.length() <= 2) {
             return "";
@@ -113,12 +119,29 @@ public class ProtoUtils {
         };
     }
 
+    /**
+     * Resolves the Java package name for the generated code.
+     * <p>
+     * It prefers the {@code java_package} option if present, otherwise falls back to the proto package.
+     *
+     * @param fileDescriptorProto The file descriptor.
+     * @return The Java package name.
+     */
     public static String getJavaPackage(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         return fileDescriptorProto.getOptions().hasJavaPackage()
                 ? fileDescriptorProto.getOptions().getJavaPackage()
                 : fileDescriptorProto.getPackage();
     }
 
+    /**
+     * Resolves the outer class name for the generated code.
+     * <p>
+     * It prefers the {@code java_outer_classname} option. If absent, it derives the name from the file name,
+     * converting it to PascalCase and appending "OuterClass" if the name conflicts with a top-level message or enum.
+     *
+     * @param fileDescriptorProto The file descriptor.
+     * @return The outer class name.
+     */
     public static String getJavaOuterClassName(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         if (fileDescriptorProto.getOptions().hasJavaOuterClassname()) {
             return fileDescriptorProto.getOptions().getJavaOuterClassname();
@@ -407,7 +430,6 @@ public class ProtoUtils {
         return label + typeName + " " + field.getName() + " = " + field.getNumber() + ";\n";
     }
 
-    // TODO optimize this by refactoring messageToString to track current indentation level and passing the string builder and indentation level to enumToString and fieldToString
     private static String indent(String s) {
         return (s == null || s.isEmpty())
                 ? ""

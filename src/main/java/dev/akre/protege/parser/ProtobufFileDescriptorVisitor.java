@@ -78,13 +78,11 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
-    // TODO rephrase and formate this javadoc
     /**
-     * generate a file descriptor by first reading the options present at the file level, and then recursively descending through all children.
-     *
-     * this.scope is updated as the graph is traversed, and is used to determine the full name of the object being processed
-     *
-     * each visit operation returns a descriptor or a record that is merged into the file descriptor
+     * Generates a file descriptor by first reading the options present at the file level, and then recursively descending through all children.
+     * <p>
+     * {@code this.scope} is updated as the graph is traversed, and is used to determine the full name of the object being processed.
+     * Each visit operation returns a descriptor or a record that is merged into the file descriptor.
      */
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
@@ -112,16 +110,6 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         });
         fileBuilder.setOptions(fileOptions.build());
         return fileBuilder;
-    }
-
-    private static <T> Optional<T> exactlyOne(List<T> l, String name) {
-        return Optional.of(l).map(ignored -> {
-            if (l.size() == 1) {
-                return l.getFirst();
-            } else {
-                throw new IllegalArgumentException("expected exactly one %s, but found: %s".formatted(name, l.size()));
-            }
-        });
     }
 
     @Override
