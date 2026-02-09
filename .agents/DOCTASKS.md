@@ -6,16 +6,18 @@
 - `dev.akre.util` contains immutable collection utilities (`Cons`).
 - Many missing Javadocs in `compiler` and `parser` packages.
 - Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code 
+- `InterfaceDescriptorFactory` converts Java interfaces to Protobuf definitions.
 
 ## Pending Approval
-- None.
+- [ ] Optimize `ProtoUtils.messageToString` to handle indentation more efficiently (from TODO).
+- [ ] Refactor `ProtoCodegen` to merge with `CodegenMetadata` (from TODO).
 
 ## Approved
 - [x] Fix Javadoc error in `CodegenUtils.java`.
 - [x] Add Javadocs to `dev.akre.util` package.
 - [x] Add Javadocs to `dev.akre.protege` root package.
 - [x] Add Javadocs to `dev.akre.protege.compiler` package.
-- [x] Add Javadocs to `dev.akre.protege.parser` package.
+- [ ] Add Javadocs to `dev.akre.protege.parser` package. (In Progress)
 - [x] Refactor `CodegenUtils.getOrBuilderType` to use `ClassName.peerClass`.
 - [x] Document "Dark Zones" in `CodegenUtils.java` (`getWriteCondition`, `relativeToProtoPackage`).
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.

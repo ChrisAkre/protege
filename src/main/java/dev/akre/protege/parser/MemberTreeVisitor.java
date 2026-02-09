@@ -7,6 +7,13 @@ import dev.akre.util.Cons;
 
 import java.util.*;
 
+/**
+ * The stage-one parser that builds a symbol table/graph of messages and enums.
+ * <p>
+ * This visitor traverses the ANTLR parse tree to construct a tree of {@link MemberNode} objects,
+ * which represents the hierarchy of messages and enums in the file. This symbol table is then
+ * used by the {@link ProtobufFileDescriptorVisitor} (pass 2) to resolve type dependencies.
+ */
 public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
 
     public record MemberNode(String name, String fullName, DescriptorProtos.FieldDescriptorProto.Type type, Map<String, MemberNode> children) {
