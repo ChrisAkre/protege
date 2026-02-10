@@ -12,12 +12,19 @@
 
 ## Approved
 - [x] Fix Javadoc error in `CodegenUtils.java`.
-- [x] Add Javadocs to `dev.akre.util` package.
-- [x] Add Javadocs to `dev.akre.protege` root package.
-- [x] Add Javadocs to `dev.akre.protege.compiler` package.
+- [x] Add Javadocs to `dev.akre.util` package (`Cons`, `UnmodifiableCons`).
+- [x] Add Javadocs to `dev.akre.protege` root package (`Field`).
+- [x] Add Javadocs to `dev.akre.protege.compiler` package (`CodegenConfig`, `CodegenUtils`, `EnumCodegen`).
 - [x] Add Javadocs to `dev.akre.protege.parser` package.
 - [x] Refactor `CodegenUtils.getOrBuilderType` to use `ClassName.peerClass`.
 - [x] Document "Dark Zones" in `CodegenUtils.java` (`getWriteCondition`, `relativeToProtoPackage`).
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [ ] Add Javadocs to `FieldCodegen.java`.
+- [ ] Add Javadocs to `GrpcCodegen.java`.
+- [ ] Add Javadocs to `InterfaceDescriptorFactory.java`.
+- [ ] Add Javadocs to `InvalidProtoException.java`.
+- [ ] Add Javadocs to `MemberTreeVisitor.java`.
+- [ ] Add Javadocs to `MessageCodegen.java`.
+- [ ] Add Javadocs to `MessageMethods.java`.
