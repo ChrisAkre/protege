@@ -24,12 +24,24 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     public static final Cons<?> NIL = new Cons<>(null, null);
 
+    /**
+     * Constructs a new Cons cell.
+     *
+     * @param head The head element.
+     * @param tail The tail of the list.
+     */
     public Cons {
         if ((head == null || tail == null) && NIL != null) {
             throw new IllegalArgumentException("must provide a non-null value");
         }
     }
 
+    /**
+     * Returns the empty list (NIL).
+     *
+     * @param <T> The type of elements in the list.
+     * @return The empty list.
+     */
     @SuppressWarnings("unchecked")
     public static <T> Cons<T> nil() {
         return (Cons<T>) NIL;
@@ -42,11 +54,21 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     /**
      * Prepends an element to this list, creating a new head.
+     *
+     * @param t The element to prepend.
+     * @return A new Cons list with the element as head.
      */
     public Cons<T> cons(T t) {
         return new Cons<>(t, this);
     }
 
+    /**
+     * Creates a Cons list from an array of elements.
+     *
+     * @param elements The elements to include in the list.
+     * @param <T>      The type of elements.
+     * @return A Cons list containing the elements.
+     */
     @SafeVarargs
     public static <T> Cons<T> of(T... elements) {
         return copyOf(Arrays.asList(elements));
@@ -58,6 +80,10 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
      * <p>
      * Note that a reversed cons list will be iterated using {@link #descendingIterator()}
      * and thus will be copied using the classic "reverse a linked list" implementation.
+     *
+     * @param values The iterable of values to copy.
+     * @param <T>    The type of elements.
+     * @return A Cons list containing the elements in the same order.
      */
     public static <T> Cons<T> copyOf(Iterable<T> values) {
         if (values instanceof Cons<T> c) {
@@ -117,6 +143,8 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     /**
      * Returns a stream of elements in descending order (Head to Tail).
+     *
+     * @return A stream of elements.
      */
     public Stream<T> descendingStream() {
         return StreamSupport.stream(descendingSpliterator(), false);

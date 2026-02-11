@@ -28,7 +28,7 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 
 * **Grammar:** `src/main/antlr4/dev/akre/protege/Protobuf.g4`
 * **Parsing Logic:** `src/main/java/dev/akre/protege/ProtobufFileDescriptorVisitor.java`
-* **Java Generation:** `src/main/java/dev/akre/protege/ProtoCodegen.java`
+* **Java Generation:** `src/main/java/dev/akre/protege/compiler/ProtoCodegen.java`
 * **Annotation Processing:** `src/main/java/dev/akre/protege/ProtoCompilerProcessor.java`
 * **Integration Tests:** `src/it/`
 
