@@ -16,6 +16,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 
+/**
+ * An annotation processor that triggers the Protobuf compilation process.
+ * <p>
+ * This processor is designed to run once per compilation cycle. It scans for {@code .proto} files
+ * in the project's source directory (specifically {@code src/main/proto} or a custom directory
+ * specified via the {@code protoDir} option) and generates the corresponding Java code.
+ * <p>
+ * This eliminates the need for an external build plugin (like the `protoc` maven plugin) by
+ * integrating the Protobuf compilation directly into the Java annotation processing round.
+ */
 @SupportedAnnotationTypes("*")
 @SupportedOptions("protoDir")
 @AutoService(Processor.class)

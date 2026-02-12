@@ -162,13 +162,21 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         UninterpretedOption.Builder result = UninterpretedOption.newBuilder()
                 .addAllName(visitOptionName(ctx.optionName()));
 
-        switch (visitConstant(ctx.constant())) {
-            case Long l when l >= 0 -> result.setPositiveIntValue(l);
-            case Long l -> result.setNegativeIntValue(-l);
-            case Double d -> result.setDoubleValue(d);
-            case ByteString s -> result.setStringValue(s);
-            case Identifier id -> result.setIdentifierValue(id.name());
-            default -> throw new IllegalStateException();
+        Object constant = visitConstant(ctx.constant());
+        if (constant instanceof Long l) {
+            if (l >= 0) {
+                result.setPositiveIntValue(l);
+            } else {
+                result.setNegativeIntValue(-l);
+            }
+        } else if (constant instanceof Double d) {
+            result.setDoubleValue(d);
+        } else if (constant instanceof ByteString s) {
+            result.setStringValue(s);
+        } else if (constant instanceof Identifier id) {
+            result.setIdentifierValue(id.name());
+        } else {
+            throw new IllegalStateException();
         }
 
         return result;
@@ -367,27 +375,28 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     private void visitReserved(ProtobufParser.ReservedContext ctx,
                                DescriptorProto.Builder messageBuilder) {
-        switch (ctx) {
-            case ProtobufParser.ReservedContext c when c.ranges() != null ->
-                    c.ranges().range().forEach(rangeCtx -> {
-                        int start = visitIntLit(rangeCtx.intLit(0));
-                        int end = switch (rangeCtx) {
-                            case ProtobufParser.RangeContext r when r.TO() == null -> start + 1;
-                            case ProtobufParser.RangeContext r when r.MAX() != null -> 536870911;
-                            default -> visitIntLit(rangeCtx.intLit(1));
-                        };
+        if (ctx.ranges() != null) {
+            ctx.ranges().range().forEach(rangeCtx -> {
+                int start = visitIntLit(rangeCtx.intLit(0));
+                int end;
+                if (rangeCtx.TO() == null) {
+                    end = start + 1;
+                } else if (rangeCtx.MAX() != null) {
+                    end = 536870911;
+                } else {
+                    end = visitIntLit(rangeCtx.intLit(1));
+                }
 
-                        messageBuilder.addReservedRange(
-                                DescriptorProto.ReservedRange.newBuilder()
-                                        .setStart(start)
-                                        .setEnd(end)
-                        );
-                    });
-            case ProtobufParser.ReservedContext c when c.fieldNames() != null ->
-                    c.fieldNames().strLit().forEach(strCtx ->
-                            messageBuilder.addReservedName(ProtoUtils.getStringLiteral(strCtx.getText()))
-                    );
-            default -> {} // EOF
+                messageBuilder.addReservedRange(
+                        DescriptorProto.ReservedRange.newBuilder()
+                                .setStart(start)
+                                .setEnd(end)
+                );
+            });
+        } else if (ctx.fieldNames() != null) {
+            ctx.fieldNames().strLit().forEach(strCtx ->
+                    messageBuilder.addReservedName(ProtoUtils.getStringLiteral(strCtx.getText()))
+            );
         }
     }
 

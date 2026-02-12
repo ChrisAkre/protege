@@ -39,10 +39,10 @@ public record MessageCodegen(
     }
 
     static ClassName className(Cons<String> scope) {
-        return switch (scope) {
-            case Cons<String> c when c.tail().tail().isEmpty() -> ClassName.get(c.tail().head(), c.head());
-            case Cons<String> c -> className(c.tail()).nestedClass(c.head());
-        };
+        if (scope.tail().tail().isEmpty()) {
+            return ClassName.get(scope.tail().head(), scope.head());
+        }
+        return className(scope.tail()).nestedClass(scope.head());
     }
 
     ClassName interfaceClassName() {

@@ -12,6 +12,19 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
 
+/**
+ * An annotation processor that generates Protobuf definition files from Java interfaces.
+ * <p>
+ * This processor scans for interfaces annotated with {@link GenProto}. For each annotated interface,
+ * it generates a corresponding {@code .proto} file in the {@code SOURCE_OUTPUT} location.
+ * <p>
+ * The generation rules are:
+ * <ul>
+ *     <li>The interface name becomes the Protobuf message name.</li>
+ *     <li>Getter methods (e.g., {@code getFoo()}) are mapped to Protobuf fields (e.g., {@code foo}).</li>
+ *     <li>Return types are mapped to standard Protobuf types (String -> string, int -> int32, etc.).</li>
+ * </ul>
+ */
 @SupportedAnnotationTypes("dev.akre.protege.GenProto")
 @AutoService(Processor.class)
 public class ProtoAnnotationProcessor extends AbstractProcessor {

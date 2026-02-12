@@ -26,6 +26,11 @@ public class CodegenUtils {
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
     private static final String CLASS_ANNOTATION = "dev.akre.protege.java_class_annotation";
 
+    /**
+     * Maps Protobuf field types to their corresponding JavaPoet {@link TypeName}.
+     * <p>
+     * Used to determine the base Java type for fields before considering generics or custom types.
+     */
     public static final Map<DescriptorProtos.FieldDescriptorProto.Type, TypeName> PROTO_TYPE_TO_TYPE_NAME = Map.ofEntries(
             Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING, ClassName.get(String.class)),
             Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32, TypeName.INT),
@@ -47,6 +52,12 @@ public class CodegenUtils {
     private CodegenUtils() {
     }
 
+    /**
+     * Extracts field annotations defined via uninterpreted options in the .proto file.
+     *
+     * @param options The field options.
+     * @return A list of parsed {@link AnnotationSpec}s.
+     */
     static List<AnnotationSpec> getFieldAnnotations(DescriptorProtos.FieldOptions options) {
         return options.getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream()
@@ -56,6 +67,12 @@ public class CodegenUtils {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Extracts class annotations defined via uninterpreted options in the .proto file.
+     *
+     * @param options The message options.
+     * @return A list of parsed {@link AnnotationSpec}s.
+     */
     static List<AnnotationSpec> getClassAnnotations(DescriptorProtos.MessageOptions options) {
         return options.getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream()
@@ -65,10 +82,24 @@ public class CodegenUtils {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Extracts message annotations defined via uninterpreted options in the .proto file.
+     *
+     * @param options The message options.
+     * @return A list of parsed {@link AnnotationSpec}s.
+     */
     static List<AnnotationSpec> getMessageAnnotations(DescriptorProtos.MessageOptions options) {
         return options.getUninterpretedOptionList().stream().filter(o -> o.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining(".")).equals(MESSAGE_ANNOTATION)).map(o -> parseAnnotation(o.getStringValue().toStringUtf8())).collect(Collectors.toList());
     }
 
+    /**
+     * Parses a string representation of an annotation into an {@link AnnotationSpec}.
+     * <p>
+     * Handles simple annotations ({@code @MyAnn}) and annotations with members ({@code @MyAnn(val="foo")}).
+     *
+     * @param annotationStr The annotation string.
+     * @return The built AnnotationSpec.
+     */
     static AnnotationSpec parseAnnotation(String annotationStr) {
         if (annotationStr.startsWith("@")) {
             annotationStr = annotationStr.substring(1);
@@ -114,6 +145,19 @@ public class CodegenUtils {
         }
     }
 
+    /**
+     * Registers all types (messages, enums) found in the file descriptor into the type registry.
+     * <p>
+     * Populates maps for identifying enums, map entries, and resolving type names.
+     *
+     * @param fileDescriptor           The file descriptor.
+     * @param packageName              The Java package name.
+     * @param outerClassName           The outer class name.
+     * @param typeRegistry             The registry of type names to ClassNames.
+     * @param isEnumMap                Map indicating if a type is an enum.
+     * @param isMapEntryMap            Map indicating if a type is a map entry.
+     * @param messageDescriptorRegistry Map of type names to DescriptorProtos.
+     */
     static void registerAllTypes(DescriptorProtos.FileDescriptorProto fileDescriptor, String packageName, String outerClassName, Map<String, ClassName> typeRegistry, Map<String, Boolean> isEnumMap, Map<String, Boolean> isMapEntryMap, Map<String, DescriptorProtos.DescriptorProto> messageDescriptorRegistry) {
         for (var message : fileDescriptor.getMessageTypeList()) {
             registerTypes(message, packageName, outerClassName, typeRegistry, isEnumMap, isMapEntryMap, messageDescriptorRegistry, new ArrayList<>());
@@ -154,6 +198,16 @@ public class CodegenUtils {
         isEnumMap.put(relativeProtoName, true);
     }
 
+    /**
+     * Fixes field types in the file descriptor to correctly identify enums.
+     * <p>
+     * Protobuf parsing sometimes treats enums as messages initially. This method resolves
+     * type references against the known enum map and corrects the field types.
+     *
+     * @param fileDescriptor The original file descriptor.
+     * @param isEnumMap      Map of known enum types.
+     * @return The corrected file descriptor.
+     */
     static DescriptorProtos.FileDescriptorProto fixAllFieldTypes(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<String, Boolean> isEnumMap) {
         var fileBuilder = fileDescriptor.toBuilder();
         for (var messageBuilder : fileBuilder.getMessageTypeBuilderList()) {
@@ -196,6 +250,14 @@ public class CodegenUtils {
         }
     }
 
+    /**
+     * Retrieves a boolean option from a list of uninterpreted options.
+     *
+     * @param options      The list of options.
+     * @param name         The option name.
+     * @param defaultValue The default value if not found.
+     * @return The boolean value.
+     */
     static boolean getBooleanOption(List<DescriptorProtos.UninterpretedOption> options, String name, boolean defaultValue) {
         for (var option : options) {
             String optionName = option.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining("."));
@@ -211,6 +273,11 @@ public class CodegenUtils {
     /**
      * Generates the condition to check if a field has a non-default value (proto3 semantics) and should be written to
      * the output stream.
+     *
+     * @param type      The field type.
+     * @param fieldName The name of the field variable.
+     * @param context   The code generation context.
+     * @return A {@link CodeBlock} representing the boolean condition.
      */
     static CodeBlock getWriteCondition(DescriptorProtos.FieldDescriptorProto.Type type, String fieldName, MessageCodegen context) {
         if (context.descriptor().getOptions().getMapEntry()) {
@@ -251,6 +318,10 @@ public class CodegenUtils {
     /**
      * Relativizes a Protobuf type name by trimming a matching package name from the start. If the package name is not
      * a prefix, the name is unchanged.
+     *
+     * @param typeName     The full type name.
+     * @param protoPackage The protobuf package.
+     * @return The relative type name.
      */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
@@ -265,6 +336,12 @@ public class CodegenUtils {
 
     /**
      * Generates code to clear fields associated with a specific oneof group.
+     * <p>
+     * Resets fields to their default values when the oneof case changes.
+     *
+     * @param context    The message codegen context.
+     * @param oneofIndex The index of the oneof declaration.
+     * @return The CodeBlock to clear the fields.
      */
     public static CodeBlock generateClearOneofCode(MessageCodegen context, int oneofIndex) {
         var message = context.descriptor();
