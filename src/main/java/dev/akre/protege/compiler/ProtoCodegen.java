@@ -12,8 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Main entry point for the Protobuf-to-Java compiler. Orchestrates the generation of the Outer Class and all nested
- * Message classes from a FileDescriptorProto.
+ * Main entry point for the Protobuf-to-Java compiler.
+ * <p>
+ * This class orchestrates the generation of the Outer Class and all nested Message classes from a
+ * {@link DescriptorProtos.FileDescriptorProto}. It delegates the actual configuration and metadata management
+ * to {@link CodegenMetadata}.
+ * <p>
+ * <strong>Note:</strong> This class acts as a facade and is currently slated for refactoring. Future versions
+ * may consolidate this logic directly into {@link CodegenMetadata} or a dedicated compiler service.
  */
 // TODO Remove this class.  Probably going to rename CodegenMetadata and use that as the entry point, the builder will
 //  take the file descriptor, the options

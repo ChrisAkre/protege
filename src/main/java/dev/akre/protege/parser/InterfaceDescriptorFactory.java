@@ -99,6 +99,25 @@ public class InterfaceDescriptorFactory {
         return update(fileDescriptorProtoBuilder.build(), cls);
     }
 
+    /**
+     * Recursively processes a Java type (class, interface, or parameterized type) and maps it to a Protobuf field definition.
+     * <p>
+     * This method handles:
+     * <ul>
+     *   <li>Standard primitives (mapped via {@link ProtoUtils#JAVA_TYPES})</li>
+     *   <li>Enums (triggers generation of {@link DescriptorProtos.EnumDescriptorProto})</li>
+     *   <li>Collections (maps to {@code repeated} fields)</li>
+     *   <li>Maps (generates synthetic Map Entry messages)</li>
+     *   <li>Nested messages (recursive calls to {@link #processClass})</li>
+     * </ul>
+     *
+     * @param messageBuilder       The builder for the containing message.
+     * @param messageQualifiedName The fully qualified name of the containing message (for resolving nested types).
+     * @param type                 The Java {@link Type} to process.
+     * @param fieldBuilder         The builder for the field being generated.
+     * @param fieldName            The name of the field (used for naming synthetic map entries).
+     * @param parentClass          The class containing this field (to detect nesting relationships).
+     */
     private void processType(DescriptorProto.Builder messageBuilder, String messageQualifiedName, Type type,
                              FieldDescriptorProto.Builder fieldBuilder, String fieldName, Class<?> parentClass) {
         if (type instanceof ParameterizedType parameterizedType) {
@@ -181,6 +200,21 @@ public class InterfaceDescriptorFactory {
         return result;
     }
 
+    /**
+     * Inspects a Java class and populates a {@link DescriptorProto.Builder} with fields, enums, and nested types.
+     * <p>
+     * This method:
+     * <ol>
+     *   <li>Adds the {@code java_implements} option based on the class name.</li>
+     *   <li>Iterates over methods annotated with {@link Field} to generate Protobuf fields.</li>
+     *   <li>Handles {@code oneof} groupings by tracking indices.</li>
+     *   <li>Recursively processes nested classes and enums.</li>
+     * </ol>
+     *
+     * @param messageBuilder The builder to populate.
+     * @param qualifiedName  The fully qualified name of the message type.
+     * @param cls            The Java class to inspect.
+     */
     private void fillMessageBuilder(DescriptorProto.Builder messageBuilder, String qualifiedName, Class<?> cls) {
         Map<String, Integer> oneofIndices = new HashMap<>();
         AtomicInteger localFieldNumber = new AtomicInteger(1);
