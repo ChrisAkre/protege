@@ -23,6 +23,7 @@ public class ComplexIntegrationTest {
                 .putIntToStringMap(1, "one")
                 .putIntToStringMap(2, "two")
                 .putStringToNestedMap("key", nested)
+                // TODO: Uncomment when generator bug with repeated enums is fixed
                 // .addEnumList(ComplexProtos.ComplexMessage.NestedMessage.NestedEnum.BAR)
                 .setFlag(true)
                 .setScore(99.5)
@@ -35,6 +36,7 @@ public class ComplexIntegrationTest {
         assertThat(message.getName()).isEqualTo("oneof-name");
         assertThat(message.getIntToStringMap().get(1)).isEqualTo("one");
         assertThat(message.getStringToNestedMap().get("key").getValue()).isEqualTo("nested-value");
+        // TODO: Uncomment when generator bug with repeated enums is fixed
         // assertThat(message.getEnumList(0)).isEqualTo(ComplexProtos.ComplexMessage.NestedMessage.NestedEnum.BAR);
         assertThat(message.getFlag()).isTrue();
         assertThat(message.getScore()).isEqualTo(99.5);
