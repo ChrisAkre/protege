@@ -8,9 +8,14 @@
 - Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code 
 
 ## Pending Approval
-- None.
+- [ ] Validate that not only is the .proto file generated, but the actual java implementation is generated as well (`GenProto` validation).
+- [ ] Remove `ProtoCodegen` class and use `CodegenMetadata` as entry point.
 
 ## Approved
+- [x] Refactor `ProtoUtils` to use `StringBuilder` and pass indentation level.
+- [x] Deprecate `ProtoCodegen` and document replacement `CodegenMetadata`.
+- [x] Fix Javadoc format in `ProtobufFileDescriptorVisitor`.
+- [x] Remove TODO from `GenProto`.
 - [x] Fix Javadoc error in `CodegenUtils.java`.
 - [x] Add Javadocs to `dev.akre.util` package.
 - [x] Add Javadocs to `dev.akre.protege` root package.
