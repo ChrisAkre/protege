@@ -78,13 +78,18 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
-    // TODO rephrase and formate this javadoc
     /**
-     * generate a file descriptor by first reading the options present at the file level, and then recursively descending through all children.
+     * Generates a file descriptor by traversing the parse tree, processing file-level options first,
+     * and then recursively descending through all child definitions.
+     * <p>
+     * As the visitor traverses the tree, {@code this.scope} is updated to track the current context,
+     * which is used to resolve the fully qualified names of the objects being processed.
+     * <p>
+     * Each visit operation returns a descriptor (e.g., {@code DescriptorProto}) or a configuration record
+     * (e.g., {@code Syntax}, {@code Package}) that is then merged into the main {@code FileDescriptorProto}.
      *
-     * this.scope is updated as the graph is traversed, and is used to determine the full name of the object being processed
-     *
-     * each visit operation returns a descriptor or a record that is merged into the file descriptor
+     * @param ctx The root context of the Protobuf file parse tree.
+     * @return A builder for the complete {@code FileDescriptorProto}.
      */
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {

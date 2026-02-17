@@ -28,6 +28,17 @@ import static java.util.function.Predicate.not;
  * <p>
  *  Additionally, this class builds a structure mirroring all the descriptors in the file to help the code generators
  *  determine structure and type information.
+ *
+ * @param fileDescriptor The root FileDescriptorProto containing the schema.
+ * @param hierarchy A map linking each descriptor to its scope hierarchy (parent descriptors).
+ * @param defaults Default configuration values.
+ * @param overrides Configuration overrides that take precedence over defaults.
+ * @param descriptorMap A map of fully qualified names to their descriptors.
+ * @param packageName The resolved Java package name for the generated code.
+ * @param typeRegistry A map of fully qualified names to their JavaPoet {@code ClassName}.
+ * @param isEnumMap A map indicating which types are Enums.
+ * @param isMapEntryMap A map indicating which messages are synthetic Map Entry types.
+ * @param oneofInterfacesByType A map of oneof interface names to their implementing classes.
  */
 public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
                               Map<String, Object> defaults, Map<String, Object> overrides,

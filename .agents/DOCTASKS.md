@@ -21,3 +21,11 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [x] Remove commented out code in `ProtoCodegen.java` and `CodegenConfig.java`.
+- [x] Fix Javadoc in `ProtobufFileDescriptorVisitor.java`.
+- [x] Add Javadocs to `CodegenMetadata.java` record components.
+
+## Technical Debt / Refactoring
+- [ ] Refactor `ProtoCodegen` to use `CodegenMetadata` as entry point (from `ProtoCodegen.java` TODO).
+- [ ] Optimize `ProtoUtils.messageToString` to avoid string concatenation overhead (from `ProtoUtils.java` TODO).
+- [ ] Validate that `@GenProto` generates correct Java implementation, not just `.proto` file (from `GenProto.java` TODO).
