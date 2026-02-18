@@ -15,15 +15,15 @@ import java.util.stream.Stream;
 import static dev.akre.protege.ProtoUtils.toPascalCase;
 
 /**
- * Visitor that creates a FileDescriptorProto.Builder from an ANTLR parse tree
+ * Visitor that creates a {@link FileDescriptorProto.Builder} from an ANTLR parse tree.
+ * <p>
+ * This class is not thread-safe and should not be reused across multiple parse operations.
  */
 public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     private final MemberNode root;
     private Cons<String> scope = Cons.nil();
 
-
-    // class is not threadsafe or reusable
     private ProtobufFileDescriptorVisitor(MemberNode root) {
         this.root = root;
     }
@@ -78,13 +78,12 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
-    // TODO rephrase and formate this javadoc
     /**
-     * generate a file descriptor by first reading the options present at the file level, and then recursively descending through all children.
-     *
-     * this.scope is updated as the graph is traversed, and is used to determine the full name of the object being processed
-     *
-     * each visit operation returns a descriptor or a record that is merged into the file descriptor
+     * Generates a file descriptor by processing file-level options and recursively visiting all child nodes.
+     * <p>
+     * The {@code scope} field is maintained during traversal to construct fully qualified names for nested objects.
+     * Each visit operation produces a descriptor or configuration record which is then merged into the main
+     * {@link FileDescriptorProto}.
      */
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {

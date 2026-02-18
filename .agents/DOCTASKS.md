@@ -8,7 +8,9 @@
 - Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code 
 
 ## Pending Approval
-- None.
+- [ ] Validate that `@GenProto` not only generates the `.proto` file but also the actual Java implementation. (From `GenProto.java`)
+- [ ] Refactor `ProtoCodegen` to use `CodegenMetadata` as the entry point, passing file descriptor and options directly. (From `ProtoCodegen.java`)
+- [ ] Verify that all "Good Documentation" examples from `DOCAGENT_INSTRUCTIONS.md` are present in the codebase.
 
 ## Approved
 - [x] Fix Javadoc error in `CodegenUtils.java`.
