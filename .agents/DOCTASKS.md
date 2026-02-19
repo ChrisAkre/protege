@@ -7,6 +7,11 @@
 - Many missing Javadocs in `compiler` and `parser` packages.
 - Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code 
 
+## Technical Debt & Refactoring
+- [ ] Refactor `ProtoCodegen` to use `CodegenMetadata` as the entry point (from `src/main/java/dev/akre/protege/compiler/ProtoCodegen.java`).
+- [ ] Optimize `ProtoUtils.messageToString` to avoid string concatenation overhead (from `src/main/java/dev/akre/protege/ProtoUtils.java`).
+- [ ] Validate generated Java implementation for `@GenProto` annotated interfaces (from `src/main/java/dev/akre/protege/GenProto.java`).
+
 ## Pending Approval
 - None.
 
