@@ -24,12 +24,26 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     public static final Cons<?> NIL = new Cons<>(null, null);
 
+    /**
+     * Compact constructor for internal use.
+     * <p>
+     * Use static factories {@link #cons(Object)}, {@link #of(Object[])}, or {@link #nil()} instead.
+     *
+     * @param head The head element (must be non-null unless creating NIL).
+     * @param tail The tail list (must be non-null unless creating NIL).
+     */
     public Cons {
         if ((head == null || tail == null) && NIL != null) {
             throw new IllegalArgumentException("must provide a non-null value");
         }
     }
 
+    /**
+     * Returns the empty list (NIL).
+     *
+     * @param <T> The type of elements.
+     * @return The singleton empty list.
+     */
     @SuppressWarnings("unchecked")
     public static <T> Cons<T> nil() {
         return (Cons<T>) NIL;
@@ -42,11 +56,21 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     /**
      * Prepends an element to this list, creating a new head.
+     *
+     * @param t The element to prepend.
+     * @return A new Cons cell with {@code t} as the head and this list as the tail.
      */
     public Cons<T> cons(T t) {
         return new Cons<>(t, this);
     }
 
+    /**
+     * Creates a Cons list from an array of elements.
+     *
+     * @param elements The elements to include.
+     * @param <T>      The type of elements.
+     * @return A Cons list containing the elements in the given order.
+     */
     @SafeVarargs
     public static <T> Cons<T> of(T... elements) {
         return copyOf(Arrays.asList(elements));
@@ -58,6 +82,10 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
      * <p>
      * Note that a reversed cons list will be iterated using {@link #descendingIterator()}
      * and thus will be copied using the classic "reverse a linked list" implementation.
+     *
+     * @param values The source collection.
+     * @param <T>    The type of elements.
+     * @return A Cons list containing the elements.
      */
     public static <T> Cons<T> copyOf(Iterable<T> values) {
         if (values instanceof Cons<T> c) {
@@ -117,6 +145,8 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     /**
      * Returns a stream of elements in descending order (Head to Tail).
+     *
+     * @return A stream ordered from newest to oldest.
      */
     public Stream<T> descendingStream() {
         return StreamSupport.stream(descendingSpliterator(), false);

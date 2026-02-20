@@ -10,8 +10,18 @@ import java.util.Spliterators;
  */
 public interface UnmodifiableCons<T> extends Collection<T> {
 
+    /**
+     * Returns a reversed view of this list.
+     *
+     * @return An {@link UnmodifiableCons} that iterates in the reverse order.
+     */
     UnmodifiableCons<T> reversed();
 
+    /**
+     * Returns an iterator that traverses the list from Head to Tail (Newest to Oldest).
+     *
+     * @return An iterator over the elements in descending order.
+     */
     Iterator<T> descendingIterator();
 
     @Override
