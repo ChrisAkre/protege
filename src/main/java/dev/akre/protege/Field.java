@@ -40,6 +40,11 @@ public @interface Field {
      */
     String oneof() default "";
 
+    /**
+     * Enumeration of supported Protobuf field types.
+     * <p>
+     * This enum maps local field types to the standard {@link FieldDescriptorProto.Type}.
+     */
     enum ProtoFieldType {
         TYPE_UNSPECIFIED(null),
         TYPE_DOUBLE(FieldDescriptorProto.Type.TYPE_DOUBLE),
@@ -67,14 +72,29 @@ public @interface Field {
             this.protoType = protoType;
         }
 
+        /**
+         * Executes the given action if a valid Protobuf type is present.
+         *
+         * @param action The action to perform on the Protobuf type.
+         */
         public void  ifPresent(Consumer<FieldDescriptorProto.Type> action) {
             getProtoType().ifPresent(action);
         }
 
+        /**
+         * Retrieves the underlying Protobuf type, if available.
+         *
+         * @return An Optional containing the FieldDescriptorProto.Type, or empty if unspecified.
+         */
         public Optional<FieldDescriptorProto.Type> getProtoType() {
             return Optional.ofNullable(this.protoType);
         }
 
+        /**
+         * Returns the numeric value associated with the Protobuf type.
+         *
+         * @return The field type number.
+         */
         public int getNumber() {
             return this.protoType.getNumber();
         }

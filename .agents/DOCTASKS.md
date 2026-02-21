@@ -21,3 +21,8 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [x] Fix missing Javadocs in `CodegenConfig.java` (params, returns, remove zombie code).
+- [x] Fix missing Javadocs in `CodegenUtils.java` (constants, params, returns).
+- [x] Fix missing Javadocs in `Cons.java` and `UnmodifiableCons.java`.
+- [x] Fix missing Javadocs in `EnumCodegen.java`.
+- [x] Fix missing Javadocs in `Field.java`.
