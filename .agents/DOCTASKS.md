@@ -5,12 +5,22 @@
 - Documentation standards are strict: "Why" over "What".
 - `dev.akre.util` contains immutable collection utilities (`Cons`).
 - Many missing Javadocs in `compiler` and `parser` packages.
-- Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code 
+- Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code
+
+## Dark Zones
+- `GrpcCodegen.java`: Unimplemented streaming methods (Bidi and Client streaming).
+
+## Technical Debt
+- `ProtoUtils.java`: Optimize `messageToString` to track indentation level.
+- `ProtoCodegen.java`: Refactor to rename `CodegenMetadata` and use it as entry point.
+- `GenProto.java`: Validate that actual Java implementation is generated.
 
 ## Pending Approval
 - None.
 
 ## Approved
+- [x] Add Javadocs to `GrpcCodegen.java`.
+- [x] Fix Javadoc in `ProtobufFileDescriptorVisitor.java`.
 - [x] Fix Javadoc error in `CodegenUtils.java`.
 - [x] Add Javadocs to `dev.akre.util` package.
 - [x] Add Javadocs to `dev.akre.protege` root package.

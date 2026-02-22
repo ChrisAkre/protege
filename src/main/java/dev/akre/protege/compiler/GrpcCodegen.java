@@ -14,12 +14,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Generates gRPC service stubs and blocking/async clients from Protobuf service definitions.
+ * <p>
+ * This class is responsible for creating the {@code *Grpc} class containing the service definition,
+ * method descriptors, and client stubs. It supports unary, client-streaming, server-streaming,
+ * and bidirectional streaming methods (with some limitations on implementation completeness).
+ */
 public record GrpcCodegen(Filer filer, CodegenMetadata config) implements CodegenConfig {
     public DescriptorProtos.FileDescriptorProto descriptor() {
         return config.fileDescriptor();
     }
 
 
+    /**
+     * Generates the gRPC service class for each service defined in the file descriptor.
+     * <p>
+     * The generated file will be placed in the package specified by the proto file's options.
+     *
+     * @throws IOException If an I/O error occurs while writing the file.
+     */
     public void generateFile() throws IOException {
         var fileDescriptor = config.fileDescriptor();
         var packageName = ProtoUtils.getJavaPackage(fileDescriptor);
