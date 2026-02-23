@@ -47,6 +47,9 @@ public class CodegenUtils {
     private CodegenUtils() {
     }
 
+    /**
+     * Extracts {@code @java_field_annotation} options from field options and parses them into {@link AnnotationSpec}s.
+     */
     static List<AnnotationSpec> getFieldAnnotations(DescriptorProtos.FieldOptions options) {
         return options.getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream()
@@ -56,6 +59,9 @@ public class CodegenUtils {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Extracts {@code @java_class_annotation} options from message options.
+     */
     static List<AnnotationSpec> getClassAnnotations(DescriptorProtos.MessageOptions options) {
         return options.getUninterpretedOptionList().stream()
                 .filter(o -> o.getNameList().stream()
@@ -65,10 +71,16 @@ public class CodegenUtils {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Extracts {@code @java_message_annotation} options from message options.
+     */
     static List<AnnotationSpec> getMessageAnnotations(DescriptorProtos.MessageOptions options) {
         return options.getUninterpretedOptionList().stream().filter(o -> o.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining(".")).equals(MESSAGE_ANNOTATION)).map(o -> parseAnnotation(o.getStringValue().toStringUtf8())).collect(Collectors.toList());
     }
 
+    /**
+     * Parses a string representation of an annotation (e.g. {@code "@Entity(name=\"users\")"}) into a JavaPoet {@link AnnotationSpec}.
+     */
     static AnnotationSpec parseAnnotation(String annotationStr) {
         if (annotationStr.startsWith("@")) {
             annotationStr = annotationStr.substring(1);
@@ -114,6 +126,12 @@ public class CodegenUtils {
         }
     }
 
+    /**
+     * Recursively traverses the file descriptor to register all message and enum types in the provided registries.
+     * <p>
+     * This builds a map of relative Protobuf type names to their generated Java {@link ClassName}, which is essential
+     * for cross-referencing types during code generation.
+     */
     static void registerAllTypes(DescriptorProtos.FileDescriptorProto fileDescriptor, String packageName, String outerClassName, Map<String, ClassName> typeRegistry, Map<String, Boolean> isEnumMap, Map<String, Boolean> isMapEntryMap, Map<String, DescriptorProtos.DescriptorProto> messageDescriptorRegistry) {
         for (var message : fileDescriptor.getMessageTypeList()) {
             registerTypes(message, packageName, outerClassName, typeRegistry, isEnumMap, isMapEntryMap, messageDescriptorRegistry, new ArrayList<>());
@@ -154,6 +172,13 @@ public class CodegenUtils {
         isEnumMap.put(relativeProtoName, true);
     }
 
+    /**
+     * Post-processes the file descriptor to correctly identify enum fields.
+     * <p>
+     * The initial parse might classify enums as messages because the type information isn't fully resolved yet.
+     * This method uses the {@code isEnumMap} (built during registration) to correct the {@link DescriptorProtos.FieldDescriptorProto.Type}
+     * of fields that refer to enums.
+     */
     static DescriptorProtos.FileDescriptorProto fixAllFieldTypes(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<String, Boolean> isEnumMap) {
         var fileBuilder = fileDescriptor.toBuilder();
         for (var messageBuilder : fileBuilder.getMessageTypeBuilderList()) {
@@ -251,6 +276,10 @@ public class CodegenUtils {
     /**
      * Relativizes a Protobuf type name by trimming a matching package name from the start. If the package name is not
      * a prefix, the name is unchanged.
+     *
+     * @param typeName     The full type name (e.g., ".com.example.Foo").
+     * @param protoPackage The protobuf package (e.g., "com.example").
+     * @return The relative name (e.g., "Foo") or the original name.
      */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
@@ -265,6 +294,10 @@ public class CodegenUtils {
 
     /**
      * Generates code to clear fields associated with a specific oneof group.
+     *
+     * @param context    The code generation context.
+     * @param oneofIndex The index of the oneof declaration.
+     * @return A CodeBlock containing the clearing logic.
      */
     public static CodeBlock generateClearOneofCode(MessageCodegen context, int oneofIndex) {
         var message = context.descriptor();

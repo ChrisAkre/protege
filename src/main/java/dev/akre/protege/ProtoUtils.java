@@ -52,20 +52,46 @@ public class ProtoUtils {
                 entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_BYTES, "bytes")
         );
 
+    /**
+     * Parses a .proto file into a FileDescriptorProto.
+     *
+     * @param file The .proto file to parse.
+     * @return The parsed FileDescriptorProto.
+     * @throws IOException If the file cannot be read.
+     */
     public static DescriptorProtos.FileDescriptorProto parseProto(File file) throws IOException {
         CharStream input = CharStreams.fromPath(file.toPath());
         return parseProto(input, file.getName());
     }
 
+    /**
+     * Parses a string containing .proto content.
+     *
+     * @param protoContent The protobuf definition string.
+     * @return The parsed FileDescriptorProto.
+     */
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent) {
         return parseProto(protoContent, null);
     }
 
+    /**
+     * Parses a string containing .proto content with an optional filename.
+     *
+     * @param protoContent The protobuf definition string.
+     * @param filename     The name of the source file (useful for debugging/logging).
+     * @return The parsed FileDescriptorProto.
+     */
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent, String filename) {
         CharStream input = CharStreams.fromString(protoContent);
         return parseProto(input, filename);
     }
 
+    /**
+     * Unescapes a string literal from the proto definition (removes surrounding quotes and handles escape sequences).
+     *
+     * @param text The string literal as it appears in the proto file (e.g., "\"hello\"").
+     * @return The unescaped string value.
+     */
     public static String getStringLiteral(String text) {
         if (text.length() <= 2) {
             return "";
@@ -92,6 +118,13 @@ public class ProtoUtils {
     }
 
 
+    /**
+     * Maps a protobuf scalar type name to its corresponding descriptor type enum.
+     *
+     * @param typeName The scalar type name (e.g., "int32", "string").
+     * @return The FieldDescriptorProto.Type.
+     * @throws IllegalArgumentException If the type name is unknown.
+     */
     public static DescriptorProtos.FieldDescriptorProto.Type fieldTypeForName(String typeName) {
         return switch (typeName) {
             case "double" -> DescriptorProtos.FieldDescriptorProto.Type.TYPE_DOUBLE;
@@ -113,12 +146,18 @@ public class ProtoUtils {
         };
     }
 
+    /**
+     * Resolves the Java package for the generated code, preferring the {@code java_package} option if present.
+     */
     public static String getJavaPackage(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         return fileDescriptorProto.getOptions().hasJavaPackage()
                 ? fileDescriptorProto.getOptions().getJavaPackage()
                 : fileDescriptorProto.getPackage();
     }
 
+    /**
+     * Determines the Java outer class name, using {@code java_outer_classname} if specified, or deriving it from the filename.
+     */
     public static String getJavaOuterClassName(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         if (fileDescriptorProto.getOptions().hasJavaOuterClassname()) {
             return fileDescriptorProto.getOptions().getJavaOuterClassname();
@@ -149,6 +188,11 @@ public class ProtoUtils {
         };
     }
 
+    /**
+     * Converts a string to PascalCase.
+     * <p>
+     * Handles both snake_case (by splitting on underscores) and existing camelCase/PascalCase (by capitalizing the first letter).
+     */
     public static String toPascalCase(String s) {
         if (s == null) {
             return null;
@@ -159,6 +203,11 @@ public class ProtoUtils {
         return StringUtils.capitalize(s);
     }
 
+    /**
+     * Converts a string to camelCase.
+     * <p>
+     * Handles both snake_case (by splitting on underscores) and existing PascalCase (by uncapitalizing the first letter).
+     */
     public static String toCamelCase(String s) {
         if (s == null) {
             return null;

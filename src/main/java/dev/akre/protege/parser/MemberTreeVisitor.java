@@ -7,9 +7,31 @@ import dev.akre.util.Cons;
 
 import java.util.*;
 
+/**
+ * First-pass visitor that builds a symbol table (tree of {@link MemberNode}s) from the Protobuf parse tree.
+ * <p>
+ * This visitor scans the file for package declarations, messages, and enums to construct a hierarchy
+ * of types. This hierarchy is subsequently used by {@link ProtobufFileDescriptorVisitor} to resolve
+ * type names (e.g., resolving a field type "Foo" to the fully qualified ".com.example.Foo").
+ */
 public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
 
+    /**
+     * Represents a node in the symbol table, corresponding to a package, message, or enum.
+     *
+     * @param name     The simple name of the member (e.g., "MyMessage").
+     * @param fullName The fully qualified name (e.g., ".com.example.MyMessage").
+     * @param type     The descriptor type (TYPE_MESSAGE or TYPE_ENUM), or null for packages.
+     * @param children A map of child nodes, keyed by their simple names.
+     */
     public record MemberNode(String name, String fullName, DescriptorProtos.FieldDescriptorProto.Type type, Map<String, MemberNode> children) {
+        /**
+         * Resolves a type name against this node hierarchy, considering the current scope.
+         *
+         * @param typeName The type name to resolve (can be fully qualified or relative).
+         * @param scope    The current scope stack (e.g., ["InnerMessage", "OuterMessage", "com", "example"]).
+         * @return An Optional containing the resolved MemberNode, or empty if not found.
+         */
         public Optional<MemberNode> resolve(String typeName, Cons<String> scope) {
             String[] typeParts = typeName.startsWith(".")
                     ? typeName.substring(1).split("\\.")

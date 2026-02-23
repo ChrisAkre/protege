@@ -37,7 +37,15 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
+    /**
+     * Functional interface for setting file-level options.
+     */
     public interface FileOption {
+        /**
+         * Applies the option to the given FileOptions builder.
+         *
+         * @param options The builder to modify.
+         */
         void set(FileOptions.Builder options);
 
         static FileOption javaPackage(String value) {
@@ -52,8 +60,28 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
             return options -> options.setJavaGenericServices(value);
         }
     }
+
+    /**
+     * Represents a "syntax" declaration in the proto file.
+     *
+     * @param version The protocol buffer version (e.g., "proto3").
+     */
     public record Syntax(String version) {}
+
+    /**
+     * Represents a "package" declaration.
+     *
+     * @param name The package name.
+     */
     public record Package(String name) {}
+
+    /**
+     * Represents an "import" statement.
+     *
+     * @param path    The path to the imported file.
+     * @param weak    Whether the import is weak.
+     * @param _public Whether the import is public.
+     */
     public record Import(String path, boolean weak, boolean _public) {
         public void addDependency(FileDescriptorProto.Builder fileBuilder) {
             int last = fileBuilder.getDependencyCount();
@@ -65,8 +93,28 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
             }
         }
     }
+
+    /**
+     * Wrapper for a constant identifier value.
+     *
+     * @param name The identifier name.
+     */
     public record Identifier(String name) {}
+
+    /**
+     * Represents a map field, which consists of the repeated field definition and the synthesized map entry message.
+     *
+     * @param field The field descriptor for the map field itself.
+     * @param entry The descriptor for the synthesized map entry message.
+     */
     public record MapField(FieldDescriptorProto.Builder field, DescriptorProto entry) {}
+
+    /**
+     * Represents a "oneof" declaration, containing the oneof descriptor and its associated fields.
+     *
+     * @param descriptor The oneof descriptor.
+     * @param fields     The list of fields belonging to this oneof.
+     */
     public record Oneof(OneofDescriptorProto.Builder descriptor, List<FieldDescriptorProto.Builder> fields) {
         public void addTo(DescriptorProto.Builder messageBuilder) {
             int oneofIndex = messageBuilder.getOneofDeclCount();
@@ -78,13 +126,17 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
-    // TODO rephrase and formate this javadoc
     /**
-     * generate a file descriptor by first reading the options present at the file level, and then recursively descending through all children.
+     * Generates a {@link FileDescriptorProto} by processing the parse tree.
+     * <p>
+     * This method first processes file-level options (syntax, package, imports) and then
+     * recursively descends into child nodes (messages, enums, services).
+     * <p>
+     * As the graph is traversed, {@code this.scope} is updated to track the current package or message
+     * context, ensuring that full names can be resolved correctly.
      *
-     * this.scope is updated as the graph is traversed, and is used to determine the full name of the object being processed
-     *
-     * each visit operation returns a descriptor or a record that is merged into the file descriptor
+     * @param ctx The root context of the parsed proto file.
+     * @return A builder for the FileDescriptorProto.
      */
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
