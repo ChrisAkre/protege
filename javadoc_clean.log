@@ -1,0 +1,368 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 6.8
+[INFO] os.detected.version.major: 6
+[INFO] os.detected.version.minor: 8
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 24.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO]
+[INFO] --------------------------< dev.akre:protege >--------------------------
+[INFO] Building Protege 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.pom
+Progress (1): 780 BProgress (1): 1.9 kBProgress (1): 4.3 kBProgress (1): 5.3 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.pom (5.3 kB at 13 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/35/maven-plugins-35.pom
+Progress (1): 752 BProgress (1): 1.8 kBProgress (1): 3.8 kBProgress (1): 6.5 kBProgress (1): 8.3 kBProgress (1): 9.9 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/35/maven-plugins-35.pom (9.9 kB at 236 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/35/maven-parent-35.pom
+Progress (1): 726 BProgress (1): 1.7 kBProgress (1): 4.5 kBProgress (1): 8.7 kBProgress (1): 12 kB Progress (1): 16 kBProgress (1): 21 kBProgress (1): 24 kBProgress (1): 26 kBProgress (1): 28 kBProgress (1): 30 kBProgress (1): 33 kBProgress (1): 37 kBProgress (1): 39 kBProgress (1): 42 kBProgress (1): 45 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/35/maven-parent-35.pom (45 kB at 984 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/25/apache-25.pom
+Progress (1): 743 BProgress (1): 1.7 kBProgress (1): 3.6 kBProgress (1): 5.6 kBProgress (1): 9.4 kBProgress (1): 14 kB Progress (1): 17 kBProgress (1): 19 kBProgress (1): 21 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/25/apache-25.pom (21 kB at 540 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.jar
+Progress (1): 0.9/36 kBProgress (1): 2.3/36 kBProgress (1): 3.7/36 kBProgress (1): 5.0/36 kBProgress (1): 6.4/36 kBProgress (1): 7.8/36 kBProgress (1): 9.1/36 kBProgress (1): 11/36 kB Progress (1): 12/36 kBProgress (1): 13/36 kBProgress (1): 15/36 kBProgress (1): 16/36 kBProgress (1): 17/36 kBProgress (1): 19/36 kBProgress (1): 20/36 kBProgress (1): 21/36 kBProgress (1): 23/36 kBProgress (1): 24/36 kBProgress (1): 26/36 kBProgress (1): 27/36 kBProgress (1): 28/36 kBProgress (1): 30/36 kBProgress (1): 31/36 kBProgress (1): 35/36 kBProgress (1): 36 kB                      Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.jar (36 kB at 759 kB/s)
+[INFO]
+[INFO] --- clean:3.2.0:clean (default-clean) @ protege ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom
+Progress (1): 790 BProgress (1): 2.3 kBProgress (1): 4.3 kBProgress (1): 5.8 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom (5.8 kB at 150 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom
+Progress (1): 781 BProgress (1): 2.3 kBProgress (1): 4.6 kBProgress (1): 5.1 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom (5.1 kB at 127 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.pom
+Progress (1): 782 BProgress (1): 2.1 kBProgress (1): 5.3 kBProgress (1): 7.5 kBProgress (1): 9.5 kBProgress (1): 12 kB Progress (1): 14 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.pom (14 kB at 407 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar
+Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar
+Progress (1): 3.8/215 kBProgress (1): 8.0/215 kBProgress (1): 12/215 kB Progress (1): 16/215 kBProgress (1): 21/215 kBProgress (1): 25/215 kBProgress (1): 29/215 kBProgress (1): 33/215 kBProgress (1): 38/215 kBProgress (1): 42/215 kBProgress (1): 46/215 kBProgress (1): 49/215 kBProgress (1): 53/215 kBProgress (1): 58/215 kBProgress (1): 62/215 kBProgress (1): 66/215 kBProgress (1): 70/215 kBProgress (1): 74/215 kBProgress (1): 78/215 kBProgress (1): 82/215 kBProgress (1): 87/215 kBProgress (1): 91/215 kBProgress (1): 95/215 kBProgress (1): 98/215 kBProgress (1): 103/215 kBProgress (1): 107/215 kBProgress (1): 111/215 kBProgress (1): 115/215 kBProgress (1): 119/215 kBProgress (1): 124/215 kBProgress (1): 128/215 kBProgress (1): 131/215 kBProgress (1): 135/215 kBProgress (1): 152/215 kBProgress (1): 164/215 kBProgress (1): 180/215 kBProgress (1): 197/215 kBProgress (1): 213/215 kBProgress (1): 215 kB                        Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar (215 kB at 3.5 MB/s)
+Progress (1): 0.9/153 kBProgress (1): 2.3/153 kBProgress (1): 3.7/153 kBProgress (1): 5.0/153 kBProgress (1): 6.4/153 kBProgress (1): 7.8/153 kBProgress (1): 9.1/153 kBProgress (1): 11/153 kB Progress (1): 12/153 kBProgress (1): 13/153 kBProgress (1): 15/153 kBProgress (1): 16/153 kBProgress (1): 17/153 kBProgress (1): 19/153 kBProgress (1): 20/153 kBProgress (1): 21/153 kBProgress (1): 23/153 kBProgress (1): 24/153 kBProgress (1): 26/153 kBProgress (1): 27/153 kBProgress (1): 28/153 kBProgress (1): 30/153 kBProgress (1): 31/153 kBProgress (1): 32/153 kBProgress (1): 34/153 kBProgress (1): 35/153 kBProgress (1): 37/153 kBProgress (1): 38/153 kBProgress (1): 39/153 kBProgress (1): 41/153 kBProgress (1): 42/153 kBProgress (1): 43/153 kBProgress (1): 45/153 kBProgress (1): 46/153 kBProgress (1): 47/153 kBProgress (1): 49/153 kBProgress (1): 50/153 kBProgress (1): 52/153 kBProgress (1): 53/153 kBProgress (1): 54/153 kBProgress (1): 56/153 kBProgress (1): 60/153 kBProgress (1): 64/153 kBProgress (1): 68/153 kBProgress (1): 73/153 kBProgress (1): 77/153 kBProgress (1): 81/153 kBProgress (1): 85/153 kBProgress (1): 90/153 kBProgress (1): 94/153 kBProgress (1): 98/153 kBProgress (1): 102/153 kBProgress (1): 106/153 kBProgress (1): 111/153 kBProgress (1): 115/153 kBProgress (1): 119/153 kBProgress (1): 123/153 kBProgress (1): 128/153 kBProgress (1): 132/153 kBProgress (1): 136/153 kBProgress (1): 140/153 kBProgress (1): 144/153 kBProgress (1): 149/153 kBProgress (1): 153/153 kBProgress (1): 153 kB                        Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar (153 kB at 1.4 MB/s)
+[INFO] Deleting /app/target
+[INFO]
+[INFO] >>> javadoc:3.12.0:javadoc (default-cli) > generate-sources @ protege >>>
+[INFO]
+[INFO] --- antlr4:4.13.2:antlr4 (default) @ protege ---
+[INFO] ANTLR 4: Processing source directory /app/src/main/antlr4
+[INFO] Processing grammar: dev/akre/protege/Protobuf.g4
+[INFO]
+[INFO] --- templating:3.0.0:filter-sources (filter-src) @ protege ---
+[INFO] Copying files with filtering to temporary directory.
+[INFO] Copying 1 resource from src/main/java-templates to target/templates-tmp3430681449
+[INFO] Copied 1 files to output directory: /app/target/generated-sources/java-templates
+[INFO] Source directory: /app/target/generated-sources/java-templates added.
+[INFO]
+[INFO] <<< javadoc:3.12.0:javadoc (default-cli) < generate-sources @ protege <<<
+[INFO]
+[INFO]
+[INFO] --- javadoc:3.12.0:javadoc (default-cli) @ protege ---
+[WARNING] Javadoc Warnings
+[WARNING] /app/src/main/java/dev/akre/util/UnmodifiableCons.java:11: warning: no @param for <T>
+[WARNING] public interface UnmodifiableCons<T> extends Collection<T> {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/util/Cons.java:23: warning: no @param for head
+[WARNING] public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/util/Cons.java:23: warning: no @param for tail
+[WARNING] public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/GrpcCodegen.java:28: warning: no @param for filer
+[WARNING] public record GrpcCodegen(Filer filer, CodegenMetadata config) implements CodegenConfig {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/GrpcCodegen.java:28: warning: no @param for config
+[WARNING] public record GrpcCodegen(Filer filer, CodegenMetadata config) implements CodegenConfig {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/EnumCodegen.java:19: warning: no @param for descriptor
+[WARNING] public record EnumCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/EnumCodegen.java:19: warning: no @param for scope
+[WARNING] public record EnumCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/EnumCodegen.java:19: warning: no @param for protoCodegen
+[WARNING] public record EnumCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/EnumCodegen.java:19: warning: no @param for config
+[WARNING] public record EnumCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:26: warning: no @param for descriptor
+[WARNING] public record MessageCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:26: warning: no @param for scope
+[WARNING] public record MessageCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:26: warning: no @param for protoCodegen
+[WARNING] public record MessageCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:26: warning: no @param for config
+[WARNING] public record MessageCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for fileDescriptor
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for hierarchy
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for defaults
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for overrides
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for descriptorMap
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for packageName
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for typeRegistry
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for isEnumMap
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for isMapEntryMap
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:32: warning: no @param for oneofInterfacesByType
+[WARNING] public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:355: warning: no @param for key
+[WARNING] public record Option(String key, ValueType type, Function<Cons<Object>, Optional<?>> lookup) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:355: warning: no @param for type
+[WARNING] public record Option(String key, ValueType type, Function<Cons<Object>, Optional<?>> lookup) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenMetadata.java:355: warning: no @param for lookup
+[WARNING] public record Option(String key, ValueType type, Function<Cons<Object>, Optional<?>> lookup) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for descriptor
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for fieldType
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for fieldName
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for pascalName
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for internalName
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for isMap
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for isRepeated
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for entryDescriptor
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for keyType
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for valueType
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for genericType
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for messageCodegen
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:16: warning: no @param for config
+[WARNING] public record FieldCodegen(
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/CodegenConfig.java:23: warning: no comment
+[WARNING] void dummyMethod(); // This should trigger a warning
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:57: warning: no comment
+[WARNING] TYPE_BOOL(FieldDescriptorProto.Type.TYPE_BOOL),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:61: warning: no comment
+[WARNING] TYPE_BYTES(FieldDescriptorProto.Type.TYPE_BYTES),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:50: warning: no comment
+[WARNING] TYPE_DOUBLE(FieldDescriptorProto.Type.TYPE_DOUBLE),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:63: warning: no comment
+[WARNING] TYPE_ENUM(FieldDescriptorProto.Type.TYPE_ENUM),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:56: warning: no comment
+[WARNING] TYPE_FIXED32(FieldDescriptorProto.Type.TYPE_FIXED32),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:55: warning: no comment
+[WARNING] TYPE_FIXED64(FieldDescriptorProto.Type.TYPE_FIXED64),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:51: warning: no comment
+[WARNING] TYPE_FLOAT(FieldDescriptorProto.Type.TYPE_FLOAT),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:59: warning: no comment
+[WARNING] TYPE_GROUP(FieldDescriptorProto.Type.TYPE_GROUP),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:54: warning: no comment
+[WARNING] TYPE_INT32(FieldDescriptorProto.Type.TYPE_INT32),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:52: warning: no comment
+[WARNING] TYPE_INT64(FieldDescriptorProto.Type.TYPE_INT64),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:60: warning: no comment
+[WARNING] TYPE_MESSAGE(FieldDescriptorProto.Type.TYPE_MESSAGE),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:64: warning: no comment
+[WARNING] TYPE_SFIXED32(FieldDescriptorProto.Type.TYPE_SFIXED32),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:65: warning: no comment
+[WARNING] TYPE_SFIXED64(FieldDescriptorProto.Type.TYPE_SFIXED64),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:66: warning: no comment
+[WARNING] TYPE_SINT32(FieldDescriptorProto.Type.TYPE_SINT32),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:67: warning: no comment
+[WARNING] TYPE_SINT64(FieldDescriptorProto.Type.TYPE_SINT64);
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:58: warning: no comment
+[WARNING] TYPE_STRING(FieldDescriptorProto.Type.TYPE_STRING),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:62: warning: no comment
+[WARNING] TYPE_UINT32(FieldDescriptorProto.Type.TYPE_UINT32),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:53: warning: no comment
+[WARNING] TYPE_UINT64(FieldDescriptorProto.Type.TYPE_UINT64),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/Field.java:49: warning: no comment
+[WARNING] TYPE_UNSPECIFIED(null),
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:35: warning: no comment
+[WARNING] public static FieldCodegen create(DescriptorProtos.FieldDescriptorProto field, MessageCodegen messageCodegen) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:366: warning: no comment
+[WARNING] public int fieldNumber() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:370: warning: no comment
+[WARNING] public DescriptorProtos.FieldDescriptorProto.Type type() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:374: warning: no comment
+[WARNING] public boolean hasOneofIndex() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:378: warning: no comment
+[WARNING] public int oneofIndex() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:382: warning: no comment
+[WARNING] public boolean isString() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:389: warning: no comment
+[WARNING] public boolean isMessage() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/FieldCodegen.java:396: warning: no comment
+[WARNING] public boolean isEnum() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/GrpcCodegen.java:34: warning: no comment
+[WARNING] public void generateFile() throws IOException {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/InterfaceDescriptorFactory.java:35: warning: no comment
+[WARNING] public InterfaceDescriptorFactory() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/InterfaceDescriptorFactory.java:82: warning: no comment
+[WARNING] public FileDescriptorProto create(Class<?> cls) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/InterfaceDescriptorFactory.java:90: warning: no comment
+[WARNING] public FileDescriptorProto create(Class<?> cls, String protoFileName) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/InvalidProtoException.java:11: warning: no comment
+[WARNING] public InvalidProtoException(String message) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/InvalidProtoException.java:16: warning: no comment
+[WARNING] public InvalidProtoException(String message, String filename, Throwable cause) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/InvalidProtoException.java:21: warning: no comment
+[WARNING] public InvalidProtoException(String message, Throwable cause) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/InvalidProtoException.java:26: warning: no comment
+[WARNING] public InvalidProtoException in(String filename) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/MemberTreeVisitor.java:10: warning: no comment
+[WARNING] public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/MemberTreeVisitor.java:12: warning: no comment
+[WARNING] public record MemberNode(String name, String fullName, DescriptorProtos.FieldDescriptorProto.Type type, Map<String, MemberNode> children) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/MemberTreeVisitor.java:10: warning: use of default constructor, which does not provide a comment
+[WARNING] public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/parser/MemberTreeVisitor.java:13: warning: no comment
+[WARNING] public Optional<MemberNode> resolve(String typeName, Cons<String> scope) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:33: warning: no comment
+[WARNING] public Cons<String> allNames() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:37: warning: no comment
+[WARNING] public ClassName messageClassName() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:56: warning: no comment
+[WARNING] public String interfaceName() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:60: warning: no comment
+[WARNING] public String[] allNamesArray() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:64: warning: no comment
+[WARNING] public List<String> currentScope() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:68: warning: no comment
+[WARNING] public String canonicalMessageName() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:72: warning: no comment
+[WARNING] public TypeSpec generateMessageClass() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:289: warning: no comment
+[WARNING] public MethodSpec internalGetMapFieldReflection() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageCodegen.java:632: warning: no comment
+[WARNING] public ClassName builderClassName() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:206: warning: no comment
+[WARNING] public static MethodSpec containsMapKey(FieldCodegen ctx) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:75: warning: no comment
+[WARNING] public static MethodSpec getDefaultInstanceForType(ClassName messageClassName) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:24: warning: no comment
+[WARNING] public static MethodSpec getDescriptor() {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:147: warning: no comment
+[WARNING] public static MethodSpec getField(FieldCodegen ctx) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:188: warning: no comment
+[WARNING] public static MethodSpec getFieldBytes(FieldCodegen ctx) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:179: warning: no comment
+[WARNING] public static MethodSpec getFieldOrBuilder(FieldCodegen ctx, TypeName orBuilderType) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:170: warning: no comment
+[WARNING] public static MethodSpec getFieldValue(FieldCodegen ctx) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:226: warning: no comment
+[WARNING] public static MethodSpec getMapCount(FieldCodegen ctx) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:259: warning: no comment
+[WARNING] public static MethodSpec getMapDeprecated(FieldCodegen ctx, TypeName fieldType) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:216: warning: no comment
+[WARNING] public static MethodSpec getMapField(FieldCodegen ctx, TypeName fieldType) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:235: warning: no comment
+[WARNING] public static MethodSpec getMapOrDefault(FieldCodegen ctx) {
+[WARNING] ^
+[WARNING] /app/src/main/java/dev/akre/protege/compiler/MessageMethods.java:246: warning: no comment
+[WARNING] public static MethodSpec getMapOrThrow(FieldCodegen ctx) {
+[WARNING] ^
+[WARNING] 100 warnings
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.796 s
+[INFO] Finished at: 2026-02-25T07:15:21Z
+[INFO] ------------------------------------------------------------------------

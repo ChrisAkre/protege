@@ -14,6 +14,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Generates gRPC service stubs and implementation bases.
+ * <p>
+ * This generator produces standard gRPC code similar to the official gRPC-Java compiler.
+ * <p>
+ * <strong>Current Limitations (Dark Zones):</strong>
+ * <ul>
+ *     <li>Client Streaming methods are not fully implemented.</li>
+ *     <li>Bidirectional Streaming methods are not fully implemented.</li>
+ * </ul>
+ */
 public record GrpcCodegen(Filer filer, CodegenMetadata config) implements CodegenConfig {
     public DescriptorProtos.FileDescriptorProto descriptor() {
         return config.fileDescriptor();

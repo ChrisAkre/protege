@@ -1,0 +1,43 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 6.8
+[INFO] os.detected.version.major: 6
+[INFO] os.detected.version.minor: 8
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 24.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO]
+[INFO] --------------------------< dev.akre:protege >--------------------------
+[INFO] Building Protege 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] >>> javadoc:3.12.0:javadoc (default-cli) > generate-sources @ protege >>>
+[INFO]
+[INFO] --- antlr4:4.13.2:antlr4 (default) @ protege ---
+[INFO] No grammars to process
+[INFO] ANTLR 4: Processing source directory /app/src/main/antlr4
+[INFO]
+[INFO] --- templating:3.0.0:filter-sources (filter-src) @ protege ---
+[INFO] Copying files with filtering to temporary directory.
+[INFO] Copying 1 resource from src/main/java-templates to target/templates-tmp3430681449
+[INFO] No files need to be copied to output directory. Up to date: /app/target/generated-sources/java-templates
+[INFO] Source directory: /app/target/generated-sources/java-templates added.
+[INFO]
+[INFO] <<< javadoc:3.12.0:javadoc (default-cli) < generate-sources @ protege <<<
+[INFO]
+[INFO]
+[INFO] --- javadoc:3.12.0:javadoc (default-cli) @ protege ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.943 s
+[INFO] Finished at: 2026-02-25T07:13:45Z
+[INFO] ------------------------------------------------------------------------
