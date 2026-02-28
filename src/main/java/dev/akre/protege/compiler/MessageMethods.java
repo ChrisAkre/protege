@@ -394,6 +394,11 @@ public class MessageMethods {
         return builder.build();
     }
 
+    /**
+     * Generates the {@code writeTo} method for the message.
+     * @param context the codegen context
+     * @return the writeTo method
+     */
     static MethodSpec writeTo(MessageCodegen context) {
         var writeToBuilder = MethodSpec.methodBuilder("writeTo")
                 .addAnnotation(Override.class)
@@ -470,6 +475,11 @@ public class MessageMethods {
         return writeToBuilder.build();
     }
 
+    /**
+     * Generates the {@code mergeFrom} method for merging another message.
+     * @param context the codegen context
+     * @return the mergeFrom method
+     */
     static MethodSpec mergeFromOther(MessageCodegen context) {
         var mergeFromSpecificMethod = MethodSpec.methodBuilder("mergeFrom")
                 .addModifiers(Modifier.PUBLIC)
