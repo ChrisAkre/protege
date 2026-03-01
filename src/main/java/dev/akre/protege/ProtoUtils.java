@@ -321,10 +321,11 @@ public class ProtoUtils {
     }
 
     private static StringBuilder qualify(StringBuilder sb, Cons<String> scope) {
-        return switch (scope) {
-            case Cons<?> c when c.isEmpty() -> sb;
-            case Cons(var head, var tail) -> qualify(sb, tail).append('.').append(head);
-        };
+        if (scope.isEmpty()) {
+            return sb;
+        } else {
+            return qualify(sb, scope.tail()).append('.').append(scope.head());
+        }
     }
 
     public static DescriptorProtos.UninterpretedOption createUninterpretedOption(String name, String value) {
@@ -407,7 +408,6 @@ public class ProtoUtils {
         return label + typeName + " " + field.getName() + " = " + field.getNumber() + ";\n";
     }
 
-    // TODO optimize this by refactoring messageToString to track current indentation level and passing the string builder and indentation level to enumToString and fieldToString
     private static String indent(String s) {
         return (s == null || s.isEmpty())
                 ? ""
@@ -451,22 +451,24 @@ public class ProtoUtils {
     }
 
     public static String formatJavaValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value.getClass().isArray()) {
+            StringBuilder sb = new StringBuilder("{");
+            int length = java.lang.reflect.Array.getLength(value);
+            for (int i = 0; i < length; i++) {
+                if (i > 0) sb.append(", ");
+                sb.append(formatJavaValue(java.lang.reflect.Array.get(value, i)));
+            }
+            sb.append("}");
+            return sb.toString();
+        }
         return switch (value) {
             case String s -> "\"" + s + "\"";
             case Character c -> "'" + c + "'";
             case Class<?> clazz -> clazz.getSimpleName() + ".class";
             case Enum<?> e -> e.name();
-            case null -> "null";
-            case Object o when o.getClass().isArray() -> {
-                StringBuilder sb = new StringBuilder("{");
-                int length = java.lang.reflect.Array.getLength(o);
-                for (int i = 0; i < length; i++) {
-                    if (i > 0) sb.append(", ");
-                    sb.append(formatJavaValue(java.lang.reflect.Array.get(o, i)));
-                }
-                sb.append("}");
-                yield sb.toString();
-            }
             default -> String.valueOf(value);
         };
     }

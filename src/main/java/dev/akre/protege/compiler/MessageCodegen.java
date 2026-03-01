@@ -22,6 +22,11 @@ import java.util.stream.Collectors;
  *   <li>Nested types (messages and enums)</li>
  *   <li>Serialization/Deserialization logic</li>
  * </ul>
+ *
+ * @param descriptor The descriptor defining the message.
+ * @param scope The current scope stack containing parent names.
+ * @param protoCodegen The context object used for orchestration.
+ * @param config Configuration options and mapping registry.
  */
 public record MessageCodegen(
         DescriptorProtos.DescriptorProto descriptor,
@@ -39,10 +44,11 @@ public record MessageCodegen(
     }
 
     static ClassName className(Cons<String> scope) {
-        return switch (scope) {
-            case Cons<String> c when c.tail().tail().isEmpty() -> ClassName.get(c.tail().head(), c.head());
-            case Cons<String> c -> className(c.tail()).nestedClass(c.head());
-        };
+        if (scope.tail().tail().isEmpty()) {
+            return ClassName.get(scope.tail().head(), scope.head());
+        } else {
+            return className(scope.tail()).nestedClass(scope.head());
+        }
     }
 
     ClassName interfaceClassName() {
