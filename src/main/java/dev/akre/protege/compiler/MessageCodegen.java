@@ -22,13 +22,17 @@ import java.util.stream.Collectors;
  *   <li>Nested types (messages and enums)</li>
  *   <li>Serialization/Deserialization logic</li>
  * </ul>
+ * @param descriptor the message descriptor
+ * @param scope the current scope
+ * @param protoCodegen the parent codegen
+ * @param config the configuration metadata
  */
 public record MessageCodegen(
         DescriptorProtos.DescriptorProto descriptor,
         Cons<String> scope,
         ProtoCodegen protoCodegen,
         CodegenMetadata config
-) implements CodegenConfig.MessageConfig {
+) implements CodegenConfig {
 
     public Cons<String> allNames() {
         return scope.cons(messageName());
