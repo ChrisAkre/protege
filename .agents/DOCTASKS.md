@@ -10,6 +10,11 @@
 ## Pending Approval
 - None.
 
+## Technical Debt / Dark Zones
+- [ ] Refactor `ProtoUtils.messageToString` to optimize string concatenation by tracking current indentation level and passing it to `enumToString` and `fieldToString`.
+- [ ] Refactor `ProtoCodegen` to merge into `CodegenMetadata` (making it the new entry point) and remove the `ProtoCodegen` class.
+- [ ] Validate that `@GenProto` correctly generates the Java implementation (not just the `.proto` file).
+
 ## Approved
 - [x] Fix Javadoc error in `CodegenUtils.java`.
 - [x] Add Javadocs to `dev.akre.util` package.
