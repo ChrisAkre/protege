@@ -7,6 +7,11 @@
 - Many missing Javadocs in `compiler` and `parser` packages.
 - Use `git blame` to determine the age of a TODO, only remove if stale or if the TODO references deleted code 
 
+## Technical Debt / Dark Zones
+- Optimizing `ProtoUtils` string generation methods (`toProtoString`, `messageToString`, `enumToString`, `fieldToString`) to use a shared `StringBuilder` and track `indentLevel` directly, instead of the inefficient `indent(String)` post-processing method.
+- Refactoring `ProtoCodegen` to merge into `CodegenMetadata` (making it the new entry point).
+- Validating that `@GenProto` correctly generates the Java implementation (not just the `.proto` file).
+
 ## Pending Approval
 - None.
 
