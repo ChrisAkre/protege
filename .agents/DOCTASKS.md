@@ -21,3 +21,4 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [x] Fix missing Javadoc parameters and return tags across compiler and utility classes based on Maven warnings.

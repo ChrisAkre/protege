@@ -22,6 +22,11 @@ import java.util.stream.Collectors;
  *   <li>Nested types (messages and enums)</li>
  *   <li>Serialization/Deserialization logic</li>
  * </ul>
+ *
+ * @param descriptor The descriptor representing the Protobuf message.
+ * @param scope The scope containing this message.
+ * @param protoCodegen The parent code generation pipeline object.
+ * @param config The metadata config instance.
  */
 public record MessageCodegen(
         DescriptorProtos.DescriptorProto descriptor,

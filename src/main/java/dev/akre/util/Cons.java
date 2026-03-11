@@ -18,18 +18,32 @@ import java.util.stream.StreamSupport;
  * Head to Tail (Newest to Oldest) traversal in classic Lisp style.
  *
  * @param <T> element type
+ * @param head the head of the list
+ * @param tail the tail of the list
  * @see <a href="https://en.wikipedia.org/wiki/Greenspun%27s_tenth_rule">Greenspun's tenth rule</a>
  */
 public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     public static final Cons<?> NIL = new Cons<>(null, null);
 
+    /**
+     * Constructs a new Cons list.
+     *
+     * @param head the head of the list
+     * @param tail the tail of the list
+     */
     public Cons {
         if ((head == null || tail == null) && NIL != null) {
             throw new IllegalArgumentException("must provide a non-null value");
         }
     }
 
+    /**
+     * Returns an empty Cons list.
+     *
+     * @param <T> element type
+     * @return an empty Cons list
+     */
     @SuppressWarnings("unchecked")
     public static <T> Cons<T> nil() {
         return (Cons<T>) NIL;
@@ -42,11 +56,21 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     /**
      * Prepends an element to this list, creating a new head.
+     *
+     * @param t The element to prepend.
+     * @return A new Cons list.
      */
     public Cons<T> cons(T t) {
         return new Cons<>(t, this);
     }
 
+    /**
+     * Creates a new Cons list populated with the given elements.
+     *
+     * @param <T> The element type.
+     * @param elements The elements to populate the list.
+     * @return A new Cons list.
+     */
     @SafeVarargs
     public static <T> Cons<T> of(T... elements) {
         return copyOf(Arrays.asList(elements));
@@ -58,6 +82,10 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
      * <p>
      * Note that a reversed cons list will be iterated using {@link #descendingIterator()}
      * and thus will be copied using the classic "reverse a linked list" implementation.
+     *
+     * @param <T> The element type.
+     * @param values The values to copy.
+     * @return A new Cons list.
      */
     public static <T> Cons<T> copyOf(Iterable<T> values) {
         if (values instanceof Cons<T> c) {
@@ -117,6 +145,8 @@ public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     /**
      * Returns a stream of elements in descending order (Head to Tail).
+     *
+     * @return a stream iterating from head to tail
      */
     public Stream<T> descendingStream() {
         return StreamSupport.stream(descendingSpliterator(), false);

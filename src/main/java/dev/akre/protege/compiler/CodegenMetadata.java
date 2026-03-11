@@ -28,6 +28,17 @@ import static java.util.function.Predicate.not;
  * <p>
  *  Additionally, this class builds a structure mirroring all the descriptors in the file to help the code generators
  *  determine structure and type information.
+ *
+ * @param fileDescriptor The associated Protobuf file descriptor.
+ * @param hierarchy The metadata hierarchy structure.
+ * @param defaults Default configuration values.
+ * @param overrides Override configuration values.
+ * @param descriptorMap A map containing descriptor objects.
+ * @param packageName The calculated Java package name.
+ * @param typeRegistry A map resolving protobuf types to JavaPoet ClassName.
+ * @param isEnumMap A map to determine if a relative name is an enum.
+ * @param isMapEntryMap A map to determine if a relative name is a map entry.
+ * @param oneofInterfacesByType A mapping of types to the sealed oneof interfaces they implement.
  */
 public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescriptor, Map<Object, Cons<Object>> hierarchy,
                               Map<String, Object> defaults, Map<String, Object> overrides,
@@ -351,6 +362,10 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
     /**
      * Defines a configuration option with a unique key, a specific {@link ValueType}, and a lookup function
      * to resolve its value from a descriptor hierarchy.
+     *
+     * @param key The unique key string for the option.
+     * @param type The value type representation.
+     * @param lookup A function defining how to look up the option value from the descriptor hierarchy.
      */
     public record Option(String key, ValueType type, Function<Cons<Object>, Optional<?>> lookup) {
         /**
