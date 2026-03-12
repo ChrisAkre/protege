@@ -21,3 +21,5 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [x] Fix `ProtoUtils.java` checkstyle parsing issue with Java 21 syntax.
+- [x] Implement `ProtoUtils` string generation optimization tracked by TODO.
