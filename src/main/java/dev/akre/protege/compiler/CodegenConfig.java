@@ -140,11 +140,4 @@ public interface CodegenConfig {
         return config().typeRegistry();
     }
 
-    interface MessageConfig extends CodegenConfig {
-
-//        default Iterable<DescriptorProtos.FieldDescriptorProto> mapFields() {
-//            return () -> this.<DescriptorProtos.DescriptorProto>descriptor().getFieldList().stream().filter(f -> f.getOptions());
-//        }
-    }
-
 }

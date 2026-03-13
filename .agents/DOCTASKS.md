@@ -21,3 +21,6 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [x] Remove `MessageConfig` zombie and commented out code in `CodegenConfig.java` and `MessageCodegen.java`.
+- [x] Clean up stale TODOs in `ProtoUtils.java`, `GenProto.java`, `ProtoCodegen.java`, and `ProtobufFileDescriptorVisitor.java`.
+- [x] Update `pom.xml` checkstyle plugin with modern Java 21 Checkstyle parser version (10.21.1).
