@@ -26,6 +26,9 @@ public class CodegenUtils {
     private static final String MESSAGE_ANNOTATION = "dev.akre.protege.java_message_annotation";
     private static final String CLASS_ANNOTATION = "dev.akre.protege.java_class_annotation";
 
+    /**
+     * Mapping from proto field type to JavaPoet type name.
+     */
     public static final Map<DescriptorProtos.FieldDescriptorProto.Type, TypeName> PROTO_TYPE_TO_TYPE_NAME = Map.ofEntries(
             Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING, ClassName.get(String.class)),
             Map.entry(DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32, TypeName.INT),
@@ -251,6 +254,10 @@ public class CodegenUtils {
     /**
      * Relativizes a Protobuf type name by trimming a matching package name from the start. If the package name is not
      * a prefix, the name is unchanged.
+     *
+     * @param typeName The type name to relativize.
+     * @param protoPackage The protobuf package name to trim.
+     * @return The relativized type name.
      */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
@@ -265,6 +272,10 @@ public class CodegenUtils {
 
     /**
      * Generates code to clear fields associated with a specific oneof group.
+     *
+     * @param context The current message codegen context.
+     * @param oneofIndex The index of the oneof group to clear.
+     * @return The generated code block to clear the fields.
      */
     public static CodeBlock generateClearOneofCode(MessageCodegen context, int oneofIndex) {
         var message = context.descriptor();
