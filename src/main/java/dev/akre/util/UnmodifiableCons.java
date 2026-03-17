@@ -7,11 +7,21 @@ import java.util.Spliterators;
 
 /**
  * A read-only collection interface for {@link Cons}, primarily used as a return type for Cons.reversed()
+ *
+ * @param <T> element type
  */
 public interface UnmodifiableCons<T> extends Collection<T> {
 
+    /**
+     * Returns a reversed view of this collection.
+     * @return A reversed unmodifiable cons.
+     */
     UnmodifiableCons<T> reversed();
 
+    /**
+     * Returns an iterator that traverses the elements in descending order.
+     * @return The descending iterator.
+     */
     Iterator<T> descendingIterator();
 
     @Override

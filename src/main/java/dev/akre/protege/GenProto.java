@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
-// TODO also look at the code and validate that not only is the .proto file generated, but the actual java implementation is generated as well.
 /**
  * Marks a Java interface for Protobuf definition generation.
  * <p>

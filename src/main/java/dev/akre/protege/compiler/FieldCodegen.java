@@ -12,6 +12,20 @@ import java.util.ArrayList;
  * <p>
  * This class abstracts the complexity of different field types (singular, repeated, map, oneof)
  * and generates the appropriate getter, setter (builder), and cleaner methods.
+ *
+ * @param descriptor The field descriptor.
+ * @param fieldType The resolved Java type for the field.
+ * @param fieldName The name of the field.
+ * @param pascalName The PascalCase name of the field.
+ * @param internalName The internal name of the field (typically suffixed with _).
+ * @param isMap True if the field is a map.
+ * @param isRepeated True if the field is repeated.
+ * @param entryDescriptor The descriptor for the map entry, if applicable.
+ * @param keyType The Java type for the map key, if applicable.
+ * @param valueType The Java type for the map value, if applicable.
+ * @param genericType The generic Java type for repeated fields, if applicable.
+ * @param messageCodegen The message codegen context.
+ * @param config The configuration metadata.
  */
 public record FieldCodegen(
         DescriptorProtos.FieldDescriptorProto descriptor,
