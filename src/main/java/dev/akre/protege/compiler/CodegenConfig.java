@@ -63,88 +63,137 @@ public interface CodegenConfig {
                 .map(CodegenUtils::parseAnnotation).toList();
     }
 
-    /** Returns annotations to be applied to the generated builder. */
+    /**
+     * Returns annotations to be applied to the generated builder.
+     * @return A list of {@link AnnotationSpec} objects.
+     */
     default List<AnnotationSpec> getBuilderAnnotations() {
         return Stream.concat(config().getList(CodegenMetadata.MESSAGE_ANNOTATIONS, descriptor()).stream(),
                         config().getList(CodegenMetadata.BUILDER_ANNOTATIONS, descriptor()).stream())
                 .map(CodegenUtils::parseAnnotation).toList();
     }
 
-    /** Retrieves the descriptor for a message by its fully qualified name. */
+    /**
+     * Retrieves the descriptor for a message by its fully qualified name.
+     * @param name The fully qualified name of the message.
+     * @return The {@link DescriptorProtos.DescriptorProto} for the message.
+     */
     default DescriptorProtos.DescriptorProto getMessageDescriptor(String name) {
         return (DescriptorProtos.DescriptorProto)config().descriptorMap().get(name);
     }
 
-    /** Checks if enhanced sealed-interface style code should be generated for oneofs. */
+    /**
+     * Checks if enhanced sealed-interface style code should be generated for oneofs.
+     * @param descriptor The descriptor to check.
+     * @return True if enhanced oneof generation is enabled, false otherwise.
+     */
     default boolean isEnhancedOneof(Object descriptor) {
         return config().getBoolean(CodegenMetadata.ENHANCED_ONEOF, descriptor);
     }
 
-    /** Checks if the legacy Case enum should be generated for oneofs. */
+    /**
+     * Checks if the legacy Case enum should be generated for oneofs.
+     * @param descriptor The descriptor to check.
+     * @return True if case enum generation is enabled, false otherwise.
+     */
     default boolean isGenerateOneofCase(Object descriptor) {
         return config().getBoolean(CodegenMetadata.ONEOF_CASE, descriptor);
     }
 
-    /** Returns the custom interface that the generated message should implement, if any. */
+    /**
+     * Returns the custom interface that the generated message should implement, if any.
+     * @return An Optional containing the fully qualified interface name, or empty if none.
+     */
     default Optional<String> getJavaImplements() {
         return config().getString(CodegenMetadata.JAVA_IMPLEMENTS, descriptor());
     }
 
-    /** Returns the superclass for the generated message, defaulting to GeneratedMessage. */
+    /**
+     * Returns the superclass for the generated message, defaulting to GeneratedMessage.
+     * @return The {@link ClassName} of the superclass.
+     */
     default ClassName getMessageSuperclass() {
         return config().getString(CodegenMetadata.JAVA_MESSAGE_SUPERCLASS, descriptor()).map(ClassName::bestGuess).orElseThrow();
     }
 
-    /** Returns the outer class name if one is defined in the file options. */
+    /**
+     * Returns the outer class name if one is defined in the file options.
+     * @return The outer class name, or an empty string if not defined.
+     */
     default String getOuterName() {
         return config().getString(CodegenMetadata.OUTER_NAME, descriptor()).orElse("");
     }
 
-    /** Resolves a Protobuf type name to a JavaPoet TypeName within the current scope. */
+    /**
+     * Resolves a Protobuf type name to a JavaPoet TypeName within the current scope.
+     * @param protoTypeName The Protobuf type name to resolve.
+     * @param currentScope The current scope.
+     * @return The resolved {@link TypeName}.
+     */
     default TypeName resolveTypeName(String protoTypeName, List<String> currentScope) {
         return config().resolveTypeName(protoTypeName, currentScope);
     }
 
-    /** Resolves a Protobuf type name to a JavaPoet TypeName within the current scope. */
+    /**
+     * Resolves a Protobuf type name to a JavaPoet TypeName within the current scope.
+     * @param protoTypeName The Protobuf type name to resolve.
+     * @param currentScope The current scope.
+     * @return The resolved {@link TypeName}.
+     */
     default TypeName resolveTypeName(String protoTypeName, Cons<String> currentScope) {
         return config().resolveTypeName(protoTypeName, currentScope);
     }
 
-    /** Determines the Java type for a given Protobuf field. */
+    /**
+     * Determines the Java type for a given Protobuf field.
+     * @param field The field descriptor.
+     * @param currentScope The current scope.
+     * @return The Java {@link TypeName} for the field.
+     */
     default TypeName getFieldType(DescriptorProtos.FieldDescriptorProto field, List<String> currentScope) {
         return config().getFieldType(field, currentScope);
     }
 
-    /** Checks if a field is a map field. */
+    /**
+     * Checks if a field is a map field.
+     * @param field The field descriptor.
+     * @return True if the field is a map, false otherwise.
+     */
     default boolean isMapField(DescriptorProtos.FieldDescriptorProto field) {
         return config().isMapField(field);
     }
 
-    /** Retrieves the descriptor for the map entry message associated with a map field. */
+    /**
+     * Retrieves the descriptor for the map entry message associated with a map field.
+     * @param field The field descriptor.
+     * @return The map entry {@link DescriptorProtos.DescriptorProto}.
+     */
     default DescriptorProtos.DescriptorProto getEntryDescriptor(DescriptorProtos.FieldDescriptorProto field) {
         return config().getEntryDescriptor(field);
     }
 
-    /** Relativizes a type name against the current proto package. */
+    /**
+     * Relativizes a type name against the current proto package.
+     * @param typeName The type name to relativize.
+     * @return The relativized type name.
+     */
     default String relativeToProtoPackage(String typeName) {
         return config().relativeToProtoPackage(typeName);
     }
 
-    /** Returns the class name for the FieldAccessorTable. */
+    /**
+     * Returns the class name for the FieldAccessorTable.
+     * @return The {@link ClassName} for the FieldAccessorTable.
+     */
     default ClassName getFieldAccessorTableClass() {
         return config().getFieldAccessorTableClass();
     }
 
-    /** Returns the registry of all known types in the file. */
+    /**
+     * Returns the registry of all known types in the file.
+     * @return A map of type names to their {@link ClassName}.
+     */
     default Map<String, ClassName> typeRegistry() {
         return config().typeRegistry();
     }
-
-    interface MessageConfig extends CodegenConfig {
-
-//        default Iterable<DescriptorProtos.FieldDescriptorProto> mapFields() {
-//            return () -> this.<DescriptorProtos.DescriptorProto>descriptor().getFieldList().stream().filter(f -> f.getOptions());
-//        }
-    }
-
 }

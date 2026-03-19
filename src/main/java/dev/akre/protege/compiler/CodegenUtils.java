@@ -251,6 +251,9 @@ public class CodegenUtils {
     /**
      * Relativizes a Protobuf type name by trimming a matching package name from the start. If the package name is not
      * a prefix, the name is unchanged.
+     * @param typeName The Protobuf type name to relativize.
+     * @param protoPackage The Protobuf package name.
+     * @return The relativized type name.
      */
     public static String relativeToProtoPackage(String typeName, String protoPackage) {
         if (typeName.startsWith(".")) {
@@ -265,6 +268,9 @@ public class CodegenUtils {
 
     /**
      * Generates code to clear fields associated with a specific oneof group.
+     * @param context The code generation context for the message.
+     * @param oneofIndex The index of the oneof group to clear.
+     * @return A {@link CodeBlock} containing the generated clear code.
      */
     public static CodeBlock generateClearOneofCode(MessageCodegen context, int oneofIndex) {
         var message = context.descriptor();

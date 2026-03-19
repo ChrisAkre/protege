@@ -84,7 +84,7 @@ public class ProtoUtils {
         } else {
             String pkg = builder.getPackage();
             if (pkg != null && !pkg.isEmpty()) {
-                String[] parts = pkg.split("\\.");
+                String[] parts = splitByDot(pkg);
                 builder.setName(parts[parts.length - 1] + ".proto");
             }
         }
@@ -198,6 +198,33 @@ public class ProtoUtils {
         }
         result.add(builder.toString());
         return result;
+    }
+
+    /**
+     * Splits a string by dots.
+     *
+     * @param s The string to split
+     * @return Array of split components
+     */
+    public static String[] splitByDot(String s) {
+        if (s == null) {
+            return new String[0];
+        }
+
+        // Fast path for no dots
+        if (s.indexOf('.') == -1) {
+            return new String[]{s};
+        }
+
+        List<String> result = new ArrayList<>();
+        int start = 0;
+        int next;
+        while ((next = s.indexOf('.', start)) != -1) {
+            result.add(s.substring(start, next));
+            start = next + 1;
+        }
+        result.add(s.substring(start));
+        return result.toArray(new String[0]);
     }
 
     public static String getWriteMethodName(DescriptorProtos.FieldDescriptorProto.Type type) {

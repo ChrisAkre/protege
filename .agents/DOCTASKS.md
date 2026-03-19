@@ -21,3 +21,9 @@
 - [x] Remove commented out code in `CodegenUtils.java`, `CodegenMethods.java`, `OneofCodegen.java`, `ProtobufFileDescriptorVisitor.java`.
 - [x] Add/Improve Javadoc for `OneofCodegen.java` and `CodegenMethods.java`.
 - [x] Add Javadocs to `CodegenConfig.java` and `CodegenMetadata.java`.
+- [x] Resolve checkstyle warnings in `ProtoUtils.java` by adding explicit method to split by dot.
+- [x] Ensure checkstyle dependencies are configured correctly in `pom.xml`.
+- [x] Add missing Javadocs in `CodegenConfig.java` and `CodegenUtils.java`.
+- [x] Add missing Javadocs in `dev.akre.util.Cons`, `dev.akre.util.UnmodifiableCons`.
+- [x] Add missing Javadocs in `dev.akre.protege.compiler.EnumCodegen`.
+- [x] Add missing Javadocs in `dev.akre.protege.Field`.
