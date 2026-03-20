@@ -15,6 +15,11 @@ import javax.lang.model.element.Modifier;
  *   <li>Value storage and retrieval</li>
  *   <li>Integration with ProtocolMessageEnum</li>
  * </ul>
+ *
+ * @param descriptor   the enum descriptor
+ * @param scope        the current scope list
+ * @param protoCodegen the parent proto codegen instance
+ * @param config       the codegen metadata configuration
  */
 public record EnumCodegen(
         DescriptorProtos.EnumDescriptorProto descriptor,
@@ -22,14 +27,30 @@ public record EnumCodegen(
         ProtoCodegen protoCodegen,
         CodegenMetadata config
 ) implements CodegenConfig {
+
+    /**
+     * Returns the name of the enum.
+     *
+     * @return the enum name
+     */
     public String getEnumName() {
         return descriptor.getName();
     }
 
+    /**
+     * Returns the outer class name for the enum.
+     *
+     * @return the outer class name
+     */
     public ClassName outerClassName() {
         return ClassName.get(getJavaPackage(), getOuterName());
     }
 
+    /**
+     * Returns the array of parent names for this enum.
+     *
+     * @return an array of parent names
+     */
     public String[] parentNames() {
         return scope.stream().toArray(String[]::new);
     }
