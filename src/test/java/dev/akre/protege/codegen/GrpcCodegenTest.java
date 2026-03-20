@@ -1,10 +1,12 @@
-package dev.akre.protege;
+package dev.akre.protege.codegen;
 
 import com.google.protobuf.DescriptorProtos;
-import dev.akre.protege.compiler.CodegenMetadata;
-import dev.akre.protege.compiler.GrpcCodegen;
-import dev.akre.protege.compiler.ProtoCodegen;
+import dev.akre.protege.CodegenMetadata;
+import dev.akre.protege.codegen.GrpcCodegen;
+import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.testutil.TestUtils;
+import dev.akre.protege.ProtoUtils;
+import dev.akre.protege.ProtegeVersion;
 import org.junit.jupiter.api.Test;
 
 import dev.akre.protege.testutil.TestProtos;

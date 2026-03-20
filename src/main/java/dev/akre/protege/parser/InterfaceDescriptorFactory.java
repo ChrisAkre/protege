@@ -6,8 +6,8 @@ import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileOptions;
 import com.google.protobuf.DescriptorProtos.MessageOptions;
-import dev.akre.protege.Field;
-import dev.akre.protege.GenProto;
+import dev.akre.protege.annotation.Field;
+import dev.akre.protege.annotation.GenProto;
 import dev.akre.protege.ProtoUtils;
 import org.apache.commons.lang3.StringUtils;
 

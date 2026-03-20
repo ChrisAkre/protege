@@ -1,7 +1,7 @@
 package dev.akre.protege.temp;
 
 import dev.akre.protege.ProtoUtils;
-import dev.akre.protege.compiler.ProtoCodegen;
+import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.testutil.TestUtils;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package dev.akre.protege.compiler;
+package dev.akre.protege;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.DescriptorProtos.UninterpretedOption.NamePart;
@@ -7,6 +7,7 @@ import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import dev.akre.protege.ProtoUtils;
+import dev.akre.protege.codegen.CodegenUtils;
 import dev.akre.util.Cons;
 import org.apache.commons.lang3.StringUtils;
 
@@ -293,7 +294,7 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
         return key.<String>get(overrides).or(() -> key.lookup(hierarchy().get(descriptor))).or(() -> key.get(defaults));
     }
 
-    List<String> getList(Option key, Object descriptor) {
+    public List<String> getList(Option key, Object descriptor) {
         try {
             return key.<List<String>>get(overrides)
                     .or(() -> Optional.ofNullable(this.hierarchy().get(descriptor)).flatMap(key::lookup))

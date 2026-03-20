@@ -2,6 +2,7 @@ package dev.akre.protege;
 
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.parser.ProtobufFileDescriptorVisitor;
+import dev.akre.protege.annotation.GenProto;
 import dev.akre.util.Cons;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.CaseUtils;

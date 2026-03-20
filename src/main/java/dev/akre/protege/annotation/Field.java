@@ -1,4 +1,4 @@
-package dev.akre.protege;
+package dev.akre.protege.annotation;
 
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
 
