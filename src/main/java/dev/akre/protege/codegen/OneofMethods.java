@@ -12,9 +12,9 @@ import javax.lang.model.element.Modifier;
 /**
  * Static methods for generating oneof-related code specifications
  */
-public class OneofMessages {
+public class OneofMethods {
 
-    private OneofMessages() {
+    private OneofMethods() {
         // Utility class
     }
 

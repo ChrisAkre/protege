@@ -28,7 +28,7 @@ public class CodegenMethods {
      */
     static class Builder {
 
-        static MethodSpec build(ClassName messageClassName) {
+        static MethodSpec build(MessageCodegen ctx, ClassName messageClassName) {
             return MethodSpec.methodBuilder("build")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -41,7 +41,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec buildPartial(ClassName messageClassName) {
+        static MethodSpec buildPartial(MessageCodegen ctx, ClassName messageClassName) {
             return MethodSpec.methodBuilder("buildPartial")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -50,7 +50,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec getDefaultInstanceForType(ClassName messageClassName) {
+        static MethodSpec getDefaultInstanceForType(MessageCodegen ctx, ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDefaultInstanceForType")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -59,7 +59,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec getDescriptorForType(ClassName messageClassName) {
+        static MethodSpec getDescriptorForType(MessageCodegen ctx, ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDescriptorForType")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -68,7 +68,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec getDescriptor(ClassName messageClassName) {
+        static MethodSpec getDescriptor(MessageCodegen ctx, ClassName messageClassName) {
             return MethodSpec.methodBuilder("getDescriptor")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                     .returns(Descriptors.Descriptor.class)
@@ -76,7 +76,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec isInitialized() {
+        static MethodSpec isInitialized(MessageCodegen ctx) {
             return MethodSpec.methodBuilder("isInitialized")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -85,7 +85,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec mergeFromCodedInput(ClassName builderClassName) {
+        static MethodSpec mergeFromCodedInput(MessageCodegen ctx, ClassName builderClassName) {
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -97,7 +97,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec mergeFromMessage(ClassName messageClassName, ClassName builderClassName) {
+        static MethodSpec mergeFromMessage(MessageCodegen ctx, ClassName messageClassName, ClassName builderClassName) {
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -112,7 +112,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec internalGetFieldAccessorTable(ClassName messageClassName, ClassName fieldAccessorTableClass) {
+        static MethodSpec internalGetFieldAccessorTable(MessageCodegen ctx, ClassName messageClassName, ClassName fieldAccessorTableClass) {
             return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -121,7 +121,7 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec internalGetMapFieldReflection(MessageCodegen msgCodegen, CodegenConfig ctx) {
+        static MethodSpec internalGetMapFieldReflection(MessageCodegen ctx) {
             var method = MethodSpec.methodBuilder("internalGetMapFieldReflection")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -129,7 +129,7 @@ public class CodegenMethods {
                     .addParameter(int.class, "fieldNumber")
                     .beginControlFlow("switch (fieldNumber)");
 
-            for (var field : msgCodegen.descriptor().getFieldList()) {
+            for (var field : ctx.descriptor().getFieldList()) {
                 if (ctx.isMapField(field)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }
@@ -141,7 +141,7 @@ public class CodegenMethods {
             return method.build();
         }
 
-        static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen msgCodegen, CodegenConfig ctx) {
+        static MethodSpec internalGetMutableMapFieldReflection(MessageCodegen ctx) {
             var method = MethodSpec.methodBuilder("internalGetMutableMapFieldReflection")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -149,7 +149,7 @@ public class CodegenMethods {
                     .addParameter(int.class, "fieldNumber")
                     .beginControlFlow("switch (fieldNumber)");
 
-            for (var field : msgCodegen.descriptor().getFieldList()) {
+            for (var field : ctx.descriptor().getFieldList()) {
                 if (ctx.isMapField(field)) {
                     method.addCode("case " + field.getNumber() + ": return " + field.getName() + "_;\n");
                 }

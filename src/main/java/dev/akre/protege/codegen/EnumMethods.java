@@ -13,13 +13,13 @@ import javax.lang.model.element.Modifier;
 /**
  * Static methods for generating enum types
  */
-public class EnumMessages {
+public class EnumMethods {
 
-    private EnumMessages() {
+    private EnumMethods() {
         // Utility class
     }
 
-    static MethodSpec getNumber() {
+    static MethodSpec getNumber(EnumCodegen ctx) {
         return MethodSpec.methodBuilder("getNumber")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -70,7 +70,7 @@ public class EnumMessages {
                 .build();
     }
 
-    static MethodSpec getValueDescriptor() {
+    static MethodSpec getValueDescriptor(EnumCodegen ctx) {
         return MethodSpec.methodBuilder("getValueDescriptor")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -79,7 +79,7 @@ public class EnumMessages {
                 .build();
     }
 
-    static MethodSpec getDescriptorForType() {
+    static MethodSpec getDescriptorForType(EnumCodegen ctx) {
         return MethodSpec.methodBuilder("getDescriptorForType")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -88,7 +88,7 @@ public class EnumMessages {
                 .build();
     }
 
-    static MethodSpec valueOf(String enumName) {
+    static MethodSpec valueOf(EnumCodegen ctx, String enumName) {
         return MethodSpec.methodBuilder("valueOf")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(Descriptors.EnumValueDescriptor.class, "desc")

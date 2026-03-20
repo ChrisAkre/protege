@@ -30,37 +30,37 @@ public record ServiceCodegen(
                 .addSuperinterface(com.google.protobuf.Service.class);
 
         // protected <ServiceName>()
-        classBuilder.addMethod(ServiceMessages.constructor());
+        classBuilder.addMethod(ServiceMethods.constructor(this));
         // public interface Interface
-        classBuilder.addType(ServiceMessages.generateInterface(service, this));
+        classBuilder.addType(ServiceMethods.generateInterface(this, service));
         // public interface BlockingInterface
-        classBuilder.addType(ServiceMessages.generateBlockingInterface(service, this));
+        classBuilder.addType(ServiceMethods.generateBlockingInterface(this, service));
 
         // public static final Descriptors.ServiceDescriptor getDescriptor()
-        classBuilder.addMethod(ServiceMessages.getDescriptor(this, service));
+        classBuilder.addMethod(ServiceMethods.getDescriptor(this, service));
         // public final Descriptors.ServiceDescriptor getDescriptorForType()
-        classBuilder.addMethod(ServiceMessages.getDescriptorForType());
+        classBuilder.addMethod(ServiceMethods.getDescriptorForType(this));
         // public final void callMethod(Descriptors.MethodDescriptor method, RpcController controller, Message request, RpcCallback<Message> done)
-        classBuilder.addMethod(ServiceMessages.callMethod(service, this));
+        classBuilder.addMethod(ServiceMethods.callMethod(this, service));
         // public final Message getRequestPrototype(Descriptors.MethodDescriptor method)
-        classBuilder.addMethod(ServiceMessages.getRequestPrototype(service, this));
+        classBuilder.addMethod(ServiceMethods.getRequestPrototype(this, service));
         // public final Message getResponsePrototype(Descriptors.MethodDescriptor method)
-        classBuilder.addMethod(ServiceMessages.getResponsePrototype(service, this));
+        classBuilder.addMethod(ServiceMethods.getResponsePrototype(this, service));
         // public static Stub newStub(RpcChannel channel)
-        classBuilder.addMethod(ServiceMessages.newStub());
+        classBuilder.addMethod(ServiceMethods.newStub(this));
         // public static final class Stub extends <ServiceName> implements Interface
-        classBuilder.addType(ServiceMessages.generateServiceStub(service, this));
+        classBuilder.addType(ServiceMethods.generateServiceStub(this, service));
         // public static BlockingInterface newBlockingStub(BlockingRpcChannel channel)
-        classBuilder.addMethod(ServiceMessages.newBlockingStub());
+        classBuilder.addMethod(ServiceMethods.newBlockingStub(this));
         // public static final class BlockingStub implements BlockingInterface
-        classBuilder.addType(ServiceMessages.generateBlockingServiceStub(service, this));
+        classBuilder.addType(ServiceMethods.generateBlockingServiceStub(this, service));
         // public static Service newReflectiveService(Interface impl)
-        classBuilder.addMethod(ServiceMessages.newReflectiveService(service, serviceName, this));
+        classBuilder.addMethod(ServiceMethods.newReflectiveService(this, service, serviceName));
         // public static BlockingService newReflectiveBlockingService(BlockingInterface impl)
-        classBuilder.addMethod(ServiceMessages.newReflectiveBlockingService(service, this));
+        classBuilder.addMethod(ServiceMethods.newReflectiveBlockingService(this, service));
 
         // public abstract void <methodName>(RpcController controller, <InputType> request, RpcCallback<<OutputType>> done)
-        service.getMethodList().stream().map(method -> ServiceMessages.rpcMethod(method, this)).forEach(classBuilder::addMethod);
+        service.getMethodList().stream().map(method -> ServiceMethods.rpcMethod(this, method)).forEach(classBuilder::addMethod);
 
         return classBuilder.build();
     }

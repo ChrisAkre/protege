@@ -63,17 +63,17 @@ public record EnumCodegen(
                 .build());
 
         // public final int getNumber()
-        enumBuilder.addMethod(EnumMessages.getNumber());
+        enumBuilder.addMethod(EnumMethods.getNumber(this));
         // public static <EnumName> forNumber(int value)
-        enumBuilder.addMethod(EnumMessages.forNumber(this));
+        enumBuilder.addMethod(EnumMethods.forNumber(this));
         // public static final Descriptors.EnumDescriptor getDescriptor()
-        enumBuilder.addMethod(EnumMessages.getDescriptor(this));
+        enumBuilder.addMethod(EnumMethods.getDescriptor(this));
         // public final Descriptors.EnumValueDescriptor getValueDescriptor()
-        enumBuilder.addMethod(EnumMessages.getValueDescriptor());
+        enumBuilder.addMethod(EnumMethods.getValueDescriptor(this));
         // public final Descriptors.EnumDescriptor getDescriptorForType()
-        enumBuilder.addMethod(EnumMessages.getDescriptorForType());
+        enumBuilder.addMethod(EnumMethods.getDescriptorForType(this));
         // public static <EnumName> valueOf(Descriptors.EnumValueDescriptor desc)
-        enumBuilder.addMethod(EnumMessages.valueOf(enumName));
+        enumBuilder.addMethod(EnumMethods.valueOf(this, enumName));
         return enumBuilder.build();
     }
 }

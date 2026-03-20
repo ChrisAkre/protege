@@ -24,7 +24,7 @@ public class MessageMethods {
 
     private MessageMethods() {}
 
-    public static MethodSpec getDescriptor() {
+    public static MethodSpec getDescriptor(MessageCodegen ctx) {
         return MethodSpec.methodBuilder("getDescriptor")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .returns(Descriptors.Descriptor.class)
@@ -32,13 +32,13 @@ public class MessageMethods {
                 .build();
     }
 
-    public static FieldSpec memoizedSizeField() {
+    public static FieldSpec memoizedSizeField(MessageCodegen ctx) {
         return FieldSpec.builder(int.class, "memoizedSize", Modifier.PRIVATE)
                 .initializer("-1")
                 .build();
     }
 
-    public static MethodSpec toBuilder(ClassName messageClassName, ClassName builderClassName) {
+    public static MethodSpec toBuilder(MessageCodegen ctx, ClassName messageClassName, ClassName builderClassName) {
         return MethodSpec.methodBuilder("toBuilder")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -47,7 +47,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getParserForType() {
+    public static MethodSpec getParserForType(MessageCodegen ctx) {
         return MethodSpec.methodBuilder("getParserForType")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -56,7 +56,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec newBuilderForType(ClassName builderClassName) {
+    public static MethodSpec newBuilderForType(MessageCodegen ctx, ClassName builderClassName) {
         return MethodSpec.methodBuilder("newBuilderForType")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -75,7 +75,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getDefaultInstanceForType(ClassName messageClassName) {
+    public static MethodSpec getDefaultInstanceForType(MessageCodegen ctx, ClassName messageClassName) {
         return MethodSpec.methodBuilder("getDefaultInstanceForType")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -84,7 +84,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getUnknownFields() {
+    public static MethodSpec getUnknownFields(MessageCodegen ctx) {
         return MethodSpec.methodBuilder("getUnknownFields")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -93,7 +93,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec isInitialized() {
+    public static MethodSpec isInitialized(MessageCodegen ctx) {
         return MethodSpec.methodBuilder("isInitialized")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -102,7 +102,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec newBuilder(ClassName messageClassName, ClassName builderClassName) {
+    public static MethodSpec newBuilder(MessageCodegen ctx, ClassName messageClassName, ClassName builderClassName) {
         return MethodSpec.methodBuilder("newBuilder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(builderClassName)
@@ -110,7 +110,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec newBuilderWithPrototype(ClassName messageClassName, ClassName builderClassName) {
+    public static MethodSpec newBuilderWithPrototype(MessageCodegen ctx, ClassName messageClassName, ClassName builderClassName) {
         return MethodSpec.methodBuilder("newBuilder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(messageClassName, "prototype")
@@ -119,7 +119,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec parser(ClassName messageClassName) {
+    public static MethodSpec parser(MessageCodegen ctx, ClassName messageClassName) {
         return MethodSpec.methodBuilder("parser")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ParameterizedTypeName.get(ClassName.get("com.google.protobuf", "Parser"), messageClassName))
@@ -127,7 +127,7 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec internalGetFieldAccessorTable(ClassName messageClassName, ClassName fieldAccessorTableClass) {
+    public static MethodSpec internalGetFieldAccessorTable(MessageCodegen ctx, ClassName messageClassName, ClassName fieldAccessorTableClass) {
         return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PROTECTED)
@@ -360,7 +360,7 @@ public class MessageMethods {
 
     // Parse methods
 
-    public static MethodSpec parseFrom(ClassName messageClassName, TypeName paramType, String paramName, boolean hasRegistry) {
+    public static MethodSpec parseFrom(MessageCodegen ctx, ClassName messageClassName, TypeName paramType, String paramName, boolean hasRegistry) {
         var builder = MethodSpec.methodBuilder("parseFrom")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(messageClassName)
@@ -380,7 +380,7 @@ public class MessageMethods {
         return builder.build();
     }
 
-    public static MethodSpec parseDelimitedFrom(ClassName messageClassName, boolean hasRegistry) {
+    public static MethodSpec parseDelimitedFrom(MessageCodegen ctx, ClassName messageClassName, boolean hasRegistry) {
         var builder = MethodSpec.methodBuilder("parseDelimitedFrom")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(messageClassName)
@@ -544,14 +544,14 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetFieldValue(String pascalName) {
+    static MethodSpec abstractGetFieldValue(MessageCodegen ctx, String pascalName) {
         return MethodSpec.methodBuilder("get" + pascalName + "Value")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(int.class)
                 .build();
     }
 
-    static MethodSpec abstractGetFieldBytes(String pascalName) {
+    static MethodSpec abstractGetFieldBytes(MessageCodegen ctx, String pascalName) {
         return MethodSpec.methodBuilder("get" + pascalName + "Bytes")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(ClassName.get("com.google.protobuf", "ByteString"))
@@ -661,7 +661,7 @@ public class MessageMethods {
                 .build();
     }
 
-    static MethodSpec abstractGetRepeatedBytes(String pascalName) {
+    static MethodSpec abstractGetRepeatedBytes(MessageCodegen ctx, String pascalName) {
         return MethodSpec.methodBuilder("get" + pascalName + "Bytes")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(ClassName.get("com.google.protobuf", "ByteString"))

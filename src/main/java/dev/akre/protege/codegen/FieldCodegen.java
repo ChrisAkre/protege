@@ -324,7 +324,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.abstractGetRepeatedList(this, fieldType));
 
         if (isString()) {
-            methods.add(MessageMethods.abstractGetRepeatedBytes(pascalName));
+            methods.add(MessageMethods.abstractGetRepeatedBytes(messageCodegen, pascalName));
         }
 
         methods.add(MessageMethods.abstractGetRepeatedCount(this));
@@ -352,7 +352,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.abstractGetField(this));
 
         if (isEnum()) {
-            methods.add(MessageMethods.abstractGetFieldValue(pascalName));
+            methods.add(MessageMethods.abstractGetFieldValue(messageCodegen, pascalName));
         }
 
         if (isMessage()) {
@@ -360,7 +360,7 @@ public record FieldCodegen(
         }
 
         if (isString()) {
-            methods.add(MessageMethods.abstractGetFieldBytes(pascalName));
+            methods.add(MessageMethods.abstractGetFieldBytes(messageCodegen, pascalName));
         }
         return methods;
     }
