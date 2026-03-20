@@ -337,6 +337,43 @@ public class ProtoUtils {
                 .build();
     }
 
+    public interface Indent {
+        Indent indent();
+        Indent dedent();
+        String toString();
+    }
+
+    private static final class TwoSpaceIndent implements Indent {
+        private final String s;
+        private final Indent prior;
+        private Indent next;
+
+        private TwoSpaceIndent(String s, Indent prior) {
+            this.s = s;
+            this.prior = prior;
+        }
+
+        @Override
+        public Indent indent() {
+            if (next == null) {
+                next = new TwoSpaceIndent(s + "  ", this);
+            }
+            return next;
+        }
+
+        @Override
+        public Indent dedent() {
+            return prior != null ? prior : this;
+        }
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    private static final Indent ROOT_INDENT = new TwoSpaceIndent("", null);
+
     public static String toProtoString(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         StringBuilder protoFileContent = new StringBuilder();
         protoFileContent.append("syntax = \"proto3\";\n\n");
@@ -346,49 +383,64 @@ public class ProtoUtils {
         }
 
         for (DescriptorProtos.EnumDescriptorProto enumType : fileDescriptorProto.getEnumTypeList()) {
-            protoFileContent.append(enumToString(enumType));
+            enumToString(enumType, protoFileContent, ROOT_INDENT);
         }
 
         for (DescriptorProtos.DescriptorProto messageType : fileDescriptorProto.getMessageTypeList()) {
-            protoFileContent.append(messageToString(messageType));
+            messageToString(messageType, protoFileContent, ROOT_INDENT);
         }
 
         return protoFileContent.toString();
     }
 
     public static String messageToString(DescriptorProtos.DescriptorProto messageType) {
-        StringBuilder messageContent = new StringBuilder();
-        messageContent.append("message ").append(messageType.getName()).append(" {\n");
+        StringBuilder sb = new StringBuilder();
+        messageToString(messageType, sb, ROOT_INDENT);
+        return sb.toString();
+    }
+
+    private static void messageToString(DescriptorProtos.DescriptorProto messageType, StringBuilder sb, Indent indent) {
+        sb.append(indent).append("message ").append(messageType.getName()).append(" {\n");
         if (messageType.getOptions().getMapEntry()) {
-            messageContent.append("  option map_entry = true;\n");
+            sb.append(indent.indent()).append("option map_entry = true;\n");
         }
 
         for (DescriptorProtos.EnumDescriptorProto enumType : messageType.getEnumTypeList()) {
-            messageContent.append(indent(enumToString(enumType)));
+            enumToString(enumType, sb, indent.indent());
         }
 
         for (DescriptorProtos.DescriptorProto nestedType : messageType.getNestedTypeList()) {
-            messageContent.append(indent(messageToString(nestedType)));
+            messageToString(nestedType, sb, indent.indent());
         }
 
         for (DescriptorProtos.FieldDescriptorProto field : messageType.getFieldList().stream().sorted(Comparator.comparing(DescriptorProtos.FieldDescriptorProto::getNumber)).toList()) {
-            messageContent.append("  ").append(fieldToString(messageType, field));
+            fieldToString(messageType, field, sb, indent.indent());
         }
-        messageContent.append("}\n\n");
-        return messageContent.toString();
+        sb.append(indent).append("}\n\n");
     }
 
     public static String enumToString(DescriptorProtos.EnumDescriptorProto enumType) {
-        StringBuilder enumContent = new StringBuilder();
-        enumContent.append("enum ").append(enumType.getName()).append(" {\n");
+        StringBuilder sb = new StringBuilder();
+        enumToString(enumType, sb, ROOT_INDENT);
+        return sb.toString();
+    }
+
+    private static void enumToString(DescriptorProtos.EnumDescriptorProto enumType, StringBuilder sb, Indent indent) {
+        sb.append(indent).append("enum ").append(enumType.getName()).append(" {\n");
         for (DescriptorProtos.EnumValueDescriptorProto value : enumType.getValueList()) {
-            enumContent.append("  ").append(value.getName()).append(" = ").append(value.getNumber()).append(";\n");
+            sb.append(indent.indent()).append(value.getName()).append(" = ").append(value.getNumber()).append(";\n");
         }
-        enumContent.append("}\n\n");
-        return enumContent.toString();
+        sb.append(indent).append("}\n\n");
     }
 
     public static String fieldToString(DescriptorProtos.DescriptorProto parentMessage, DescriptorProtos.FieldDescriptorProto field) {
+        StringBuilder sb = new StringBuilder();
+        fieldToString(parentMessage, field, sb, ROOT_INDENT);
+        return sb.toString();
+    }
+
+    private static void fieldToString(DescriptorProtos.DescriptorProto parentMessage, DescriptorProtos.FieldDescriptorProto field, StringBuilder sb, Indent indent) {
+        sb.append(indent);
         String typeName = field.hasTypeName() ? field.getTypeName() : PROTO_TYPES.get(field.getType());
         String label = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED ? "repeated " : "";
         if (field.hasTypeName() && field.getTypeName().endsWith("Entry")) {
@@ -400,20 +452,12 @@ public class ProtoUtils {
                 DescriptorProtos.DescriptorProto m = mapEntryMessage.get();
                 String keyType = m.getField(0).hasTypeName() ? m.getField(0).getTypeName() : PROTO_TYPES.get(m.getField(0).getType());
                 String valueType = m.getField(1).hasTypeName() ? m.getField(1).getTypeName() : PROTO_TYPES.get(m.getField(1).getType());
-                return "map<" + keyType + ", " + valueType + "> " + field.getName() + " = " + field.getNumber() + ";\n";
+                sb.append("map<").append(keyType).append(", ").append(valueType).append("> ").append(field.getName()).append(" = ").append(field.getNumber()).append(";\n");
+                return;
             }
         }
 
-        return label + typeName + " " + field.getName() + " = " + field.getNumber() + ";\n";
-    }
-
-    // TODO optimize this by refactoring messageToString to track current indentation level and passing the string builder and indentation level to enumToString and fieldToString
-    private static String indent(String s) {
-        return (s == null || s.isEmpty())
-                ? ""
-                : s.lines()
-                    .map(line -> line.isEmpty() ? line : "  " + line)
-                    .collect(Collectors.joining("\n")) + "\n";
+        sb.append(label).append(typeName).append(" ").append(field.getName()).append(" = ").append(field.getNumber()).append(";\n");
     }
 
     public static String annotationToString(java.lang.annotation.Annotation ann) {
