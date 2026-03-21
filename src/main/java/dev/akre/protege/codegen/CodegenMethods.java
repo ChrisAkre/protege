@@ -28,7 +28,8 @@ public class CodegenMethods {
      */
     static class Builder {
 
-        static MethodSpec build(MessageCodegen ctx, ClassName messageClassName) {
+        static MethodSpec build(MessageCodegen ctx) {
+            ClassName messageClassName = ctx.messageClassName();
             return MethodSpec.methodBuilder("build")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -41,7 +42,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec buildPartial(MessageCodegen ctx, ClassName messageClassName) {
+        static MethodSpec buildPartial(MessageCodegen ctx) {
+            ClassName messageClassName = ctx.messageClassName();
             return MethodSpec.methodBuilder("buildPartial")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -50,7 +52,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec getDefaultInstanceForType(MessageCodegen ctx, ClassName messageClassName) {
+        static MethodSpec getDefaultInstanceForType(MessageCodegen ctx) {
+            ClassName messageClassName = ctx.messageClassName();
             return MethodSpec.methodBuilder("getDefaultInstanceForType")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -59,7 +62,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec getDescriptorForType(MessageCodegen ctx, ClassName messageClassName) {
+        static MethodSpec getDescriptorForType(MessageCodegen ctx) {
+            ClassName messageClassName = ctx.messageClassName();
             return MethodSpec.methodBuilder("getDescriptorForType")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -68,7 +72,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec getDescriptor(MessageCodegen ctx, ClassName messageClassName) {
+        static MethodSpec getDescriptor(MessageCodegen ctx) {
+            ClassName messageClassName = ctx.messageClassName();
             return MethodSpec.methodBuilder("getDescriptor")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                     .returns(Descriptors.Descriptor.class)
@@ -85,7 +90,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec mergeFromCodedInput(MessageCodegen ctx, ClassName builderClassName) {
+        static MethodSpec mergeFromCodedInput(MessageCodegen ctx) {
+            ClassName builderClassName = ctx.builderClassName();
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -97,7 +103,9 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec mergeFromMessage(MessageCodegen ctx, ClassName messageClassName, ClassName builderClassName) {
+        static MethodSpec mergeFromMessage(MessageCodegen ctx) {
+            ClassName messageClassName = ctx.messageClassName();
+            ClassName builderClassName = ctx.builderClassName();
             return MethodSpec.methodBuilder("mergeFrom")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -112,7 +120,9 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec internalGetFieldAccessorTable(MessageCodegen ctx, ClassName messageClassName, ClassName fieldAccessorTableClass) {
+        static MethodSpec internalGetFieldAccessorTable(MessageCodegen ctx) {
+            ClassName messageClassName = ctx.messageClassName();
+            ClassName fieldAccessorTableClass = ctx.getFieldAccessorTableClass();
             return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PROTECTED)
@@ -194,7 +204,8 @@ public class CodegenMethods {
             return builder.build();
         }
 
-        static MethodSpec setField(FieldCodegen ctx, ClassName builderClassName, CodeBlock clearOneofCode) {
+        static MethodSpec setField(FieldCodegen ctx, CodeBlock clearOneofCode) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             var builder = MethodSpec.methodBuilder("set" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -214,7 +225,8 @@ public class CodegenMethods {
             return builder.build();
         }
 
-        static MethodSpec clearField(FieldCodegen ctx, ClassName builderClassName, String defaultValue) {
+        static MethodSpec clearField(FieldCodegen ctx, String defaultValue) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("clear" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -233,7 +245,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec setFieldValue(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec setFieldValue(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("set" + ctx.pascalName() + "Value")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -260,7 +273,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec setFieldBytes(FieldCodegen ctx, ClassName builderClassName, CodeBlock clearOneofCode) {
+        static MethodSpec setFieldBytes(FieldCodegen ctx, CodeBlock clearOneofCode) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             var builder = MethodSpec.methodBuilder("set" + ctx.pascalName() + "Bytes")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -302,7 +316,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec setFieldBuilder(FieldCodegen ctx, ClassName builderClassName, ClassName elementBuilderType) {
+        static MethodSpec setFieldBuilder(FieldCodegen ctx, ClassName elementBuilderType) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("set" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -311,7 +326,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec mergeField(FieldCodegen ctx, ClassName builderClassName, CodeBlock clearOneofCode) {
+        static MethodSpec mergeField(FieldCodegen ctx, CodeBlock clearOneofCode) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             var builder = MethodSpec.methodBuilder("merge" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -394,7 +410,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec putMap(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec putMap(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("put" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -420,7 +437,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec removeMap(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec removeMap(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("remove" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -441,7 +459,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec putAllMap(FieldCodegen ctx, ClassName builderClassName, TypeName fieldType) {
+        static MethodSpec putAllMap(FieldCodegen ctx, TypeName fieldType) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("putAll" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -452,7 +471,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec clearMap(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec clearMap(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("clear" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -482,7 +502,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec addRepeatedBytes(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec addRepeatedBytes(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("add" + ctx.pascalName() + "Bytes")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -521,7 +542,8 @@ public class CodegenMethods {
                         .build();
         }
 
-        static MethodSpec setRepeatedElement(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec setRepeatedElement(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("set" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -535,7 +557,8 @@ public class CodegenMethods {
         }
 
 
-        static MethodSpec addRepeatedElement(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec addRepeatedElement(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("add" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -547,7 +570,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec addAllRepeatedElements(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec addAllRepeatedElements(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("addAll" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -559,7 +583,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec clearRepeatedField(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec clearRepeatedField(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("clear" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -630,7 +655,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec addRepeatedElementAtIndex(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec addRepeatedElementAtIndex(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("add" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -643,7 +669,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec setRepeatedBuilder(FieldCodegen ctx, ClassName builderClassName, ClassName elementBuilderType) {
+        static MethodSpec setRepeatedBuilder(FieldCodegen ctx, ClassName elementBuilderType) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("set" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -653,7 +680,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec addRepeatedBuilderValue(FieldCodegen ctx, ClassName builderClassName, ClassName elementBuilderType) {
+        static MethodSpec addRepeatedBuilderValue(FieldCodegen ctx, ClassName elementBuilderType) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("add" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -662,7 +690,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec addRepeatedBuilderValueAtIndex(FieldCodegen ctx, ClassName builderClassName, ClassName elementBuilderType) {
+        static MethodSpec addRepeatedBuilderValueAtIndex(FieldCodegen ctx, ClassName elementBuilderType) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("add" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -675,7 +704,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec removeRepeatedElement(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec removeRepeatedElement(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("remove" + ctx.pascalName())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -704,7 +734,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec setRepeatedValue(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec setRepeatedValue(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("set" + ctx.pascalName() + "Value")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -717,7 +748,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec addRepeatedValue(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec addRepeatedValue(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("add" + ctx.pascalName() + "Value")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)
@@ -729,7 +761,8 @@ public class CodegenMethods {
                     .build();
         }
 
-        static MethodSpec addAllRepeatedValue(FieldCodegen ctx, ClassName builderClassName) {
+        static MethodSpec addAllRepeatedValue(FieldCodegen ctx) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
             return MethodSpec.methodBuilder("addAll" + ctx.pascalName() + "Value")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderClassName)

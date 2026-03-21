@@ -192,22 +192,22 @@ public record MessageCodegen(
                 .build());
 
         // protected GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
-        classBuilder.addMethod(MessageMethods.internalGetFieldAccessorTable(this, messageClassName(), getFieldAccessorTableClass()));
+        classBuilder.addMethod(MessageMethods.internalGetFieldAccessorTable(this));
     }
 
     private void generateRequiredAbstractMethods(TypeSpec.Builder classBuilder) {
         var messageClassName = messageClassName();
         var builderClassName = messageClassName.nestedClass("Builder");
         // public Builder toBuilder()
-        classBuilder.addMethod(MessageMethods.toBuilder(this, messageClassName, builderClassName));
+        classBuilder.addMethod(MessageMethods.toBuilder(this));
         // public Parser<<MessageName>> getParserForType()
         classBuilder.addMethod(MessageMethods.getParserForType(this));
         // public Builder newBuilderForType()
-        classBuilder.addMethod(MessageMethods.newBuilderForType(this, builderClassName));
+        classBuilder.addMethod(MessageMethods.newBuilderForType(this));
         // protected Builder newBuilderForType(GeneratedMessageV3.BuilderParent parent)
         classBuilder.addMethod(MessageMethods.newBuilderForTypeWithParent(this));
         // public <MessageName> getDefaultInstanceForType()
-        classBuilder.addMethod(MessageMethods.getDefaultInstanceForType(this, messageClassName));
+        classBuilder.addMethod(MessageMethods.getDefaultInstanceForType(this));
         // public final UnknownFieldSet getUnknownFields()
         classBuilder.addMethod(MessageMethods.getUnknownFields(this));
         // public final boolean isInitialized()
@@ -218,9 +218,9 @@ public record MessageCodegen(
         var messageClassName = messageClassName();
         var builderClassName = messageClassName.nestedClass("Builder");
         // public static Builder newBuilder()
-        classBuilder.addMethod(MessageMethods.newBuilder(this, messageClassName, builderClassName));
+        classBuilder.addMethod(MessageMethods.newBuilder(this));
         // public static Builder newBuilder(<MessageName> prototype)
-        classBuilder.addMethod(MessageMethods.newBuilderWithPrototype(this, messageClassName, builderClassName));
+        classBuilder.addMethod(MessageMethods.newBuilderWithPrototype(this));
     }
 
     private void generateParserField(TypeSpec.Builder classBuilder) {
@@ -253,7 +253,7 @@ public record MessageCodegen(
                 .build());
 
         // public Parser<<MessageName>> parser()
-        classBuilder.addMethod(MessageMethods.parser(this, messageClassName));
+        classBuilder.addMethod(MessageMethods.parser(this));
     }
 
     private void generateParseFromMethods(TypeSpec.Builder classBuilder) {
@@ -264,29 +264,29 @@ public record MessageCodegen(
         var codedInputStream = ClassName.get("com.google.protobuf", "CodedInputStream");
 
         // public static <MessageName> parseFrom(ByteBuffer data)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, byteBuffer, "data", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, byteBuffer, "data", false));
         // public static <MessageName> parseFrom(ByteBuffer data, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, byteBuffer, "data", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, byteBuffer, "data", true));
         // public static <MessageName> parseFrom(ByteString data)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, byteString, "data", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, byteString, "data", false));
         // public static <MessageName> parseFrom(ByteString data, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, byteString, "data", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, byteString, "data", true));
         // public static <MessageName> parseFrom(byte[] data)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, TypeName.get(byte[].class), "data", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, TypeName.get(byte[].class), "data", false));
         // public static <MessageName> parseFrom(byte[] data, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, TypeName.get(byte[].class), "data", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, TypeName.get(byte[].class), "data", true));
         // public static <MessageName> parseFrom(InputStream input)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, inputStream, "input", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, inputStream, "input", false));
         // public static <MessageName> parseFrom(InputStream input, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, inputStream, "input", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, inputStream, "input", true));
         // public static <MessageName> parseFrom(CodedInputStream input)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, codedInputStream, "input", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, codedInputStream, "input", false));
         // public static <MessageName> parseFrom(CodedInputStream input, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(this, messageClassName, codedInputStream, "input", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, codedInputStream, "input", true));
         // public static <MessageName> parseDelimitedFrom(InputStream input)
-        classBuilder.addMethod(MessageMethods.parseDelimitedFrom(this, messageClassName, false));
+        classBuilder.addMethod(MessageMethods.parseDelimitedFrom(this, false));
         // public static <MessageName> parseDelimitedFrom(InputStream input, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseDelimitedFrom(this, messageClassName, true));
+        classBuilder.addMethod(MessageMethods.parseDelimitedFrom(this, true));
     }
 
     public MethodSpec internalGetMapFieldReflection() {
@@ -732,13 +732,13 @@ public record MessageCodegen(
             }
 
             // public Builder clear<OneofName>()
-            builderClassBuilder.addMethod(OneofMethods.clearOneof(oneofCtx, builderClassName(), CodegenUtils.generateClearOneofCode(this, i)));
+            builderClassBuilder.addMethod(OneofMethods.clearOneof(oneofCtx, CodegenUtils.generateClearOneofCode(this, i)));
         }
 
         // public <MessageName> build()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.build(this, messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.build(this));
         // public <MessageName> buildPartial()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.buildPartial(this, messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.buildPartial(this));
 
         // clear()
         var clearMethod = MethodSpec.methodBuilder("clear")
@@ -773,23 +773,23 @@ public record MessageCodegen(
         builderClassBuilder.addMethod(clearMethod.build());
 
         // public <MessageName> getDefaultInstanceForType()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.getDefaultInstanceForType(this, messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.getDefaultInstanceForType(this));
         // public static final Descriptors.Descriptor getDescriptor()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.getDescriptorForType(this, messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.getDescriptorForType(this));
         // public Descriptors.Descriptor getDescriptorForType()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.getDescriptor(this, messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.getDescriptor(this));
         // public final boolean isInitialized()
         builderClassBuilder.addMethod(CodegenMethods.Builder.isInitialized(this));
         // public Builder mergeFrom(CodedInputStream input, ExtensionRegistryLite extensionRegistry)
-        builderClassBuilder.addMethod(CodegenMethods.Builder.mergeFromCodedInput(this, builderClassName()));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.mergeFromCodedInput(this));
         // protected GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetFieldAccessorTable(this, messageClassName, getFieldAccessorTableClass()));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetFieldAccessorTable(this));
         // protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber)
         builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetMapFieldReflection(this));
         // protected MapFieldReflectionAccessor internalGetMutableMapFieldReflection(int fieldNumber)
         builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetMutableMapFieldReflection(this));
         // public Builder mergeFrom(Message other)
-        builderClassBuilder.addMethod(CodegenMethods.Builder.mergeFromMessage(this, messageClassName, builderClassName()));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.mergeFromMessage(this));
 
         // public Builder mergeFrom(<MessageName> other)
         builderClassBuilder.addMethod(MessageMethods.mergeFromOther(this));

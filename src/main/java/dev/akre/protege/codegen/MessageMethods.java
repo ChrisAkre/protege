@@ -38,7 +38,9 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec toBuilder(MessageCodegen ctx, ClassName messageClassName, ClassName builderClassName) {
+    public static MethodSpec toBuilder(MessageCodegen ctx) {
+        ClassName messageClassName = ctx.messageClassName();
+        ClassName builderClassName = ctx.builderClassName();
         return MethodSpec.methodBuilder("toBuilder")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -56,7 +58,8 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec newBuilderForType(MessageCodegen ctx, ClassName builderClassName) {
+    public static MethodSpec newBuilderForType(MessageCodegen ctx) {
+        ClassName builderClassName = ctx.builderClassName();
         return MethodSpec.methodBuilder("newBuilderForType")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -75,7 +78,8 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec getDefaultInstanceForType(MessageCodegen ctx, ClassName messageClassName) {
+    public static MethodSpec getDefaultInstanceForType(MessageCodegen ctx) {
+        ClassName messageClassName = ctx.messageClassName();
         return MethodSpec.methodBuilder("getDefaultInstanceForType")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -102,7 +106,9 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec newBuilder(MessageCodegen ctx, ClassName messageClassName, ClassName builderClassName) {
+    public static MethodSpec newBuilder(MessageCodegen ctx) {
+        ClassName messageClassName = ctx.messageClassName();
+        ClassName builderClassName = ctx.builderClassName();
         return MethodSpec.methodBuilder("newBuilder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(builderClassName)
@@ -110,7 +116,9 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec newBuilderWithPrototype(MessageCodegen ctx, ClassName messageClassName, ClassName builderClassName) {
+    public static MethodSpec newBuilderWithPrototype(MessageCodegen ctx) {
+        ClassName messageClassName = ctx.messageClassName();
+        ClassName builderClassName = ctx.builderClassName();
         return MethodSpec.methodBuilder("newBuilder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(messageClassName, "prototype")
@@ -119,7 +127,8 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec parser(MessageCodegen ctx, ClassName messageClassName) {
+    public static MethodSpec parser(MessageCodegen ctx) {
+        ClassName messageClassName = ctx.messageClassName();
         return MethodSpec.methodBuilder("parser")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ParameterizedTypeName.get(ClassName.get("com.google.protobuf", "Parser"), messageClassName))
@@ -127,7 +136,9 @@ public class MessageMethods {
                 .build();
     }
 
-    public static MethodSpec internalGetFieldAccessorTable(MessageCodegen ctx, ClassName messageClassName, ClassName fieldAccessorTableClass) {
+    public static MethodSpec internalGetFieldAccessorTable(MessageCodegen ctx) {
+        ClassName messageClassName = ctx.messageClassName();
+        ClassName fieldAccessorTableClass = ctx.getFieldAccessorTableClass();
         return MethodSpec.methodBuilder("internalGetFieldAccessorTable")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PROTECTED)
@@ -360,7 +371,8 @@ public class MessageMethods {
 
     // Parse methods
 
-    public static MethodSpec parseFrom(MessageCodegen ctx, ClassName messageClassName, TypeName paramType, String paramName, boolean hasRegistry) {
+    public static MethodSpec parseFrom(MessageCodegen ctx, TypeName paramType, String paramName, boolean hasRegistry) {
+        ClassName messageClassName = ctx.messageClassName();
         var builder = MethodSpec.methodBuilder("parseFrom")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(messageClassName)
@@ -380,7 +392,8 @@ public class MessageMethods {
         return builder.build();
     }
 
-    public static MethodSpec parseDelimitedFrom(MessageCodegen ctx, ClassName messageClassName, boolean hasRegistry) {
+    public static MethodSpec parseDelimitedFrom(MessageCodegen ctx, boolean hasRegistry) {
+        ClassName messageClassName = ctx.messageClassName();
         var builder = MethodSpec.methodBuilder("parseDelimitedFrom")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(messageClassName)

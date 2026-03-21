@@ -50,7 +50,8 @@ public class OneofMethods {
                 .build();
     }
 
-    static MethodSpec clearOneof(OneofCodegen ctx, ClassName builderClassName, CodeBlock clearCode) {
+    static MethodSpec clearOneof(OneofCodegen ctx, CodeBlock clearCode) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
         return MethodSpec.methodBuilder("clear" + ctx.pascalName())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClassName)
