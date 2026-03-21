@@ -1,4 +1,7 @@
-package dev.akre.protege.compiler;
+package dev.akre.protege.codegen;
+
+import dev.akre.protege.CodegenConfig;
+import dev.akre.protege.CodegenMetadata;
 
 import com.google.protobuf.DescriptorProtos;
 import com.palantir.javapoet.*;
@@ -69,7 +72,7 @@ public class CodegenUtils {
         return options.getUninterpretedOptionList().stream().filter(o -> o.getNameList().stream().map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart).collect(Collectors.joining(".")).equals(MESSAGE_ANNOTATION)).map(o -> parseAnnotation(o.getStringValue().toStringUtf8())).collect(Collectors.toList());
     }
 
-    static AnnotationSpec parseAnnotation(String annotationStr) {
+    public static AnnotationSpec parseAnnotation(String annotationStr) {
         if (annotationStr.startsWith("@")) {
             annotationStr = annotationStr.substring(1);
         }
@@ -114,7 +117,7 @@ public class CodegenUtils {
         }
     }
 
-    static void registerAllTypes(DescriptorProtos.FileDescriptorProto fileDescriptor, String packageName, String outerClassName, Map<String, ClassName> typeRegistry, Map<String, Boolean> isEnumMap, Map<String, Boolean> isMapEntryMap, Map<String, DescriptorProtos.DescriptorProto> messageDescriptorRegistry) {
+    public static void registerAllTypes(DescriptorProtos.FileDescriptorProto fileDescriptor, String packageName, String outerClassName, Map<String, ClassName> typeRegistry, Map<String, Boolean> isEnumMap, Map<String, Boolean> isMapEntryMap, Map<String, DescriptorProtos.DescriptorProto> messageDescriptorRegistry) {
         for (var message : fileDescriptor.getMessageTypeList()) {
             registerTypes(message, packageName, outerClassName, typeRegistry, isEnumMap, isMapEntryMap, messageDescriptorRegistry, new ArrayList<>());
         }

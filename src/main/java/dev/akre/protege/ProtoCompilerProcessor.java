@@ -1,9 +1,9 @@
 package dev.akre.protege;
 
 import com.google.auto.service.AutoService;
-import dev.akre.protege.compiler.CodegenMetadata;
-import dev.akre.protege.compiler.GrpcCodegen;
-import dev.akre.protege.compiler.ProtoCodegen;
+import dev.akre.protege.CodegenMetadata;
+import dev.akre.protege.codegen.GrpcCodegen;
+import dev.akre.protege.codegen.ProtoCodegen;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;

@@ -1,7 +1,7 @@
 package com.example.interfaces;
 
-import dev.akre.protege.Field;
-import dev.akre.protege.GenProto;
+import dev.akre.protege.annotation.Field;
+import dev.akre.protege.annotation.GenProto;
 import jdk.jfr.Enabled;
 
 import javax.annotation.Resource;

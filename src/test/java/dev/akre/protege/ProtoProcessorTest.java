@@ -22,7 +22,7 @@ public class ProtoProcessorTest {
                 """
                 package dev.akre.protege;
                 
-                import dev.akre.protege.GenProto;
+                import dev.akre.protege.annotation.GenProto;
                 
                 @GenProto
                 public interface TestInterface {

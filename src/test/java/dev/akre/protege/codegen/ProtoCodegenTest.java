@@ -1,4 +1,4 @@
-package dev.akre.protege;
+package dev.akre.protege.codegen;
 
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.testutil.ClassAssert;

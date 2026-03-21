@@ -2,7 +2,7 @@ package dev.akre.protege.temp;
 
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.ProtegeVersion;
-import dev.akre.protege.compiler.ProtoCodegen;
+import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.ProtoUtils;
 import dev.akre.protege.testutil.ClassAssert;
 import dev.akre.protege.testutil.TestUtils;

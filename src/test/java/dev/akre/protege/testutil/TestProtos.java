@@ -2,16 +2,16 @@ package dev.akre.protege.testutil;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
-import dev.akre.protege.GenProto;
+import dev.akre.protege.annotation.GenProto;
 import dev.akre.protege.ProtegeVersion;
-import dev.akre.protege.compiler.CodegenMetadata;
-import dev.akre.protege.compiler.ProtoCodegen;
+import dev.akre.protege.CodegenMetadata;
+import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.ProtoUtils;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 import org.junit.jupiter.params.provider.Arguments;
 
-import dev.akre.protege.compiler.GrpcCodegen;
+import dev.akre.protege.codegen.GrpcCodegen;
 import com.google.testing.compile.JavaFileObjects;
 
 import javax.tools.JavaFileObject;

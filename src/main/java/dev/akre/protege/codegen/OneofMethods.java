@@ -1,4 +1,7 @@
-package dev.akre.protege.compiler;
+package dev.akre.protege.codegen;
+
+import dev.akre.protege.CodegenConfig;
+import dev.akre.protege.CodegenMetadata;
 
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
@@ -9,9 +12,9 @@ import javax.lang.model.element.Modifier;
 /**
  * Static methods for generating oneof-related code specifications
  */
-public class OneofMessages {
+public class OneofMethods {
 
-    private OneofMessages() {
+    private OneofMethods() {
         // Utility class
     }
 
@@ -47,7 +50,8 @@ public class OneofMessages {
                 .build();
     }
 
-    static MethodSpec clearOneof(OneofCodegen ctx, ClassName builderClassName, CodeBlock clearCode) {
+    static MethodSpec clearOneof(OneofCodegen ctx, CodeBlock clearCode) {
+        ClassName builderClassName = ctx.messageCodegen().builderClassName();
         return MethodSpec.methodBuilder("clear" + ctx.pascalName())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClassName)

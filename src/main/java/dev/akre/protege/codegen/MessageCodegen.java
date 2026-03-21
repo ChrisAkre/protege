@@ -1,4 +1,7 @@
-package dev.akre.protege.compiler;
+package dev.akre.protege.codegen;
+
+import dev.akre.protege.CodegenConfig;
+import dev.akre.protege.CodegenMetadata;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
@@ -108,7 +111,7 @@ public record MessageCodegen(
         generateOneofs(classBuilder);
 
         // private int memoizedSize
-        classBuilder.addField(MessageMethods.memoizedSizeField());
+        classBuilder.addField(MessageMethods.memoizedSizeField(this));
 
         // protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber)
         classBuilder.addMethod(internalGetMapFieldReflection());
@@ -139,7 +142,7 @@ public record MessageCodegen(
         // private static Descriptors.Descriptor descriptor
         classBuilder.addField(descriptorField(classBuilder));
         // public static final Descriptors.Descriptor getDescriptor()
-        classBuilder.addMethod(MessageMethods.getDescriptor());
+        classBuilder.addMethod(MessageMethods.getDescriptor(this));
     }
 
         private FieldSpec descriptorField(TypeSpec.Builder classBuilder) {
@@ -189,35 +192,35 @@ public record MessageCodegen(
                 .build());
 
         // protected GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
-        classBuilder.addMethod(MessageMethods.internalGetFieldAccessorTable(messageClassName(), getFieldAccessorTableClass()));
+        classBuilder.addMethod(MessageMethods.internalGetFieldAccessorTable(this));
     }
 
     private void generateRequiredAbstractMethods(TypeSpec.Builder classBuilder) {
         var messageClassName = messageClassName();
         var builderClassName = messageClassName.nestedClass("Builder");
         // public Builder toBuilder()
-        classBuilder.addMethod(MessageMethods.toBuilder(messageClassName, builderClassName));
+        classBuilder.addMethod(MessageMethods.toBuilder(this));
         // public Parser<<MessageName>> getParserForType()
-        classBuilder.addMethod(MessageMethods.getParserForType());
+        classBuilder.addMethod(MessageMethods.getParserForType(this));
         // public Builder newBuilderForType()
-        classBuilder.addMethod(MessageMethods.newBuilderForType(builderClassName));
+        classBuilder.addMethod(MessageMethods.newBuilderForType(this));
         // protected Builder newBuilderForType(GeneratedMessageV3.BuilderParent parent)
         classBuilder.addMethod(MessageMethods.newBuilderForTypeWithParent(this));
         // public <MessageName> getDefaultInstanceForType()
-        classBuilder.addMethod(MessageMethods.getDefaultInstanceForType(messageClassName));
+        classBuilder.addMethod(MessageMethods.getDefaultInstanceForType(this));
         // public final UnknownFieldSet getUnknownFields()
-        classBuilder.addMethod(MessageMethods.getUnknownFields());
+        classBuilder.addMethod(MessageMethods.getUnknownFields(this));
         // public final boolean isInitialized()
-        classBuilder.addMethod(MessageMethods.isInitialized());
+        classBuilder.addMethod(MessageMethods.isInitialized(this));
     }
 
     private void generateNewBuilderMethods(TypeSpec.Builder classBuilder) {
         var messageClassName = messageClassName();
         var builderClassName = messageClassName.nestedClass("Builder");
         // public static Builder newBuilder()
-        classBuilder.addMethod(MessageMethods.newBuilder(messageClassName, builderClassName));
+        classBuilder.addMethod(MessageMethods.newBuilder(this));
         // public static Builder newBuilder(<MessageName> prototype)
-        classBuilder.addMethod(MessageMethods.newBuilderWithPrototype(messageClassName, builderClassName));
+        classBuilder.addMethod(MessageMethods.newBuilderWithPrototype(this));
     }
 
     private void generateParserField(TypeSpec.Builder classBuilder) {
@@ -250,7 +253,7 @@ public record MessageCodegen(
                 .build());
 
         // public Parser<<MessageName>> parser()
-        classBuilder.addMethod(MessageMethods.parser(messageClassName));
+        classBuilder.addMethod(MessageMethods.parser(this));
     }
 
     private void generateParseFromMethods(TypeSpec.Builder classBuilder) {
@@ -261,29 +264,29 @@ public record MessageCodegen(
         var codedInputStream = ClassName.get("com.google.protobuf", "CodedInputStream");
 
         // public static <MessageName> parseFrom(ByteBuffer data)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, byteBuffer, "data", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, byteBuffer, "data", false));
         // public static <MessageName> parseFrom(ByteBuffer data, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, byteBuffer, "data", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, byteBuffer, "data", true));
         // public static <MessageName> parseFrom(ByteString data)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, byteString, "data", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, byteString, "data", false));
         // public static <MessageName> parseFrom(ByteString data, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, byteString, "data", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, byteString, "data", true));
         // public static <MessageName> parseFrom(byte[] data)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, TypeName.get(byte[].class), "data", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, TypeName.get(byte[].class), "data", false));
         // public static <MessageName> parseFrom(byte[] data, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, TypeName.get(byte[].class), "data", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, TypeName.get(byte[].class), "data", true));
         // public static <MessageName> parseFrom(InputStream input)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, inputStream, "input", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, inputStream, "input", false));
         // public static <MessageName> parseFrom(InputStream input, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, inputStream, "input", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, inputStream, "input", true));
         // public static <MessageName> parseFrom(CodedInputStream input)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, codedInputStream, "input", false));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, codedInputStream, "input", false));
         // public static <MessageName> parseFrom(CodedInputStream input, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseFrom(messageClassName, codedInputStream, "input", true));
+        classBuilder.addMethod(MessageMethods.parseFrom(this, codedInputStream, "input", true));
         // public static <MessageName> parseDelimitedFrom(InputStream input)
-        classBuilder.addMethod(MessageMethods.parseDelimitedFrom(messageClassName, false));
+        classBuilder.addMethod(MessageMethods.parseDelimitedFrom(this, false));
         // public static <MessageName> parseDelimitedFrom(InputStream input, ExtensionRegistryLite extensionRegistry)
-        classBuilder.addMethod(MessageMethods.parseDelimitedFrom(messageClassName, true));
+        classBuilder.addMethod(MessageMethods.parseDelimitedFrom(this, true));
     }
 
     public MethodSpec internalGetMapFieldReflection() {
@@ -720,22 +723,22 @@ public record MessageCodegen(
                 switchCode.addStatement("default: return null");
                 switchCode.endControlFlow();
                 // public <OneofName> get<OneofName>()
-                builderClassBuilder.addMethod(OneofMessages.getOneof(oneofCtx, switchCode.build()));
+                builderClassBuilder.addMethod(OneofMethods.getOneof(oneofCtx, switchCode.build()));
             }
 
             if (isGenerateOneofCase(descriptor)) {
                 // public <OneofName>Case get<OneofName>Case()
-                builderClassBuilder.addMethod(OneofMessages.getOneofCase(oneofCtx, generateGetCaseCode(descriptor, i, oneof.getName(), oneofCtx.enumName())));
+                builderClassBuilder.addMethod(OneofMethods.getOneofCase(oneofCtx, generateGetCaseCode(descriptor, i, oneof.getName(), oneofCtx.enumName())));
             }
 
             // public Builder clear<OneofName>()
-            builderClassBuilder.addMethod(OneofMessages.clearOneof(oneofCtx, builderClassName(), CodegenUtils.generateClearOneofCode(this, i)));
+            builderClassBuilder.addMethod(OneofMethods.clearOneof(oneofCtx, CodegenUtils.generateClearOneofCode(this, i)));
         }
 
         // public <MessageName> build()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.build(messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.build(this));
         // public <MessageName> buildPartial()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.buildPartial(messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.buildPartial(this));
 
         // clear()
         var clearMethod = MethodSpec.methodBuilder("clear")
@@ -770,23 +773,23 @@ public record MessageCodegen(
         builderClassBuilder.addMethod(clearMethod.build());
 
         // public <MessageName> getDefaultInstanceForType()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.getDefaultInstanceForType(messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.getDefaultInstanceForType(this));
         // public static final Descriptors.Descriptor getDescriptor()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.getDescriptorForType(messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.getDescriptorForType(this));
         // public Descriptors.Descriptor getDescriptorForType()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.getDescriptor(messageClassName));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.getDescriptor(this));
         // public final boolean isInitialized()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.isInitialized());
+        builderClassBuilder.addMethod(CodegenMethods.Builder.isInitialized(this));
         // public Builder mergeFrom(CodedInputStream input, ExtensionRegistryLite extensionRegistry)
-        builderClassBuilder.addMethod(CodegenMethods.Builder.mergeFromCodedInput(builderClassName()));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.mergeFromCodedInput(this));
         // protected GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
-        builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetFieldAccessorTable(messageClassName, getFieldAccessorTableClass()));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetFieldAccessorTable(this));
         // protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber)
-        builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetMapFieldReflection(this, this));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetMapFieldReflection(this));
         // protected MapFieldReflectionAccessor internalGetMutableMapFieldReflection(int fieldNumber)
-        builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetMutableMapFieldReflection(this, this));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.internalGetMutableMapFieldReflection(this));
         // public Builder mergeFrom(Message other)
-        builderClassBuilder.addMethod(CodegenMethods.Builder.mergeFromMessage(messageClassName, builderClassName()));
+        builderClassBuilder.addMethod(CodegenMethods.Builder.mergeFromMessage(this));
 
         // public Builder mergeFrom(<MessageName> other)
         builderClassBuilder.addMethod(MessageMethods.mergeFromOther(this));
@@ -893,7 +896,7 @@ public record MessageCodegen(
                 classBuilder.addType(enumBuilder.build());
 
                 // public <OneofName>Case get<OneofName>Case()
-                classBuilder.addMethod(OneofMessages.getOneofCase(oneofCtx, generateGetCaseCode(descriptor, i, oneofCtx.oneofName(), oneofCtx.enumName())));
+                classBuilder.addMethod(OneofMethods.getOneofCase(oneofCtx, generateGetCaseCode(descriptor, i, oneofCtx.oneofName(), oneofCtx.enumName())));
             }
 
             if (isEnhancedOneof(descriptor)) {
@@ -908,7 +911,7 @@ public record MessageCodegen(
                 switchCode.endControlFlow();
 
                 // public <OneofName> get<OneofName>()
-                classBuilder.addMethod(OneofMessages.getOneof(oneofCtx, switchCode.build()));
+                classBuilder.addMethod(OneofMethods.getOneof(oneofCtx, switchCode.build()));
             }
         }
     }
@@ -949,12 +952,12 @@ public record MessageCodegen(
 
             if (isEnhancedOneof(descriptor)) {
                 // <OneofName> get<OneofName>()
-                interfaceBuilder.addMethod(OneofMessages.abstractGetOneof(oneofCtx));
+                interfaceBuilder.addMethod(OneofMethods.abstractGetOneof(oneofCtx));
             }
 
             if (isGenerateOneofCase(descriptor)) {
                 // <OneofName>Case get<OneofName>Case()
-                interfaceBuilder.addMethod(OneofMessages.abstractGetOneofCase(oneofCtx));
+                interfaceBuilder.addMethod(OneofMethods.abstractGetOneofCase(oneofCtx));
             }
         }
         // public interface <MessageName>OrBuilder extends MessageOrBuilder

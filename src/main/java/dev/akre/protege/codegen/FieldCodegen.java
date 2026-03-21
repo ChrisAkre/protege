@@ -1,4 +1,7 @@
-package dev.akre.protege.compiler;
+package dev.akre.protege.codegen;
+
+import dev.akre.protege.CodegenConfig;
+import dev.akre.protege.CodegenMetadata;
 
 import com.google.protobuf.DescriptorProtos;
 import com.palantir.javapoet.*;
@@ -186,14 +189,14 @@ public record FieldCodegen(
             methods.add(CodegenMethods.Builder.getMutableMapDeprecated(this, fieldType));
         }
 
-        methods.add(CodegenMethods.Builder.putMap(this, builderClassName));
+        methods.add(CodegenMethods.Builder.putMap(this));
         if (valueType instanceof ClassName && valueFieldType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
             var valueBuilderType = ((ClassName) valueType).nestedClass("Builder");
             methods.add(CodegenMethods.Builder.putMapBuilderIfAbsent(this, valueBuilderType));
         }
-        methods.add(CodegenMethods.Builder.removeMap(this, builderClassName));
-        methods.add(CodegenMethods.Builder.putAllMap(this, builderClassName, fieldType));
-        methods.add(CodegenMethods.Builder.clearMap(this, builderClassName));
+        methods.add(CodegenMethods.Builder.removeMap(this));
+        methods.add(CodegenMethods.Builder.putAllMap(this, fieldType));
+        methods.add(CodegenMethods.Builder.clearMap(this));
         return methods;
     }
 
@@ -204,17 +207,17 @@ public record FieldCodegen(
         if (isString()) {
             methods.add(CodegenMethods.Builder.getRepeatedListString(this));
             methods.add(CodegenMethods.Builder.getRepeatedBytes(this));
-            methods.add(CodegenMethods.Builder.addRepeatedBytes(this, builderClassName));
+            methods.add(CodegenMethods.Builder.addRepeatedBytes(this));
         } else {
             methods.add(CodegenMethods.Builder.getRepeatedList(this, fieldType));
         }
 
         methods.add(CodegenMethods.Builder.getRepeatedCount(this));
         methods.add(CodegenMethods.Builder.getRepeatedElement(this));
-        methods.add(CodegenMethods.Builder.setRepeatedElement(this, builderClassName));
-        methods.add(CodegenMethods.Builder.addRepeatedElement(this, builderClassName));
-        methods.add(CodegenMethods.Builder.addAllRepeatedElements(this, builderClassName));
-        methods.add(CodegenMethods.Builder.clearRepeatedField(this, builderClassName));
+        methods.add(CodegenMethods.Builder.setRepeatedElement(this));
+        methods.add(CodegenMethods.Builder.addRepeatedElement(this));
+        methods.add(CodegenMethods.Builder.addAllRepeatedElements(this));
+        methods.add(CodegenMethods.Builder.clearRepeatedField(this));
 
         if (isMessage()) {
             var orBuilderType = CodegenUtils.getOrBuilderType(genericType);
@@ -226,19 +229,19 @@ public record FieldCodegen(
             methods.add(CodegenMethods.Builder.addRepeatedBuilder(this, elementBuilderType));
             methods.add(CodegenMethods.Builder.addRepeatedBuilderAtIndex(this, elementBuilderType));
             methods.add(CodegenMethods.Builder.getRepeatedBuilderList(this, elementBuilderType));
-            methods.add(CodegenMethods.Builder.addRepeatedElementAtIndex(this, builderClassName));
-            methods.add(CodegenMethods.Builder.setRepeatedBuilder(this, builderClassName, elementBuilderType));
-            methods.add(CodegenMethods.Builder.addRepeatedBuilderValue(this, builderClassName, elementBuilderType));
-            methods.add(CodegenMethods.Builder.addRepeatedBuilderValueAtIndex(this, builderClassName, elementBuilderType));
-            methods.add(CodegenMethods.Builder.removeRepeatedElement(this, builderClassName));
+            methods.add(CodegenMethods.Builder.addRepeatedElementAtIndex(this));
+            methods.add(CodegenMethods.Builder.setRepeatedBuilder(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.addRepeatedBuilderValue(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.addRepeatedBuilderValueAtIndex(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.removeRepeatedElement(this));
         }
 
         if (isEnum()) {
             methods.add(CodegenMethods.Builder.getRepeatedValueList(this));
             methods.add(CodegenMethods.Builder.getRepeatedValue(this));
-            methods.add(CodegenMethods.Builder.setRepeatedValue(this, builderClassName));
-            methods.add(CodegenMethods.Builder.addRepeatedValue(this, builderClassName));
-            methods.add(CodegenMethods.Builder.addAllRepeatedValue(this, builderClassName));
+            methods.add(CodegenMethods.Builder.setRepeatedValue(this));
+            methods.add(CodegenMethods.Builder.addRepeatedValue(this));
+            methods.add(CodegenMethods.Builder.addAllRepeatedValue(this));
         }
 
         methods.add(CodegenMethods.Builder.ensureIsMutable(this));
@@ -257,17 +260,17 @@ public record FieldCodegen(
 
         if (isEnum()) {
             methods.add(CodegenMethods.Builder.getFieldValue(this));
-            methods.add(CodegenMethods.Builder.setFieldValue(this, builderClassName));
+            methods.add(CodegenMethods.Builder.setFieldValue(this));
         }
 
         if (isString()) {
             methods.add(CodegenMethods.Builder.getFieldBytes(this));
             var clearOneof = generateClearOneofCode();
-            methods.add(CodegenMethods.Builder.setFieldBytes(this, builderClassName, clearOneof));
+            methods.add(CodegenMethods.Builder.setFieldBytes(this, clearOneof));
         }
 
         var clearOneof = generateClearOneofCode();
-        methods.add(CodegenMethods.Builder.setField(this, builderClassName, clearOneof));
+        methods.add(CodegenMethods.Builder.setField(this, clearOneof));
 
         String defaultValue;
         if (descriptor.getType() == DescriptorProtos.FieldDescriptorProto.Type.TYPE_STRING) {
@@ -275,14 +278,14 @@ public record FieldCodegen(
         } else {
             defaultValue = ProtoUtils.getDefaultReturnValue(fieldType.toString());
         }
-        methods.add(CodegenMethods.Builder.clearField(this, builderClassName, defaultValue));
+        methods.add(CodegenMethods.Builder.clearField(this, defaultValue));
 
         if (isMessage()) {
             var elementBuilderType = ((ClassName) fieldType).nestedClass("Builder");
             methods.add(CodegenMethods.Builder.getFieldOrBuilder(this, CodegenUtils.getOrBuilderType(fieldType)));
             methods.add(CodegenMethods.Builder.getFieldBuilder(this, elementBuilderType));
-            methods.add(CodegenMethods.Builder.setFieldBuilder(this, builderClassName, elementBuilderType));
-            methods.add(CodegenMethods.Builder.mergeField(this, builderClassName, clearOneof));
+            methods.add(CodegenMethods.Builder.setFieldBuilder(this, elementBuilderType));
+            methods.add(CodegenMethods.Builder.mergeField(this, clearOneof));
         }
         return methods;
     }
@@ -321,7 +324,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.abstractGetRepeatedList(this, fieldType));
 
         if (isString()) {
-            methods.add(MessageMethods.abstractGetRepeatedBytes(pascalName));
+            methods.add(MessageMethods.abstractGetRepeatedBytes(messageCodegen, pascalName));
         }
 
         methods.add(MessageMethods.abstractGetRepeatedCount(this));
@@ -349,7 +352,7 @@ public record FieldCodegen(
         methods.add(MessageMethods.abstractGetField(this));
 
         if (isEnum()) {
-            methods.add(MessageMethods.abstractGetFieldValue(pascalName));
+            methods.add(MessageMethods.abstractGetFieldValue(messageCodegen, pascalName));
         }
 
         if (isMessage()) {
@@ -357,7 +360,7 @@ public record FieldCodegen(
         }
 
         if (isString()) {
-            methods.add(MessageMethods.abstractGetFieldBytes(pascalName));
+            methods.add(MessageMethods.abstractGetFieldBytes(messageCodegen, pascalName));
         }
         return methods;
     }

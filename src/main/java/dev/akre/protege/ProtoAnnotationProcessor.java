@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
 
-@SupportedAnnotationTypes("dev.akre.protege.GenProto")
+@SupportedAnnotationTypes("dev.akre.protege.annotation.GenProto")
 @AutoService(Processor.class)
 public class ProtoAnnotationProcessor extends AbstractProcessor {
 

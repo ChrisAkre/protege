@@ -1,4 +1,4 @@
-package dev.akre.protege;
+package dev.akre.protege.parser;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
@@ -7,6 +7,8 @@ import dev.akre.protege.testutil.DescriptorAssert;
 import dev.akre.protege.testutil.TestProtos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import dev.akre.protege.annotation.GenProto;
+import dev.akre.protege.annotation.Field;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -63,12 +65,12 @@ class InterfaceDescriptorFactoryTest {
                         name_part: "dev.akre.protege.java_implements"
                         is_extension: true
                       }
-                      string_value: "dev.akre.protege.InterfaceDescriptorFactoryTest$1MyMessage"
+                      string_value: "dev.akre.protege.parser.InterfaceDescriptorFactoryTest$1MyMessage"
                     }
                   }
                 }
                 options {
-                  java_package: "dev.akre.protege"
+                  java_package: "dev.akre.protege.parser"
                 }
                 """;
 

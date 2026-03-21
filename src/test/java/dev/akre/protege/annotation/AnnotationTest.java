@@ -1,7 +1,8 @@
-package dev.akre.protege;
+package dev.akre.protege.annotation;
 
-import dev.akre.protege.compiler.ProtoCodegen;
+import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.testutil.TestUtils;
+import dev.akre.protege.ProtoUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Annotation;
