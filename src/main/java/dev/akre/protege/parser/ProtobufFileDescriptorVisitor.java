@@ -7,6 +7,7 @@ import dev.akre.protege.ProtobufBaseVisitor;
 import dev.akre.protege.ProtobufParser;
 import dev.akre.protege.parser.MemberTreeVisitor.MemberNode;
 import dev.akre.util.Cons;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -96,7 +97,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         String packageName = ctx.packageStatement().isEmpty()
                 ? ""
                 : ctx.packageStatement().getFirst().name.getText();
-        this.scope = Cons.of(packageName.split("\\."));
+        this.scope = Cons.of(StringUtils.split(packageName, '.'));
         FileDescriptorProto.Builder fileBuilder = FileDescriptorProto.newBuilder();
         var fileOptions = FileOptions.newBuilder();
         // configure scope prior to walking the tree to allow creating full type names
