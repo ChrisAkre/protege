@@ -7,6 +7,7 @@ import dev.akre.protege.ProtobufBaseVisitor;
 import dev.akre.protege.ProtobufParser;
 import dev.akre.protege.parser.MemberTreeVisitor.MemberNode;
 import dev.akre.util.Cons;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,20 +79,25 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
-    // TODO rephrase and formate this javadoc
     /**
-     * generate a file descriptor by first reading the options present at the file level, and then recursively descending through all children.
+     * Generates a file descriptor by first reading the options present at the file level
+     * and then recursively descending through all children.
+     * <p>
+     * The {@code scope} is updated as the graph is traversed and is used to determine
+     * the full name of the object being processed.
+     * <p>
+     * Each visit operation returns a descriptor or a record that is merged into the
+     * file descriptor.
      *
-     * this.scope is updated as the graph is traversed, and is used to determine the full name of the object being processed
-     *
-     * each visit operation returns a descriptor or a record that is merged into the file descriptor
+     * @param ctx the parse tree context
+     * @return a {@link FileDescriptorProto.Builder} containing the parsed protobuf file information
      */
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
         String packageName = ctx.packageStatement().isEmpty()
                 ? ""
                 : ctx.packageStatement().getFirst().name.getText();
-        this.scope = Cons.of(packageName.split("\\."));
+        this.scope = Cons.of(StringUtils.split(packageName, '.'));
         FileDescriptorProto.Builder fileBuilder = FileDescriptorProto.newBuilder();
         var fileOptions = FileOptions.newBuilder();
         // configure scope prior to walking the tree to allow creating full type names
