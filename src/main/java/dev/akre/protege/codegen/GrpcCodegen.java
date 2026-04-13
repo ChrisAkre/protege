@@ -393,7 +393,7 @@ public record GrpcCodegen(Filer filer, CodegenMetadata config) implements Codege
             if (typeRegistry.containsKey(typeName)) {
                 return typeRegistry.get(typeName);
             }
-            return ClassName.get(packageName, outerClassName, typeName.split("\\."));
+            return ClassName.get(packageName, outerClassName, StringUtils.split(typeName, '.'));
         }
 
         for (int i = currentScope.size(); i >= 0; i--) {
@@ -404,6 +404,6 @@ public record GrpcCodegen(Filer filer, CodegenMetadata config) implements Codege
             }
         }
 
-        return ClassName.get(packageName, outerClassName, protoTypeName.split("\\."));
+        return ClassName.get(packageName, outerClassName, StringUtils.split(protoTypeName, '.'));
     }
 }

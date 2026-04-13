@@ -85,7 +85,7 @@ public class ProtoUtils {
         } else {
             String pkg = builder.getPackage();
             if (pkg != null && !pkg.isEmpty()) {
-                String[] parts = pkg.split("\\.");
+                String[] parts = StringUtils.split(pkg, '.');
                 builder.setName(parts[parts.length - 1] + ".proto");
             }
         }
