@@ -34,7 +34,7 @@ class ConsTest {
 
     @Test
     void testCons() {
-        Cons<Integer> list = Cons.nil().cons(1);
+        Cons<Integer> list = Cons.<Integer>nil().cons(1);
         assertThat(list.isEmpty()).isFalse();
         assertThat(list.head()).isEqualTo(1);
         assertThat(list.tail()).isSameAs(Cons.NIL);
