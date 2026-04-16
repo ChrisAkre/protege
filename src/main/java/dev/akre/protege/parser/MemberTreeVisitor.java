@@ -4,6 +4,7 @@ import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.ProtobufBaseVisitor;
 import dev.akre.protege.ProtobufParser;
 import dev.akre.util.Cons;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -11,9 +12,7 @@ public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.Mem
 
     public record MemberNode(String name, String fullName, DescriptorProtos.FieldDescriptorProto.Type type, Map<String, MemberNode> children) {
         public Optional<MemberNode> resolve(String typeName, Cons<String> scope) {
-            String[] typeParts = typeName.startsWith(".")
-                    ? typeName.substring(1).split("\\.")
-                    : typeName.split("\\.");
+            String[] typeParts = StringUtils.split(typeName, '.');
 
             if (typeName.startsWith(".")) {
                 return resolveRelative(typeParts);
@@ -53,7 +52,7 @@ public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.Mem
         MemberNode root = new MemberNode("", "", null, new HashMap<>());
         MemberNode current = root;
         if (!packageName.isEmpty()) {
-            for (String part : packageName.split("\\.")) {
+            for (String part : StringUtils.split(packageName, '.')) {
                 MemberNode next = new MemberNode(part, current.fullName().isEmpty() ? "." + part : current.fullName() + "." + part, null, new HashMap<>());
                 current.children().put(part, next);
                 current = next;
