@@ -88,7 +88,7 @@ public class CodegenUtils {
                 List<String> parts = new ArrayList<>();
                 boolean inQuotes = false;
                 StringBuilder currentPart = new StringBuilder();
-                for (int i = 0; i < content.length(); i++) {
+                for (int i = 0, len = content.length(); i < len; i++) {
                     char c = content.charAt(i);
                     if (c == '"') {
                         inQuotes = !inQuotes;
