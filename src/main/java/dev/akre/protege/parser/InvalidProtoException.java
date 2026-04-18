@@ -14,7 +14,7 @@ public class InvalidProtoException extends RuntimeException {
     }
 
     public InvalidProtoException(String message, String filename, Throwable cause) {
-        super(message);
+        super(message, cause);
         this.filename = filename;
     }
 
