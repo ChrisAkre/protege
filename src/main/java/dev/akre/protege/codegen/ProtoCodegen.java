@@ -1,6 +1,5 @@
 package dev.akre.protege.codegen;
 
-import dev.akre.protege.CodegenConfig;
 import dev.akre.protege.CodegenMetadata;
 
 import com.google.protobuf.DescriptorProtos;
