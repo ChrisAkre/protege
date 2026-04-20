@@ -5,7 +5,6 @@ import com.google.protobuf.Descriptors;
 import dev.akre.protege.annotation.GenProto;
 import dev.akre.protege.ProtegeVersion;
 import dev.akre.protege.CodegenMetadata;
-import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.ProtoUtils;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
@@ -44,8 +43,8 @@ public class TestProtos {
                                 }
                                 throw e;
                             }
-                            ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-                            Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto).toJavaFileObject());
+                            var config = CodegenMetadata.build(parsedProto).build();
+                            Class<?> generatedClass = TestUtils.compile(outerClassName, config.generate(new TestUtils.MockFiler()).toJavaFileObject());
                             ClassAssert.assertThat(generatedClass)
                                     .hasPublicStaticFinalStringField("PROTEGE_VERSION", ProtegeVersion.VERSION_STRING);
                             return Arguments.of(protoPath, parsedProto, expectedClass, generatedClass);
@@ -172,12 +171,11 @@ public class TestProtos {
 
             try {
                 TestUtils.MockFiler filer = new TestUtils.MockFiler();
-                ProtoCodegen protoCodegen = new ProtoCodegen(filer);
-
-                protoCodegen.generateFile(parsedProto);
-
                 CodegenMetadata config = CodegenMetadata.build(parsedProto)
                         .build();
+
+                config.generate(filer);
+
                 GrpcCodegen grpcCodegen = new GrpcCodegen(filer, config);
                 grpcCodegen.generateFile();
 

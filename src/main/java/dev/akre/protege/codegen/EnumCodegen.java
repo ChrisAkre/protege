@@ -22,7 +22,6 @@ import javax.lang.model.element.Modifier;
 public record EnumCodegen(
         DescriptorProtos.EnumDescriptorProto descriptor,
         Cons<String> scope,
-        ProtoCodegen protoCodegen,
         CodegenMetadata config
 ) implements CodegenConfig {
     public String getEnumName() {

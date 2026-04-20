@@ -3,7 +3,6 @@ package dev.akre.protege.codegen;
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.CodegenMetadata;
 import dev.akre.protege.codegen.GrpcCodegen;
-import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.testutil.TestUtils;
 import dev.akre.protege.ProtoUtils;
 import dev.akre.protege.ProtegeVersion;
@@ -68,12 +67,11 @@ public class GrpcCodegenTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = ProtoUtils.parseProto(protoContent, "test.proto");
 
         TestUtils.MockFiler filer = new TestUtils.MockFiler();
-        ProtoCodegen protoCodegen = new ProtoCodegen(filer);
-
-        protoCodegen.generateFile(fileDescriptor);
-
         CodegenMetadata config = CodegenMetadata.build(fileDescriptor)
                 .build();
+
+        config.generate(filer);
+
         GrpcCodegen grpcCodegen = new GrpcCodegen(filer, config);
         grpcCodegen.generateFile();
 
@@ -124,12 +122,11 @@ public class GrpcCodegenTest {
         DescriptorProtos.FileDescriptorProto fileDescriptor = ProtoUtils.parseProto(protoContent, "streaming.proto");
 
         TestUtils.MockFiler filer = new TestUtils.MockFiler();
-        ProtoCodegen protoCodegen = new ProtoCodegen(filer);
-
-        protoCodegen.generateFile(fileDescriptor);
-
         CodegenMetadata config = CodegenMetadata.build(fileDescriptor)
                 .build();
+
+        config.generate(filer);
+
         GrpcCodegen grpcCodegen = new GrpcCodegen(filer, config);
         grpcCodegen.generateFile();
 

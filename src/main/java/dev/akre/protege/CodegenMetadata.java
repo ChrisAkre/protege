@@ -4,13 +4,17 @@ import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.DescriptorProtos.UninterpretedOption.NamePart;
 import com.google.protobuf.GeneratedMessage;
 import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import dev.akre.protege.ProtoUtils;
 import dev.akre.protege.codegen.CodegenUtils;
+import dev.akre.protege.codegen.OuterClassCodegen;
 import dev.akre.util.Cons;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.processing.Filer;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +43,8 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
                               Map<String, Boolean> isMapEntryMap,
                               Map<String, List<ClassName>> oneofInterfacesByType
 ) {
+
+    public static final ClassName OR_BUILDER_INTERFACE = ClassName.get("com.google.protobuf", "MessageOrBuilder");
 
     /** Option for specifying annotations on generated fields. */
     public static final Option FIELD_ANNOTATIONS = Option.customStringList("dev.akre.protege.java_field_annotation");
@@ -79,6 +85,21 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
      */
     public static CodegenMetadata.Builder build(DescriptorProtos.FileDescriptorProto fileDescriptor) {
         return new Builder(fileDescriptor);
+    }
+
+    /**
+     * Main entry point for the Protobuf-to-Java compiler. Orchestrates the generation of the Outer Class and all nested
+     * Message classes from a FileDescriptorProto and writes it to the filer.
+     *
+     * @param filer The Filer to write the generated code to.
+     * @return The generated JavaFile.
+     * @throws IOException If writing to the filer fails.
+     */
+    public JavaFile generate(Filer filer) throws IOException {
+        var outerClass = new OuterClassCodegen(this).generate();
+        var javaFile = JavaFile.builder(packageName(), outerClass).build();
+        javaFile.writeTo(filer);
+        return javaFile;
     }
 
     /**

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public record MessageCodegen(
         DescriptorProtos.DescriptorProto descriptor,
         Cons<String> scope,
-        ProtoCodegen protoCodegen,
         CodegenMetadata config
 ) implements CodegenConfig.MessageConfig {
 
@@ -85,7 +84,7 @@ public record MessageCodegen(
 
 
         for (var nestedMessage : descriptor.getNestedTypeList()) {
-            var nestedMsgCodegen = new MessageCodegen(nestedMessage, allNames(), protoCodegen, config);
+            var nestedMsgCodegen = new MessageCodegen(nestedMessage, allNames(), config);
             // public interface <MessageName>OrBuilder extends MessageOrBuilder
             classBuilder.addType(nestedMsgCodegen.generateMessageInterface());
             // public static final class <MessageName> extends GeneratedMessageV3 implements <MessageName>OrBuilder
@@ -93,7 +92,7 @@ public record MessageCodegen(
         }
 
         for (var nestedEnum : descriptor.getEnumTypeList()) {
-            var enumCodegen = new EnumCodegen(nestedEnum, allNames(), protoCodegen, config);
+            var enumCodegen = new EnumCodegen(nestedEnum, allNames(), config);
             // public enum <EnumName> implements ProtocolMessageEnum
             classBuilder.addType(enumCodegen.generate());
         }
@@ -924,7 +923,7 @@ public record MessageCodegen(
     TypeSpec generateMessageInterface() {
         var interfaceBuilder = TypeSpec.interfaceBuilder(interfaceClassName())
                 .addAnnotations(CodegenUtils.getMessageAnnotations(descriptor.getOptions()))
-                .addSuperinterface(ProtoCodegen.OR_BUILDER_INTERFACE)
+                .addSuperinterface(CodegenMetadata.OR_BUILDER_INTERFACE)
                 .addModifiers(Modifier.PUBLIC);
 
         getJavaImplements().ifPresent(s -> interfaceBuilder.addSuperinterface(ClassName.bestGuess(s)));

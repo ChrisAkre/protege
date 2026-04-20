@@ -1,7 +1,7 @@
 package dev.akre.protege.temp;
 
 import com.google.protobuf.DescriptorProtos;
-import dev.akre.protege.codegen.ProtoCodegen;
+import dev.akre.protege.CodegenMetadata;
 import dev.akre.protege.ProtoUtils;
 import dev.akre.protege.testutil.ClassAssert;
 import dev.akre.protege.testutil.TestProtos;
@@ -34,8 +34,8 @@ public class GameProtoTest {
         DescriptorProtos.FileDescriptorProto parsedProto = ProtoUtils.parseProto(protoPath.toFile());
         String outerClassName = TestUtils.makeOuterClassName(parsedProto, protoPath.getFileName().toString());
         
-        ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-        var generatedFile = codegen.generateFile(parsedProto).toJavaFileObject();
+        var config = CodegenMetadata.build(parsedProto).build();
+        var generatedFile = config.generate(new TestUtils.MockFiler()).toJavaFileObject();
         assertNotNull(generatedFile);
         
         // This will attempt to compile the generated code.
@@ -135,8 +135,8 @@ public class GameProtoTest {
         parsedProto = parsedProto.toBuilder().setOptions(parsedProto.getOptions().toBuilder().setJavaOuterClassname("GameNoDeprecated")).build();
         String outerClassName = "com.example.proto.generated.GameNoDeprecated";
 
-        ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler(), false);
-        var generatedFile = codegen.generateFile(parsedProto).toJavaFileObject();
+        var config = CodegenMetadata.build(parsedProto).setGenerateDeprecated(false).build();
+        var generatedFile = config.generate(new TestUtils.MockFiler()).toJavaFileObject();
         assertNotNull(generatedFile);
 
         Class<?> generatedClass = TestUtils.compile(outerClassName, generatedFile);

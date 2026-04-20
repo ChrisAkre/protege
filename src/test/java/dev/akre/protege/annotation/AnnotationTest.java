@@ -1,6 +1,6 @@
 package dev.akre.protege.annotation;
 
-import dev.akre.protege.codegen.ProtoCodegen;
+import dev.akre.protege.CodegenMetadata;
 import dev.akre.protege.testutil.TestUtils;
 import dev.akre.protege.ProtoUtils;
 import org.junit.jupiter.api.Test;
@@ -49,9 +49,9 @@ public class AnnotationTest {
 
         var parsedProto = ProtoUtils.parseProto(protoContent, "annotations.proto");
         var mockFiler = new TestUtils.MockFiler();
-        ProtoCodegen codegen = new ProtoCodegen(mockFiler);
+        var config = CodegenMetadata.build(parsedProto).build();
         
-        var javaFileObject = codegen.generateFile(parsedProto);
+        var javaFileObject = config.generate(mockFiler);
         
         String outerClassName = "com.example.annotations.AnnotationProto";
         Class<?> outerClass = TestUtils.compile(outerClassName, javaFileObject.toJavaFileObject());
