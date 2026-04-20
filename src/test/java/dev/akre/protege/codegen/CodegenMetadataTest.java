@@ -14,8 +14,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-@DisplayName("Proto Code Generation Tests")
-public class ProtoCodegenTest {
+@DisplayName("Codegen Metadata Generation Tests")
+public class CodegenMetadataTest {
 
     static Stream<Arguments> descriptors() {
         return TestProtos.DESCRIPTORS.stream();
@@ -93,5 +93,3 @@ public class ProtoCodegenTest {
                 .hasMethodsEqualTo(expectedServiceClass);
     }
 }
-
-    

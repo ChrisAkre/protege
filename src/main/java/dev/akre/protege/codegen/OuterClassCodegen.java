@@ -15,8 +15,7 @@ import dev.akre.util.Cons;
 
 import javax.lang.model.element.Modifier;
 
-public record OuterClassCodegen(ProtoCodegen protoCodegen,
-                                CodegenMetadata config) implements CodegenConfig {
+public record OuterClassCodegen(CodegenMetadata config) implements CodegenConfig {
     public DescriptorProtos.FileDescriptorProto descriptor() {
         return config.fileDescriptor();
     }
@@ -34,13 +33,13 @@ public record OuterClassCodegen(ProtoCodegen protoCodegen,
         outerClassBuilder.addMethod(getDescriptor(this));
 
         for (var enumType : config.fileDescriptor().getEnumTypeList()) {
-            var enumCodegen = new EnumCodegen(enumType, Cons.of(getOuterName()), protoCodegen, config);
+            var enumCodegen = new EnumCodegen(enumType, Cons.of(getOuterName()), config);
             // public enum <name> implements ProtocolMessageEnum
             outerClassBuilder.addType(enumCodegen.generate());
         }
 
         for (var message : config.fileDescriptor().getMessageTypeList()) {
-            MessageCodegen messageCodegen = new MessageCodegen(message, Cons.of(getOuterName()), protoCodegen, config);
+            MessageCodegen messageCodegen = new MessageCodegen(message, Cons.of(getOuterName()), config);
             // public interface <name>OrBuilder extends MessageOrBuilder
             outerClassBuilder.addType(messageCodegen.generateMessageInterface());
             // public static final class <name> extends GeneratedMessageV3 implements <name>OrBuilder

@@ -28,7 +28,7 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 
 * **Grammar:** `src/main/antlr4/dev/akre/protege/Protobuf.g4`
 * **Parsing Logic:** `src/main/java/dev/akre/protege/ProtobufFileDescriptorVisitor.java`
-* **Java Generation:** `src/main/java/dev/akre/protege/ProtoCodegen.java`
+* **Java Generation:** `src/main/java/dev/akre/protege/CodegenMetadata.java`
 * **Annotation Processing:** `src/main/java/dev/akre/protege/ProtoCompilerProcessor.java`
 * **Integration Tests:** `src/it/`
 
@@ -43,11 +43,11 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 
 ### Compilation Phase
 
-* **`ProtoCodegen`**: The primary engine. Generates POJOs, Records, Builders, and Enums from a `FileDescriptor`.
+* **`CodegenMetadata`**: The primary engine. Generates POJOs, Records, Builders, and Enums from a `FileDescriptor`.
 * **`GrpcCodegen`**: Generates gRPC service interfaces, blocking stubs, and async stubs.
 * **`ProtoAnnotationProcessor`**: Triggers the Java-to-Proto flow by scanning for `@GenProto`.
 * **`ProtoCompilerProcessor`**: A specialized processor that intercepts `.proto` files in the source path to trigger the
-  `ProtoCodegen` pipeline.
+  `CodegenMetadata` pipeline.
 * **`InterfaceDescriptorFactory`**: The mapping engine that converts Java Reflection types into Protobuf descriptors.
 
 ## Development Rules for AI Agents
@@ -94,7 +94,7 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 
 ## Common Workflows
 
-* **Adding a feature to generated code**: Modify `ProtoCodegen.java` and add a corresponding test case in `src/it` to
+* **Adding a feature to generated code**: Modify `CodegenMetadata.java` and its associated codegen classes and add a corresponding test case in `src/it` to
   verify the generated source compiles.
 * **Fixing Parsing issues**: Check the ANTLR visitor logic in `ProtobufFileDescriptorVisitor.java`. Use the `Cons` stack
   to debug nested message scoping.

@@ -3,7 +3,6 @@ package dev.akre.protege;
 import com.google.auto.service.AutoService;
 import dev.akre.protege.CodegenMetadata;
 import dev.akre.protege.codegen.GrpcCodegen;
-import dev.akre.protege.codegen.ProtoCodegen;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -52,13 +51,11 @@ public class ProtoCompilerProcessor extends AbstractProcessor {
                     .filter(path -> path.toString().endsWith(".proto"))
                     .toList();
 
-            ProtoCodegen codegen = new ProtoCodegen(processingEnv.getFiler());
             for (Path protoFile : protoFiles) {
                 var fileDescriptor = ProtoUtils.parseProto(protoFile.toFile());
-                codegen.generateFile(fileDescriptor);
-
                 CodegenMetadata config = CodegenMetadata.build(fileDescriptor)
                         .build();
+                config.generate(processingEnv.getFiler());
                 new GrpcCodegen(processingEnv.getFiler(), config).generateFile();
             }
         } catch (IOException e) {

@@ -1,8 +1,8 @@
 package dev.akre.protege.temp;
 
 import com.google.protobuf.DescriptorProtos;
+import dev.akre.protege.CodegenMetadata;
 import dev.akre.protege.ProtegeVersion;
-import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.ProtoUtils;
 import dev.akre.protege.testutil.ClassAssert;
 import dev.akre.protege.testutil.TestUtils;
@@ -61,8 +61,8 @@ public class EnhancedOneOfTest {
         String protoPath = "oneof.proto";
         DescriptorProtos.FileDescriptorProto parsedProto = ProtoUtils.parseProto(TEST_PROTO, protoPath);
         String outerClassName = TestUtils.makeOuterClassName(parsedProto, protoPath.toString());
-        ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-        Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto).toJavaFileObject());
+        var config = CodegenMetadata.build(parsedProto).build();
+        Class<?> generatedClass = TestUtils.compile(outerClassName, config.generate(new TestUtils.MockFiler()).toJavaFileObject());
         ClassAssert.assertThat(generatedClass)
                 .hasPublicStaticFinalStringField("PROTEGE_VERSION",ProtegeVersion.VERSION_STRING);
 
@@ -134,10 +134,10 @@ public class EnhancedOneOfTest {
                 }
                 """;
         DescriptorProtos.FileDescriptorProto parsedProto = ProtoUtils.parseProto(proto, "test.proto");
-        ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-        
+        var config = CodegenMetadata.build(parsedProto).build();
+
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            codegen.generateFile(parsedProto);
+            config.generate(new TestUtils.MockFiler());
         });
     }
 
@@ -162,10 +162,10 @@ public class EnhancedOneOfTest {
                         .addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_enhanced_oneof", "true")))
                 .build();
 
-        ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-        
+        var config = CodegenMetadata.build(fileProto).build();
+
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            codegen.generateFile(fileProto);
+            config.generate(new TestUtils.MockFiler());
         });
     }
 }
