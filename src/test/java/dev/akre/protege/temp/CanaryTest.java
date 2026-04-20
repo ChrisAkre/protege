@@ -1,7 +1,7 @@
 package dev.akre.protege.temp;
 
+import dev.akre.protege.CodegenMetadata;
 import dev.akre.protege.ProtoUtils;
-import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.testutil.TestUtils;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +20,9 @@ public class CanaryTest {
 
     @Test
     public void testCompileOutput() throws Exception {
-        String output = new ProtoCodegen(new TestUtils.MockFiler()).generateFile(ProtoUtils.parseProto(TEST_PROTO, "canary.proto")).toJavaFileObject().getCharContent(false).toString();
+        var parsedProto = ProtoUtils.parseProto(TEST_PROTO, "canary.proto");
+        var config = CodegenMetadata.build(parsedProto).build();
+        String output = config.generate(new TestUtils.MockFiler()).toJavaFileObject().getCharContent(false).toString();
         assertThat(output).isEqualTo("""
                 package com.example;
                 
