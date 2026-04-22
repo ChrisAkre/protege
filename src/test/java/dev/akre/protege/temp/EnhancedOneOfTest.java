@@ -134,10 +134,9 @@ public class EnhancedOneOfTest {
                 }
                 """;
         DescriptorProtos.FileDescriptorProto parsedProto = ProtoUtils.parseProto(proto, "test.proto");
-        var config = CodegenMetadata.build(parsedProto).build();
 
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            config.generate(new TestUtils.MockFiler());
+            CodegenMetadata.build(parsedProto).build();
         });
     }
 
@@ -162,10 +161,8 @@ public class EnhancedOneOfTest {
                         .addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_enhanced_oneof", "true")))
                 .build();
 
-        var config = CodegenMetadata.build(fileProto).build();
-
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            config.generate(new TestUtils.MockFiler());
+            CodegenMetadata.build(fileProto).build();
         });
     }
 }
