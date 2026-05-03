@@ -644,6 +644,8 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
                 Map<String, List<ClassName>> oneofInterfacesByType) {
 
             var currentPath = parentPath.cons(message.getName());
+            var outerName = metadata.getString(OUTER_NAME, metadata.fileDescriptor()).orElse("");
+            var capitalizedPath = currentPath.stream().map(StringUtils::capitalize).toList().toArray(new String[0]);
 
             for (int i = 0; i < message.getOneofDeclCount(); i++) {
 
@@ -652,10 +654,8 @@ public record CodegenMetadata(DescriptorProtos.FileDescriptorProto fileDescripto
                     continue;
                 }
                 var pascalName = ProtoUtils.toPascalCase(oneof.getName());
-                var outerName = metadata.getString(OUTER_NAME, metadata.fileDescriptor()).orElse("");
 
-                var capitalizedPath = currentPath.stream().map(StringUtils::capitalize).toList();
-                var interfaceClassName = ClassName.get(metadata.packageName(), outerName, capitalizedPath.toArray(new String[0])).nestedClass(pascalName);
+                var interfaceClassName = ClassName.get(metadata.packageName(), outerName, capitalizedPath).nestedClass(pascalName);
 
                 for (var field : message.getFieldList()) {
                     if (field.hasOneofIndex() && field.getOneofIndex() == i) {
