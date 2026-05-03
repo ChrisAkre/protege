@@ -1,8 +1,5 @@
 package dev.akre.protege.codegen;
 
-import dev.akre.protege.CodegenConfig;
-import dev.akre.protege.CodegenMetadata;
-
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.MethodSpec;
