@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Spliterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -142,5 +143,30 @@ class ConsTest {
         List<Integer> descendingReversed = new java.util.ArrayList<>();
         reversed.descendingIterator().forEachRemaining(descendingReversed::add);
         assertThat(descendingReversed).containsExactly(1, 2, 3);
+    }
+
+    @Test
+    void testDescendingSpliterator() {
+        Cons<Integer> list = Cons.of(1, 2, 3);
+        Spliterator<Integer> spliterator = list.descendingSpliterator();
+
+        // Check characteristics
+        assertThat(spliterator.hasCharacteristics(Spliterator.IMMUTABLE | Spliterator.ORDERED | Spliterator.NONNULL)).isTrue();
+
+        // Check order
+        List<Integer> result = new java.util.ArrayList<>();
+        spliterator.forEachRemaining(result::add);
+        assertThat(result).containsExactly(3, 2, 1);
+
+        // Check empty list
+        Spliterator<Integer> emptySpliterator = Cons.<Integer>nil().descendingSpliterator();
+        assertThat(emptySpliterator.tryAdvance(e -> {})).isFalse();
+
+        // Check reversed view descendingSpliterator (should be Oldest to Newest)
+        UnmodifiableCons<Integer> reversed = list.reversed();
+        Spliterator<Integer> revDescSpliterator = reversed.descendingSpliterator();
+        List<Integer> revDescResult = new java.util.ArrayList<>();
+        revDescSpliterator.forEachRemaining(revDescResult::add);
+        assertThat(revDescResult).containsExactly(1, 2, 3);
     }
 }
