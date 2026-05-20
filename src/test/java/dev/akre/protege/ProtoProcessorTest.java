@@ -17,17 +17,19 @@ public class ProtoProcessorTest {
     @Test
     @DisplayName("Should generate a .proto file from an interface annotated with @GenProto")
     public void shouldGenerateProtoFileFromAnnotatedInterface() {
-        JavaFileObject sourceFile = JavaFileObjects.forSourceLines(
+        JavaFileObject sourceFile = JavaFileObjects.forSourceString(
                 "dev.akre.protege.TestInterface",
-                "package dev.akre.protege;",
-                "",
-                "import dev.akre.protege.GenProto;",
-                "",
-                "@GenProto",
-                "public interface TestInterface {",
-                "    String getName();",
-                "    int getId();",
-                "}"
+                """
+                package dev.akre.protege;
+                
+                import dev.akre.protege.annotation.GenProto;
+                
+                @GenProto
+                public interface TestInterface {
+                    String getName();
+                    int getId();
+                }
+                """
         );
 
         Compilation compilation = javac()

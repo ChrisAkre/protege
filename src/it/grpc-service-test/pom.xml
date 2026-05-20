@@ -5,21 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.akre.it</groupId>
-    <artifactId>enhanced-oneof-test</artifactId>
+    <artifactId>grpc-service-test</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <grpc.version>1.68.1</grpc.version>
+        <grpc.version>1.75.0</grpc.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>dev.akre</groupId>
             <artifactId>protege</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>@project.version@</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.22.0</version>
+            <version>3.27.7</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -83,7 +83,7 @@
                         <path>
                             <groupId>dev.akre</groupId>
                             <artifactId>protege</artifactId>
-                            <version>0.0.1-SNAPSHOT</version>
+                            <version>@project.version@</version>
                         </path>
                     </annotationProcessorPaths>
                     <annotationProcessors>

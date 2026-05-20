@@ -2,7 +2,11 @@ package dev.akre.protege;
 
 import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.parser.ProtobufFileDescriptorVisitor;
+import dev.akre.protege.annotation.GenProto;
 import dev.akre.util.Cons;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.CaseUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -13,7 +17,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -50,8 +53,8 @@ public class ProtoUtils {
         );
 
     public static DescriptorProtos.FileDescriptorProto parseProto(File file) throws IOException {
-        String content = Files.readString(file.toPath());
-        return parseProto(content, file.getName());
+        CharStream input = CharStreams.fromPath(file.toPath());
+        return parseProto(input, file.getName());
     }
 
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent) {
@@ -60,6 +63,17 @@ public class ProtoUtils {
 
     public static DescriptorProtos.FileDescriptorProto parseProto(String protoContent, String filename) {
         CharStream input = CharStreams.fromString(protoContent);
+        return parseProto(input, filename);
+    }
+
+    public static String getStringLiteral(String text) {
+        if (text.length() <= 2) {
+            return "";
+        }
+        return StringEscapeUtils.unescapeJava(text.substring(1, text.length() - 1));
+    }
+
+    private static DescriptorProtos.FileDescriptorProto parseProto(CharStream input, String filename) {
         ProtobufLexer lexer = new ProtobufLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ProtobufParser parser = new ProtobufParser(tokens);
@@ -70,7 +84,7 @@ public class ProtoUtils {
         } else {
             String pkg = builder.getPackage();
             if (pkg != null && !pkg.isEmpty()) {
-                String[] parts = pkg.split("\\.");
+                String[] parts = StringUtils.split(pkg, '.');
                 builder.setName(parts[parts.length - 1] + ".proto");
             }
         }
@@ -99,10 +113,6 @@ public class ProtoUtils {
         };
     }
 
-    public static String capitalize(String s) {
-        return s == null || s.isEmpty() ? s : s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
-
     public static String getJavaPackage(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         return fileDescriptorProto.getOptions().hasJavaPackage()
                 ? fileDescriptorProto.getOptions().getJavaPackage()
@@ -114,33 +124,61 @@ public class ProtoUtils {
             return fileDescriptorProto.getOptions().getJavaOuterClassname();
         }
         String fileName = fileDescriptorProto.getName();
-        String baseName = fileName.contains("/")
+        String baseName = (fileName.contains("/")
                 ? fileName.substring(fileName.lastIndexOf("/") + 1)
-                : fileName;
-        return toPascalCase(baseName.replace(".proto", "")) + "OuterClass";
+                : fileName).replace(".proto", "");
+        return getNames(fileDescriptorProto).anyMatch(baseName::equalsIgnoreCase)
+                ? (toPascalCase(baseName) + "OuterClass")
+                : toPascalCase(baseName);
+
+    }
+
+    private static Stream<String> getNames(Object descriptor) {
+        return switch (descriptor) {
+            case DescriptorProtos.FileDescriptorProto f -> Stream.of(
+                    f.getMessageTypeList().stream().flatMap(ProtoUtils::getNames),
+                    f.getEnumTypeList().stream().flatMap(ProtoUtils::getNames))
+                    .flatMap(s -> s);
+            case DescriptorProtos.DescriptorProto m -> Stream.of(
+                            Stream.of(m.getName()),
+                            m.getNestedTypeList().stream().flatMap(ProtoUtils::getNames),
+                            m.getEnumTypeList().stream().flatMap(ProtoUtils::getNames))
+                    .flatMap(s -> s);
+            case DescriptorProtos.EnumDescriptorProto e -> Stream.of(e.getName());
+            default -> throw new IllegalArgumentException("unexpected: " + descriptor);
+        };
     }
 
     public static String toPascalCase(String s) {
-        return s == null ? null : Arrays.stream(s.split("_"))
-                .filter(not(String::isEmpty))
-                .map(ProtoUtils::capitalize)
-                .collect(Collectors.joining(""));
+        if (s == null) {
+            return null;
+        }
+        if (s.contains("_")) {
+            return CaseUtils.toCamelCase(s, true, '_');
+        }
+        return StringUtils.capitalize(s);
     }
 
     public static String toCamelCase(String s) {
         if (s == null) {
             return null;
         }
-        String[] parts = s.split("_");
-        return Stream.concat(Stream.of(decapitalize(parts[0])), Arrays.stream(parts).skip(1).map(ProtoUtils::capitalize))
-                .collect(Collectors.joining(""));
+        if (s.contains("_")) {
+            return CaseUtils.toCamelCase(s, false, '_');
+        }
+        return StringUtils.uncapitalize(s);
     }
 
-    public static String[] splitAndEscapeBytes(byte[] bytes) {
+    public static List<String> splitAndEscapeBytes(byte[] bytes) {
+        List<String> result = new ArrayList<>();
         StringBuilder builder = new StringBuilder();
         for (byte b : bytes) {
             switch (b) {
-                case '\n' -> builder.append("\\n");
+                case '\n' -> {
+                    builder.append("\\n");
+                    result.add(builder.toString());
+                    builder.setLength(0);
+                }
                 case '\r' -> builder.append("\\r");
                 case '\t' -> builder.append("\\t");
                 case '\"' -> builder.append("\\\"");
@@ -149,12 +187,17 @@ public class ProtoUtils {
                     if (b >= 32 && b <= 126) {
                         builder.append((char) b);
                     } else {
-                        builder.append(String.format("\\%03o", b & 0xFF));
+                        builder.append('\\');
+                        int v = b & 0xFF;
+                        builder.append((char) ('0' + ((v >> 6) & 7)));
+                        builder.append((char) ('0' + ((v >> 3) & 7)));
+                        builder.append((char) ('0' + (v & 7)));
                     }
                 }
             }
         }
-        return builder.toString().split("(?<=\\\\n)");
+        result.add(builder.toString());
+        return result;
     }
 
     public static String getWriteMethodName(DescriptorProtos.FieldDescriptorProto.Type type) {
@@ -226,6 +269,39 @@ public class ProtoUtils {
         };
     }
 
+    public static com.google.protobuf.WireFormat.FieldType getWireFormatType(DescriptorProtos.FieldDescriptorProto.Type type) {
+        return switch (type) {
+            case TYPE_DOUBLE -> com.google.protobuf.WireFormat.FieldType.DOUBLE;
+            case TYPE_FLOAT -> com.google.protobuf.WireFormat.FieldType.FLOAT;
+            case TYPE_INT64 -> com.google.protobuf.WireFormat.FieldType.INT64;
+            case TYPE_UINT64 -> com.google.protobuf.WireFormat.FieldType.UINT64;
+            case TYPE_INT32 -> com.google.protobuf.WireFormat.FieldType.INT32;
+            case TYPE_FIXED64 -> com.google.protobuf.WireFormat.FieldType.FIXED64;
+            case TYPE_FIXED32 -> com.google.protobuf.WireFormat.FieldType.FIXED32;
+            case TYPE_BOOL -> com.google.protobuf.WireFormat.FieldType.BOOL;
+            case TYPE_STRING -> com.google.protobuf.WireFormat.FieldType.STRING;
+            case TYPE_GROUP -> com.google.protobuf.WireFormat.FieldType.GROUP;
+            case TYPE_MESSAGE -> com.google.protobuf.WireFormat.FieldType.MESSAGE;
+            case TYPE_BYTES -> com.google.protobuf.WireFormat.FieldType.BYTES;
+            case TYPE_UINT32 -> com.google.protobuf.WireFormat.FieldType.UINT32;
+            case TYPE_ENUM -> com.google.protobuf.WireFormat.FieldType.ENUM;
+            case TYPE_SFIXED32 -> com.google.protobuf.WireFormat.FieldType.SFIXED32;
+            case TYPE_SFIXED64 -> com.google.protobuf.WireFormat.FieldType.SFIXED64;
+            case TYPE_SINT32 -> com.google.protobuf.WireFormat.FieldType.SINT32;
+            case TYPE_SINT64 -> com.google.protobuf.WireFormat.FieldType.SINT64;
+        };
+    }
+
+    public static int getWireType(DescriptorProtos.FieldDescriptorProto.Type type) {
+        return switch (type) {
+            case TYPE_INT32, TYPE_INT64, TYPE_UINT32, TYPE_UINT64, TYPE_SINT32, TYPE_SINT64, TYPE_BOOL, TYPE_ENUM -> 0;
+            case TYPE_DOUBLE, TYPE_FIXED64, TYPE_SFIXED64 -> 1;
+            case TYPE_STRING, TYPE_BYTES, TYPE_MESSAGE -> 2;
+            case TYPE_FLOAT, TYPE_FIXED32, TYPE_SFIXED32 -> 5;
+            default -> throw new IllegalArgumentException("Unsupported type: " + type);
+        };
+    }
+
     public static String getDefaultReturnValue(String typeName) {
         return switch (typeName) {
             case "boolean" -> "false";
@@ -261,6 +337,43 @@ public class ProtoUtils {
                 .build();
     }
 
+    public interface Indent {
+        Indent indent();
+        Indent dedent();
+        String toString();
+    }
+
+    private static final class TwoSpaceIndent implements Indent {
+        private final String s;
+        private final Indent prior;
+        private Indent next;
+
+        private TwoSpaceIndent(String s, Indent prior) {
+            this.s = s;
+            this.prior = prior;
+        }
+
+        @Override
+        public Indent indent() {
+            if (next == null) {
+                next = new TwoSpaceIndent(s + "  ", this);
+            }
+            return next;
+        }
+
+        @Override
+        public Indent dedent() {
+            return prior != null ? prior : this;
+        }
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    private static final Indent ROOT_INDENT = new TwoSpaceIndent("", null);
+
     public static String toProtoString(DescriptorProtos.FileDescriptorProto fileDescriptorProto) {
         StringBuilder protoFileContent = new StringBuilder();
         protoFileContent.append("syntax = \"proto3\";\n\n");
@@ -270,49 +383,64 @@ public class ProtoUtils {
         }
 
         for (DescriptorProtos.EnumDescriptorProto enumType : fileDescriptorProto.getEnumTypeList()) {
-            protoFileContent.append(enumToString(enumType));
+            enumToString(enumType, protoFileContent, ROOT_INDENT);
         }
 
         for (DescriptorProtos.DescriptorProto messageType : fileDescriptorProto.getMessageTypeList()) {
-            protoFileContent.append(messageToString(messageType));
+            messageToString(messageType, protoFileContent, ROOT_INDENT);
         }
 
         return protoFileContent.toString();
     }
 
     public static String messageToString(DescriptorProtos.DescriptorProto messageType) {
-        StringBuilder messageContent = new StringBuilder();
-        messageContent.append("message ").append(messageType.getName()).append(" {\n");
+        StringBuilder sb = new StringBuilder();
+        messageToString(messageType, sb, ROOT_INDENT);
+        return sb.toString();
+    }
+
+    private static void messageToString(DescriptorProtos.DescriptorProto messageType, StringBuilder sb, Indent indent) {
+        sb.append(indent).append("message ").append(messageType.getName()).append(" {\n");
         if (messageType.getOptions().getMapEntry()) {
-            messageContent.append("  option map_entry = true;\n");
+            sb.append(indent.indent()).append("option map_entry = true;\n");
         }
 
         for (DescriptorProtos.EnumDescriptorProto enumType : messageType.getEnumTypeList()) {
-            messageContent.append(indent(enumToString(enumType)));
+            enumToString(enumType, sb, indent.indent());
         }
 
         for (DescriptorProtos.DescriptorProto nestedType : messageType.getNestedTypeList()) {
-            messageContent.append(indent(messageToString(nestedType)));
+            messageToString(nestedType, sb, indent.indent());
         }
 
         for (DescriptorProtos.FieldDescriptorProto field : messageType.getFieldList().stream().sorted(Comparator.comparing(DescriptorProtos.FieldDescriptorProto::getNumber)).toList()) {
-            messageContent.append("  ").append(fieldToString(messageType, field));
+            fieldToString(messageType, field, sb, indent.indent());
         }
-        messageContent.append("}\n\n");
-        return messageContent.toString();
+        sb.append(indent).append("}\n\n");
     }
 
     public static String enumToString(DescriptorProtos.EnumDescriptorProto enumType) {
-        StringBuilder enumContent = new StringBuilder();
-        enumContent.append("enum ").append(enumType.getName()).append(" {\n");
+        StringBuilder sb = new StringBuilder();
+        enumToString(enumType, sb, ROOT_INDENT);
+        return sb.toString();
+    }
+
+    private static void enumToString(DescriptorProtos.EnumDescriptorProto enumType, StringBuilder sb, Indent indent) {
+        sb.append(indent).append("enum ").append(enumType.getName()).append(" {\n");
         for (DescriptorProtos.EnumValueDescriptorProto value : enumType.getValueList()) {
-            enumContent.append("  ").append(value.getName()).append(" = ").append(value.getNumber()).append(";\n");
+            sb.append(indent.indent()).append(value.getName()).append(" = ").append(value.getNumber()).append(";\n");
         }
-        enumContent.append("}\n\n");
-        return enumContent.toString();
+        sb.append(indent).append("}\n\n");
     }
 
     public static String fieldToString(DescriptorProtos.DescriptorProto parentMessage, DescriptorProtos.FieldDescriptorProto field) {
+        StringBuilder sb = new StringBuilder();
+        fieldToString(parentMessage, field, sb, ROOT_INDENT);
+        return sb.toString();
+    }
+
+    private static void fieldToString(DescriptorProtos.DescriptorProto parentMessage, DescriptorProtos.FieldDescriptorProto field, StringBuilder sb, Indent indent) {
+        sb.append(indent);
         String typeName = field.hasTypeName() ? field.getTypeName() : PROTO_TYPES.get(field.getType());
         String label = field.getLabel() == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED ? "repeated " : "";
         if (field.hasTypeName() && field.getTypeName().endsWith("Entry")) {
@@ -324,19 +452,12 @@ public class ProtoUtils {
                 DescriptorProtos.DescriptorProto m = mapEntryMessage.get();
                 String keyType = m.getField(0).hasTypeName() ? m.getField(0).getTypeName() : PROTO_TYPES.get(m.getField(0).getType());
                 String valueType = m.getField(1).hasTypeName() ? m.getField(1).getTypeName() : PROTO_TYPES.get(m.getField(1).getType());
-                return "map<" + keyType + ", " + valueType + "> " + field.getName() + " = " + field.getNumber() + ";\n";
+                sb.append("map<").append(keyType).append(", ").append(valueType).append("> ").append(field.getName()).append(" = ").append(field.getNumber()).append(";\n");
+                return;
             }
         }
 
-        return label + typeName + " " + field.getName() + " = " + field.getNumber() + ";\n";
-    }
-
-    private static String indent(String s) {
-        return (s == null || s.isEmpty())
-                ? ""
-                : s.lines()
-                    .map(line -> line.isEmpty() ? line : "  " + line)
-                    .collect(Collectors.joining("\n")) + "\n";
+        sb.append(label).append(typeName).append(" ").append(field.getName()).append(" = ").append(field.getNumber()).append(";\n");
     }
 
     public static String annotationToString(java.lang.annotation.Annotation ann) {
@@ -429,18 +550,70 @@ public class ProtoUtils {
         return "Object";
     }
 
-    public static String decapitalize(String s) {
-        if (s == null || s.isEmpty() || Character.isLowerCase(s.charAt(0))) {
-            return s;
-        }
-        return Character.toLowerCase(s.charAt(0)) + s.substring(1);
-    }
-
     public static boolean isJavaGenericServicesEnabled(DescriptorProtos.FileDescriptorProto fileDescriptor) {
         if (fileDescriptor.getOptions().hasJavaGenericServices()) {
             return fileDescriptor.getOptions().getJavaGenericServices();
         }
         // Default: false for proto3, true for proto2
         return !"proto3".equals(fileDescriptor.getSyntax());
+    }
+
+    public static boolean isStringEmpty(Object value) {
+        if (value instanceof String) {
+            return ((String) value).isEmpty();
+        }
+        if (value instanceof com.google.protobuf.ByteString) {
+            return ((com.google.protobuf.ByteString) value).isEmpty();
+        }
+        return value == null;
+    }
+
+    public static Stream<Object> descriptorStream(Object descriptor) {
+        return Stream.concat(Stream.of(descriptor), descriptorChildren(descriptor));
+    }
+
+    public static <T> Stream<T> descriptorChildren(Object descriptor, Class<T> descriptorClass) {
+        return descriptorChildren(descriptor).filter(descriptorClass::isInstance).map(descriptorClass::cast);
+    }
+
+    public static Stream<Object> descriptorChildren(Object descriptor) {
+        return switch (descriptor) {
+            case DescriptorProtos.FileDescriptorProto f -> Stream.of(
+                            f.getMessageTypeList().stream(),
+                            f.getEnumTypeList().stream(),
+                            f.getServiceList().stream())
+                    .flatMap(s -> s);
+            case DescriptorProtos.DescriptorProto m -> Stream.of(
+                        m.getNestedTypeList().stream(),
+                        m.getEnumTypeList().stream(),
+                        m.getFieldList().stream(),
+                        m.getOneofDeclList().stream())
+                    .flatMap(s -> s);
+            case DescriptorProtos.ServiceDescriptorProto s -> s.getMethodList().stream().map(m -> (Object) m);
+            case DescriptorProtos.EnumDescriptorProto ignored -> Stream.empty();
+            case DescriptorProtos.FieldDescriptorProto ignored -> Stream.empty();
+            case DescriptorProtos.OneofDescriptorProto ignored -> Stream.empty();
+            case DescriptorProtos.MethodDescriptorProto ignored -> Stream.empty();
+            default -> throw new IllegalStateException();
+        };
+    }
+
+    public static Predicate<List<DescriptorProtos.UninterpretedOption.NamePart>> nameList(String key) {
+        return l -> {
+            String optionName = l.stream()
+                    .map(DescriptorProtos.UninterpretedOption.NamePart::getNamePart)
+                    .collect(Collectors.joining("."));
+            return optionName.equals(key);
+        };
+    }
+
+    @SafeVarargs
+    public static <T> List<T> listConcat(List<T> list, T... elements) {
+        if (elements.length == 0) {
+            return list;
+        }
+        List<T> result = new ArrayList<>(list);
+        Collections.addAll(result, elements);
+        return result;
     }
 }

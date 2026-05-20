@@ -1,6 +1,7 @@
 package dev.akre.protege;
 
 import com.google.auto.service.AutoService;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
 
-@SupportedAnnotationTypes("dev.akre.protege.GenProto")
+@SupportedAnnotationTypes("dev.akre.protege.annotation.GenProto")
 @AutoService(Processor.class)
 public class ProtoAnnotationProcessor extends AbstractProcessor {
 
@@ -24,7 +25,9 @@ public class ProtoAnnotationProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {
             for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-                if (element.getKind() != ElementKind.INTERFACE) continue;
+                if (element.getKind() != ElementKind.INTERFACE) {
+                    continue;
+                }
                 try {
                     TypeElement typeElement = (TypeElement) element;
                     String protoContent = generateProto(typeElement);
@@ -56,7 +59,7 @@ public class ProtoAnnotationProcessor extends AbstractProcessor {
                 ExecutableElement method = (ExecutableElement) enclosed;
                 String name = method.getSimpleName().toString();
                 if (name.startsWith("get")) {
-                    name = decapitalize(name.substring(3));
+                    name = StringUtils.uncapitalize(name.substring(3));
                     String type = getProtoType(method.getReturnType());
                     sb.append("  ").append(type).append(" ").append(name).append(" = ").append(count++).append(";\n");
                 }
@@ -67,18 +70,14 @@ public class ProtoAnnotationProcessor extends AbstractProcessor {
     }
 
     private String getProtoType(javax.lang.model.type.TypeMirror type) {
-        String typeStr = type.toString();
-        if (typeStr.equals("java.lang.String")) return "string";
-        if (typeStr.equals("int")) return "int32";
-        if (typeStr.equals("long")) return "int64";
-        if (typeStr.equals("boolean")) return "bool";
-        if (typeStr.equals("float")) return "float";
-        if (typeStr.equals("double")) return "double";
-        return "string"; // Default
-    }
-
-    private String decapitalize(String s) {
-        if (s == null || s.isEmpty()) return s;
-        return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+        return switch (type.toString()) {
+            case "java.lang.String" -> "string";
+            case "int" -> "int32";
+            case "long" -> "int64";
+            case "boolean" -> "bool";
+            case "float" -> "float";
+            case "double" -> "double";
+            default -> "string"; // Default
+        };
     }
 }

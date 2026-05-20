@@ -7,6 +7,7 @@ import dev.akre.protege.ProtobufBaseVisitor;
 import dev.akre.protege.ProtobufParser;
 import dev.akre.protege.parser.MemberTreeVisitor.MemberNode;
 import dev.akre.util.Cons;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,9 @@ import java.util.stream.Stream;
 
 import static dev.akre.protege.ProtoUtils.toPascalCase;
 
+/**
+ * Visitor that creates a FileDescriptorProto.Builder from an ANTLR parse tree
+ */
 public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     private final MemberNode root;
@@ -36,12 +40,15 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     public interface FileOption {
         void set(FileOptions.Builder options);
+
         static FileOption javaPackage(String value) {
             return options -> options.setJavaPackage(value);
         }
+
         static FileOption javaOuterClass(String value) {
             return options -> options.setJavaOuterClassname(value);
         }
+
         static FileOption javaGenericServices(boolean value) {
             return options -> options.setJavaGenericServices(value);
         }
@@ -72,22 +79,31 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         }
     }
 
+    /**
+     * Generates a file descriptor by first reading the options present at the file level
+     * and then recursively descending through all children.
+     * <p>
+     * The {@code scope} is updated as the graph is traversed and is used to determine
+     * the full name of the object being processed.
+     * <p>
+     * Each visit operation returns a descriptor or a record that is merged into the
+     * file descriptor.
+     *
+     * @param ctx the parse tree context
+     * @return a {@link FileDescriptorProto.Builder} containing the parsed protobuf file information
+     */
     @Override
     public FileDescriptorProto.Builder visitProto(ProtobufParser.ProtoContext ctx) {
-        String packageName = ctx.packageStatement().isEmpty() ? "" : ctx.packageStatement().getFirst().name.getText();
-        Cons<String> protoScope = Cons.nil();
-        if (!packageName.isEmpty()) {
-            for (String part : packageName.split("\\.")) {
-                protoScope = protoScope.cons(part);
-            }
-        }
-        this.scope = protoScope;
+        String packageName = ctx.packageStatement().isEmpty()
+                ? ""
+                : ctx.packageStatement().getFirst().name.getText();
+        this.scope = Cons.of(StringUtils.split(packageName, '.'));
         FileDescriptorProto.Builder fileBuilder = FileDescriptorProto.newBuilder();
         var fileOptions = FileOptions.newBuilder();
         // configure scope prior to walking the tree to allow creating full type names
 
-        ctx.children.forEach(c -> {
-            switch (visit(c)) {
+        ctx.children.stream().map(this::visit).forEach(ret -> {
+            switch (ret) {
                 case Syntax s -> fileBuilder.setSyntax(s.version());
                 case Package p -> fileBuilder.setPackage(p.name());
                 case FileOption o -> o.set(fileOptions);
@@ -97,7 +113,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                 case ServiceDescriptorProto.Builder s -> fileBuilder.addService(s);
                 case UninterpretedOption.Builder o -> fileOptions.addUninterpretedOption(o);
                 case null -> {} // EOF
-                default -> throw new IllegalStateException("unexpected: " + c);
+                default -> throw new IllegalStateException("unexpected: " + ret);
             }
         });
         fileBuilder.setOptions(fileOptions.build());
@@ -116,7 +132,11 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
 
     @Override
     public Syntax visitSyntax(ProtobufParser.SyntaxContext ctx) {
-        return new Syntax(getStringLiteral(ctx.protoVersion().getText()));
+        try {
+            return new Syntax(ProtoUtils.getStringLiteral(ctx.protoVersion().getText()));
+        } catch (NullPointerException e) {
+            throw new InvalidProtoException("missing syntax declaration");
+        }
     }
 
     @Override
@@ -127,7 +147,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
     @Override
     public Import visitImportStatement(ProtobufParser.ImportStatementContext ctx) {
         return new Import(
-                getStringLiteral(ctx.strLit().getText()),
+                ProtoUtils.getStringLiteral(ctx.strLit().getText()),
                 ctx.WEAK() != null,
                 ctx.PUBLIC() != null
         );
@@ -136,8 +156,8 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
     @Override
     public Object visitOptionDecl(ProtobufParser.OptionDeclContext ctx) {
         return switch (ctx.option().optionName().getText()) {
-            case "java_package" -> FileOption.javaPackage(getStringLiteral(ctx.option().constant().getText()));
-            case "java_outer_classname" -> FileOption.javaOuterClass(getStringLiteral(ctx.option().constant().getText()));
+            case "java_package" -> FileOption.javaPackage(ProtoUtils.getStringLiteral(ctx.option().constant().getText()));
+            case "java_outer_classname" -> FileOption.javaOuterClass(ProtoUtils.getStringLiteral(ctx.option().constant().getText()));
             case "java_generic_services" -> FileOption.javaGenericServices(Boolean.parseBoolean(ctx.option().constant().getText()));
             default -> visitOption(ctx.option());
         };
@@ -160,6 +180,9 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         return result;
     }
 
+    /**
+     * Pushes the message name onto the scope stack to handle nested type resolution.
+     */
     @Override
     public DescriptorProto.Builder visitMessageDef(ProtobufParser.MessageDefContext ctx) {
         String messageName = ctx.name.getText();
@@ -230,6 +253,14 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                 .setLabel(FieldDescriptorProto.Label.LABEL_REPEATED)
                 .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
                 .setTypeName(ProtoUtils.qualify(entryName, scope));
+
+        if (ctx.fieldOptions() != null) {
+            var options = FieldOptions.newBuilder();
+            ctx.fieldOptions().option().stream()
+                    .map(this::visitOption)
+                    .forEach(options::addUninterpretedOption);
+            field.setOptions(options);
+        }
 
         return new MapField(field, entry);
     }
@@ -360,7 +391,7 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
                     });
             case ProtobufParser.ReservedContext c when c.fieldNames() != null ->
                     c.fieldNames().strLit().forEach(strCtx ->
-                            messageBuilder.addReservedName(getStringLiteral(strCtx.getText()))
+                            messageBuilder.addReservedName(ProtoUtils.getStringLiteral(strCtx.getText()))
                     );
             default -> {} // EOF
         }
@@ -398,26 +429,22 @@ public class ProtobufFileDescriptorVisitor extends ProtobufBaseVisitor<Object> {
         } else if (ctx.intLit() != null) {
             return Long.parseLong(ctx.intLit().getText());
         } else if (ctx.floatLit() != null) {
-            return Double.parseDouble(ctx.floatLit().getText());
+            String text = ctx.floatLit().getText();
+            return switch (text) {
+                case "inf", "+inf" -> Double.POSITIVE_INFINITY;
+                case "-inf" -> Double.NEGATIVE_INFINITY;
+                case "nan" -> Double.NaN;
+                default -> Double.parseDouble(text);
+            };
         } else if (ctx.strLit() != null) {
-            return ByteString.copyFromUtf8(getStringLiteral(ctx.strLit().getText()));
+            return ByteString.copyFromUtf8(ProtoUtils.getStringLiteral(ctx.strLit().getText()));
         } else {
             throw new IllegalStateException();
         }
     }
 
     static String getStringConstant(ProtobufParser.OptionContext ctx) {
-        return getStringLiteral(ctx.constant().getText());
-    }
-
-    static String getStringLiteral(String text) {
-        return text.substring(1, text.length() - 1)
-                .replace("\\n", "\n")
-                .replace("\\r", "\r")
-                .replace("\\t", "\t")
-                .replace("\\\"", "\"")
-                .replace("\\'", "'")
-                .replace("\\\\", "\\");
+        return ProtoUtils.getStringLiteral(ctx.constant().getText());
     }
 
     private void setFieldTypeName(ProtobufParser.Type_Context ctx, FieldDescriptorProto.Builder fieldBuilder) {

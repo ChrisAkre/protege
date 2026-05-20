@@ -4,33 +4,28 @@ import com.google.protobuf.DescriptorProtos;
 import dev.akre.protege.ProtobufBaseVisitor;
 import dev.akre.protege.ProtobufParser;
 import dev.akre.util.Cons;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
-class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
+public class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode> {
 
     public record MemberNode(String name, String fullName, DescriptorProtos.FieldDescriptorProto.Type type, Map<String, MemberNode> children) {
         public Optional<MemberNode> resolve(String typeName, Cons<String> scope) {
-            String[] typeParts = typeName.startsWith(".")
-                    ? typeName.substring(1).split("\\.")
-                    : typeName.split("\\.");
+            String[] typeParts = StringUtils.split(typeName, '.');
 
             if (typeName.startsWith(".")) {
                 return resolveRelative(typeParts);
             }
 
-            List<String> scopeList = new ArrayList<>();
-            scope.forEach(scopeList::add);
-            Collections.reverse(scopeList);
-
-            return resolveInScope(scopeList, 0, typeParts);
+            return resolveInScope(Cons.copyOf(scope.reversed()), typeParts);
         }
 
-        private Optional<MemberNode> resolveInScope(List<String> scopeParts, int index, String[] typeParts) {
-            if (index < scopeParts.size()) {
-                MemberNode next = children.get(scopeParts.get(index));
+        private Optional<MemberNode> resolveInScope(Cons<String> scopeParts, String[] typeParts) {
+            if (!scopeParts.isEmpty()) {
+                MemberNode next = children.get(scopeParts.head());
                 if (next != null) {
-                    Optional<MemberNode> result = next.resolveInScope(scopeParts, index + 1, typeParts);
+                    Optional<MemberNode> result = next.resolveInScope(scopeParts.tail(), typeParts);
                     if (result.isPresent()) {
                         return result;
                     }
@@ -43,7 +38,9 @@ class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode
             MemberNode current = this;
             for (String part : parts) {
                 current = current.children().get(part);
-                if (current == null) return Optional.empty();
+                if (current == null) {
+                    return Optional.empty();
+                }
             }
             return Optional.of(current);
         }
@@ -55,7 +52,7 @@ class MemberTreeVisitor extends ProtobufBaseVisitor<MemberTreeVisitor.MemberNode
         MemberNode root = new MemberNode("", "", null, new HashMap<>());
         MemberNode current = root;
         if (!packageName.isEmpty()) {
-            for (String part : packageName.split("\\.")) {
+            for (String part : StringUtils.split(packageName, '.')) {
                 MemberNode next = new MemberNode(part, current.fullName().isEmpty() ? "." + part : current.fullName() + "." + part, null, new HashMap<>());
                 current.children().put(part, next);
                 current = next;

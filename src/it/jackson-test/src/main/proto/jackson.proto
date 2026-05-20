@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package dev.akre.it;
+
+import "google/protobuf/descriptor.proto";
+
+//option java_multiple_files = true;
+option (dev.akre.protege.java_jackson_annotations) = true;
+
+message SingleFieldMessage {
+  string value = 1;
+}
+
+message MultiFieldMessage {
+  string name = 1;
+  int32 id = 2;
+}

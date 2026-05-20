@@ -2,15 +2,16 @@ package dev.akre.protege.testutil;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
-import dev.akre.protege.GenProto;
+import dev.akre.protege.annotation.GenProto;
 import dev.akre.protege.ProtegeVersion;
-import dev.akre.protege.compiler.ProtoCodegen;
+import dev.akre.protege.CodegenMetadata;
+import dev.akre.protege.codegen.ProtoCodegen;
 import dev.akre.protege.ProtoUtils;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 import org.junit.jupiter.params.provider.Arguments;
 
-import dev.akre.protege.compiler.GrpcCodegen;
+import dev.akre.protege.codegen.GrpcCodegen;
 import com.google.testing.compile.JavaFileObjects;
 
 import javax.tools.JavaFileObject;
@@ -19,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -32,16 +34,26 @@ public class TestProtos {
                         try {
                             DescriptorProtos.FileDescriptorProto parsedProto = ProtoUtils.parseProto(protoPath.toFile());
                             String outerClassName = TestUtils.makeOuterClassName(parsedProto, protoPath.getFileName().toString());
-                            Class<?> expectedClass = Class.forName(outerClassName);
+                            Class<?> expectedClass;
+                            try {
+                                expectedClass = Class.forName(outerClassName);
+                            } catch (ClassNotFoundException e) {
+                                if (!parsedProto.hasSyntax()) {
+                                    // probably a commented out file
+                                    return null;
+                                }
+                                throw e;
+                            }
                             ProtoCodegen codegen = new ProtoCodegen(new TestUtils.MockFiler());
-                            Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto));
+                            Class<?> generatedClass = TestUtils.compile(outerClassName, codegen.generateFile(parsedProto).toJavaFileObject());
                             ClassAssert.assertThat(generatedClass)
                                     .hasPublicStaticFinalStringField("PROTEGE_VERSION", ProtegeVersion.VERSION_STRING);
                             return Arguments.of(protoPath, parsedProto, expectedClass, generatedClass);
                         } catch (Exception e) {
+                            e.printStackTrace();
                             throw new RuntimeException("Failed to prepare parameters for " + protoPath, e);
                         }
-                    }).toList();
+                    }).filter(Objects::nonNull).toList();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -101,7 +113,9 @@ public class TestProtos {
                     .map(message -> {
                         String messageName = message.getName();
                         Class<?> expectedMessage = TestUtils.findInnerClass(expectedClass, messageName).orElseThrow();
-                        Class<?> generatedMessage = TestUtils.findInnerClass(generatedClass, messageName).orElseThrow();
+                        Class<?> generatedMessage = TestUtils.findInnerClass(generatedClass, messageName).orElseThrow(() -> {
+                            throw new IllegalArgumentException("%s not found in class generated from %s".formatted(messageName, protoPath));
+                        });
                         return Arguments.of(protoPath, parsedProto, messageName, expectedMessage, generatedMessage);
                     });
         }).toList();
@@ -159,10 +173,13 @@ public class TestProtos {
             try {
                 TestUtils.MockFiler filer = new TestUtils.MockFiler();
                 ProtoCodegen protoCodegen = new ProtoCodegen(filer);
-                GrpcCodegen grpcCodegen = new GrpcCodegen(filer);
 
                 protoCodegen.generateFile(parsedProto);
-                grpcCodegen.generateFile(parsedProto);
+
+                CodegenMetadata config = CodegenMetadata.build(parsedProto)
+                        .build();
+                GrpcCodegen grpcCodegen = new GrpcCodegen(filer, config);
+                grpcCodegen.generateFile();
 
                 List<JavaFileObject> sourceFiles = filer.getSources().entrySet().stream()
                         .map(e -> JavaFileObjects.forSourceString(e.getKey(), e.getValue()))

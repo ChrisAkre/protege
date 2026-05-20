@@ -1,78 +1,111 @@
 package dev.akre.util;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Immutable Linked List
+ * An immutable, singly-linked list implementation (Lisp-style cons cells).
+ * <p>
+ * This structure is optimized for stack-based traversal where efficient
+ * head insertion and tail sharing are required. It is <strong>not</strong>
+ * suitable for random access operations.
+ * <p>
+ * Iteration order via {@link #iterator()} and {@link #stream()} is from
+ * Tail to Head (Oldest to Newest), effectively reversing the stack.
+ * Use {@link #descendingIterator()} or {@link #descendingStream()} for
+ * Head to Tail (Newest to Oldest) traversal in classic Lisp style.
  *
- * @link <a href="https://en.wikipedia.org/wiki/Greenspun%27s_tenth_rule">Greenspun's tenth rule</a>
+ * @param <T> element type
+ * @see <a href="https://en.wikipedia.org/wiki/Greenspun%27s_tenth_rule">Greenspun's tenth rule</a>
  */
-public record Cons<T>(T head, Cons<T> tail) implements Iterable<T> {
-    public Cons {
-        if (tail == null && NIL != null) {
-            throw new IllegalArgumentException("must be a non-empty cons or NIL");
-        }
-    }
+public record Cons<T>(T head, Cons<T> tail) implements UnmodifiableCons<T> {
 
     public static final Cons<?> NIL = new Cons<>(null, null);
+
+    public Cons {
+        if ((head == null || tail == null) && NIL != null) {
+            throw new IllegalArgumentException("must provide a non-null value");
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public static <T> Cons<T> nil() {
         return (Cons<T>) NIL;
     }
 
+    @Override
     public boolean isEmpty() {
         return this == NIL;
     }
 
+    /**
+     * Prepends an element to this list, creating a new head.
+     */
     public Cons<T> cons(T t) {
         return new Cons<>(t, this);
     }
 
     @SafeVarargs
     public static <T> Cons<T> of(T... elements) {
-        Cons<T> acc = nil();
-        for (int i = elements.length - 1; i >= 0; i--) {
-            acc = new Cons<>(elements[i], acc);
-        }
-        return acc;
+        return copyOf(Arrays.asList(elements));
     }
 
-    public static <T> Cons<T> copyOf(List<T> values) {
+    /**
+     * Creates a copy of a collection as a cons list. The iteration order of the resulting list
+     * will match the iteration order of the original collection.
+     * <p>
+     * Note that a reversed cons list will be iterated using {@link #descendingIterator()}
+     * and thus will be copied using the classic "reverse a linked list" implementation.
+     */
+    public static <T> Cons<T> copyOf(Iterable<T> values) {
+        if (values instanceof Cons<T> c) {
+            // already unmodifiable
+            return c;
+        }
         Cons<T> acc = nil();
-        for (int i = values.size() - 1; i >= 0; i--) {
-            acc = new Cons<>(values.get(i), acc);
+        for (T t : values) {
+            acc = acc.cons(t);
         }
         return acc;
     }
 
     @Override
-    public Spliterator<T> spliterator() {
-        return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.IMMUTABLE | Spliterator.ORDERED | Spliterator.NONNULL);
+    public int size() {
+        int count = 0;
+        Cons<T> curr = this;
+        while (!curr.isEmpty()) {
+            count++;
+            curr = curr.tail();
+        }
+        return count;
     }
 
-    public Stream<T> stream() {
-        return StreamSupport.stream(spliterator(), false);
+    @Override
+    public boolean contains(Object o) {
+        Cons<T> curr = this;
+        while (!curr.isEmpty()) {
+            if (Objects.equals(o, curr.head)) return true;
+            curr = curr.tail();
+        }
+        return false;
     }
 
     @Override
     public Iterator<T> iterator() {
+        return stream().iterator();
+    }
+
+    @Override
+    public Iterator<T> descendingIterator() {
         return new Iterator<>() {
             private Cons<T> current = Cons.this;
 
-            @Override
             public boolean hasNext() {
-                return current != NIL;
+                return !current.isEmpty();
             }
 
-            @Override
             public T next() {
                 if (!hasNext()) throw new NoSuchElementException();
                 T value = current.head();
@@ -82,8 +115,72 @@ public record Cons<T>(T head, Cons<T> tail) implements Iterable<T> {
         };
     }
 
+    /**
+     * Returns a stream of elements in descending order (Head to Tail).
+     */
+    public Stream<T> descendingStream() {
+        return StreamSupport.stream(descendingSpliterator(), false);
+    }
+
+    @Override
+    public Stream<T> stream() {
+        List<T> buffer = new ArrayList<>();
+        descendingIterator().forEachRemaining(buffer::add);
+        Collections.reverse(buffer);
+        return buffer.stream();
+    }
+
     @Override
     public String toString() {
-        return stream().map(T::toString).collect(Collectors.joining(", ", "[", "]"));
+        return stream().map(String::valueOf).collect(Collectors.joining(", ", "[", "]"));
     }
+
+    /**
+     * Returns a reversed read-only view of the collection. To be able to append elements to this collection, use Cons.copyOf.
+     */
+    @Override
+    public UnmodifiableCons<T> reversed() {
+        return new UnmodifiableCons<>() {
+            @Override
+            public UnmodifiableCons<T> reversed() {
+                return Cons.this;
+            }
+
+            @Override
+            public Iterator<T> iterator() {
+                return Cons.this.descendingIterator();
+            }
+
+            @Override
+            public Iterator<T> descendingIterator() {
+                return Cons.this.iterator();
+            }
+
+            @Override
+            public int size() {
+                return Cons.this.size();
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return Cons.this.isEmpty();
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                return Cons.this.contains(o);
+            }
+
+            @Override
+            public Stream<T> stream() {
+                return Cons.this.descendingStream();
+            }
+
+            @Override
+            public String toString() {
+                return stream().map(String::valueOf).collect(Collectors.joining(", ", "[", "]"));
+            }
+        };
+    }
+
 }

@@ -6,9 +6,10 @@ import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileOptions;
 import com.google.protobuf.DescriptorProtos.MessageOptions;
-import dev.akre.protege.Field;
-import dev.akre.protege.GenProto;
+import dev.akre.protege.annotation.Field;
+import dev.akre.protege.annotation.GenProto;
 import dev.akre.protege.ProtoUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -16,6 +17,13 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Generates Protobuf descriptors from annotated Java interfaces.
+ * <p>
+ * This class uses reflection to scan Java classes (typically interfaces) annotated with
+ * {@link dev.akre.protege.GenProto} and {@link dev.akre.protege.Field} to build
+ * corresponding {@link FileDescriptorProto} objects.
+ */
 public class InterfaceDescriptorFactory {
 
     private final Map<Type, DescriptorProtos.DescriptorProto> messages = new LinkedHashMap<>();
@@ -29,6 +37,13 @@ public class InterfaceDescriptorFactory {
     }
 
 
+    /**
+     * Updates an existing FileDescriptorProto with definitions from a Java class.
+     *
+     * @param descriptor The base descriptor to update.
+     * @param cls        The Java class to inspect.
+     * @return The updated FileDescriptorProto.
+     */
     public FileDescriptorProto update(FileDescriptorProto descriptor, Class<?> cls) {
         FileDescriptorProto.Builder builder = descriptor.toBuilder();
 
@@ -72,9 +87,9 @@ public class InterfaceDescriptorFactory {
         return create(cls, name);
     }
 
-    public FileDescriptorProto create(Class<?> cls, String name) {
+    public FileDescriptorProto create(Class<?> cls, String protoFileName) {
         FileDescriptorProto.Builder fileDescriptorProtoBuilder = FileDescriptorProto.newBuilder();
-        fileDescriptorProtoBuilder.setName(name + ".proto");
+        fileDescriptorProtoBuilder.setName(protoFileName + ".proto");
 
         GenProto genProto = cls.getAnnotation(GenProto.class);
         String pkg = (genProto != null && !genProto.pkg().isEmpty()) ? genProto.pkg() : cls.getPackageName();
@@ -101,12 +116,16 @@ public class InterfaceDescriptorFactory {
 
                 FieldDescriptorProto.Builder keyField = FieldDescriptorProto.newBuilder().setName("key").setNumber(1);
                 processType(mapEntryBuilder, mapEntryQualifiedName, keyType, keyField, "key", null);
-                if (!keyField.hasLabel()) keyField.setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                if (!keyField.hasLabel()) {
+                    keyField.setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                }
                 mapEntryBuilder.addField(keyField);
 
                 FieldDescriptorProto.Builder valueField = FieldDescriptorProto.newBuilder().setName("value").setNumber(2);
                 processType(mapEntryBuilder, mapEntryQualifiedName, valueType, valueField, "value", null);
-                if (!valueField.hasLabel()) valueField.setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                if (!valueField.hasLabel()) {
+                    valueField.setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL);
+                }
                 mapEntryBuilder.addField(valueField);
 
                 messageBuilder.addNestedType(mapEntryBuilder.build());
@@ -181,7 +200,7 @@ public class InterfaceDescriptorFactory {
             if (method.getParameterCount() == 0 && !method.isDefault() && !method.isSynthetic()) {
                 String propertyName = method.getName();
                 if (propertyName.startsWith("get") && propertyName.length() > 3) {
-                    propertyName = ProtoUtils.decapitalize(propertyName.substring(3));
+                    propertyName = StringUtils.uncapitalize(propertyName.substring(3));
                 }
                 FieldDescriptorProto.Builder fieldBuilder = FieldDescriptorProto.newBuilder();
                 fieldBuilder.setName(propertyName);
@@ -189,9 +208,7 @@ public class InterfaceDescriptorFactory {
                 Field fieldAnn = method.getAnnotation(Field.class);
                 if (fieldAnn != null) {
                     fieldBuilder.setNumber(fieldAnn.value());
-                    if (fieldAnn.type() != DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32) {
-                        fieldBuilder.setType(fieldAnn.type());
-                    }
+                    fieldAnn.type().ifPresent(fieldBuilder::setType);
                     if (!fieldAnn.oneof().isEmpty()) {
                         String oneofName = fieldAnn.oneof();
                         int index = oneofIndices.computeIfAbsent(oneofName, k -> {
@@ -204,7 +221,9 @@ public class InterfaceDescriptorFactory {
 
                     DescriptorProtos.FieldOptions.Builder fieldOptions = DescriptorProtos.FieldOptions.newBuilder();
                     for (java.lang.annotation.Annotation ann : method.getAnnotations()) {
-                        if (ann.annotationType().equals(Field.class)) continue;
+                        if (ann.annotationType().getName().equals(Field.class.getName())) {
+                            continue;
+                        }
 
                         fieldOptions.addUninterpretedOption(ProtoUtils.createUninterpretedOption("dev.akre.protege.java_annotation", ProtoUtils.annotationToString(ann)));
                     }
@@ -257,5 +276,3 @@ public class InterfaceDescriptorFactory {
         return result;
     }
 }
-
-    

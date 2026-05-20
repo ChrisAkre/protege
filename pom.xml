@@ -8,6 +8,10 @@
     <artifactId>protege</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
+    <name>Protege</name>
+    <description>A Java-based code generation library for Google Protocol Buffers with Jackson support and interface-based generation.</description>
+    <url>https://github.com/ChrisAkre/protege</url>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -15,6 +19,20 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <id>ChrisAkre</id>
+            <name>Chris Akre</name>
+            <url>https://github.com/ChrisAkre</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ChrisAkre/protege.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ChrisAkre/protege.git</developerConnection>
+        <url>https://github.com/ChrisAkre/protege/tree/master</url>
+    </scm>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -37,6 +55,11 @@
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
             <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -72,7 +95,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.22.0</version>
+            <version>3.27.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -109,6 +132,12 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
             <version>1.68.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.palantir.goethe</groupId>
+            <artifactId>goethe</artifactId>
+            <version>0.18.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -200,6 +229,13 @@
                     <settingsFile>src/it/settings.xml</settingsFile>
                     <showErrors>true</showErrors>
                     <streamLogsOnFailures>true</streamLogsOnFailures>
+                    <filterProperties>
+                        <project.version>${project.version}</project.version>
+                    </filterProperties>
+                    <pomExcludes>
+                        <pomExclude>jackson-test/pom.xml</pomExclude>
+                        <pomExclude>hibernate-test/pom.xml</pomExclude>
+                    </pomExcludes>
                     <goals>
                         <goal>clean</goal>
                         <goal>verify</goal>
@@ -218,4 +254,92 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.4</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals><goal>jar-no-fork</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.6.3</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals><goal>jar</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.7.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-release-plugin</artifactId>
+                        <version>3.1.1</version>
+                        <configuration>
+                            <tagNameFormat>v@{project.version}</tagNameFormat>
+                            <autoVersionSubmodules>true</autoVersionSubmodules>
+                            <useReleaseProfile>false</useReleaseProfile>
+                            <releaseProfiles>release</releaseProfiles>
+                            <goals>deploy</goals>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>Central Repository OSSRH</name>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>github-snapshot</id>
+            <name>GitHub Protege Snapshots</name>
+            <url>https://maven.pkg.github.com/ChrisAkre/protege</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

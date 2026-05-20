@@ -12,8 +12,8 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 
 ## Project Identity
 
-* **The Name "Protege":** This is a phonetic pun pronounced as **"Proto-J"**. It stands for **Proto**col Buffers for **J
-  **ava. When generating documentation or interacting with the project, maintain this branding and recognize that the
+* **The Name "Protege":** This is a phonetic pun pronounced as **"Proto-J"**. It stands for **Proto**col Buffers for
+  **J**ava. When generating documentation or interacting with the project, maintain this branding and recognize that the
   name reflects its primary function.
 
 ## Tech Stack
@@ -58,6 +58,7 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
   expressions for enums/sealed types.
 * **Immutability**: Use `dev.akre.util.Cons` (Immutable Linked List) for stack-based traversal during recursion.
 * **Statelessness**: Prefer `static` utility methods for transformation logic within visitors and factories.
+* **1TBS**: Always put braces around each clause in if-else statements.
 
 ### 2. Grammar and AST
 
@@ -69,21 +70,31 @@ Protege is a Java-based code generation library for Protocol Buffers. It serves 
 ### 3. Code Generation (JavaPoet)
 
 * **No String Templates**: All Java generation must use `JavaPoet` (`TypeSpec`, `MethodSpec`).
-* **Type Mapping**: When adding new annotations (like JPA), ensure they are added as `AnnotationSpec` within the
-  `ProtoCodegen` logic.
-* **Sealed Interfaces**: Oneof fields must be generated as sealed interfaces with record implementations to ensure
-  pattern-matching compatibility.
 
 ### 4. Build and Verification
 
 * **Integration Testing**: Unit tests are insufficient for codegen changes. You must run `mvn verify` to trigger the
-  `maven-invoker-plugin` tests in `src/it`.
+  `maven-invoker-plugin` tests in `src/it`.  Individual integration tests can be executed using 
+  `mvn verify -DskipTests -Dinvoker.test=<test folder name>`.  To exclude a broken integration test from running in CI,
+  add it to an pomExcludes element in the configuration of the invoker plugin. See the following example
+```xml
+    <pomExcludes>
+        <pomExclude>hibernate-test/*</pomExclude>
+    </pomExcludes>
+```
+
 * **Template Injection**: Do not hardcode versions. The build uses `ProtegeVersion.java` as a template for version
   injection.
 
+### 5. Documentation
+
+* **README Synchronization**: When making changes to the codebase (adding features, changing configuration options,
+  etc.), always check `README.md` to see if documentation updates are required to reflect the new functionality or
+  changes.
+
 ## Common Workflows
 
-* **Adding a feature to generated code:** Modify `ProtoCodegen.java` and add a corresponding test case in `src/it` to
+* **Adding a feature to generated code**: Modify `ProtoCodegen.java` and add a corresponding test case in `src/it` to
   verify the generated source compiles.
-* **Fixing Parsing issues:** Check the ANTLR visitor logic in `ProtobufFileDescriptorVisitor.java`. Use the `Cons` stack
+* **Fixing Parsing issues**: Check the ANTLR visitor logic in `ProtobufFileDescriptorVisitor.java`. Use the `Cons` stack
   to debug nested message scoping.

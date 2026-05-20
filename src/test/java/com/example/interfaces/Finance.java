@@ -1,7 +1,7 @@
 package com.example.interfaces;
 
-import dev.akre.protege.GenProto;
-import dev.akre.protege.Field;
+import dev.akre.protege.annotation.GenProto;
+import dev.akre.protege.annotation.Field;
 
 import java.util.Map;
 
@@ -21,7 +21,7 @@ public class Finance {
         Party sender();
         @Field(6)
         Party receiver();
-        @Field(value = 7, type = com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Type.TYPE_FIXED64)
+        @Field(value = 7, type = Field.ProtoFieldType.TYPE_FIXED64)
         long internal_trace_id();
 
         enum Type {
